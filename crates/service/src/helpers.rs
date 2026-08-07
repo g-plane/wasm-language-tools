@@ -133,7 +133,7 @@ pub(crate) mod syntax {
         ops::{ControlFlow, Deref},
     };
     use wat_syntax::{
-        AmberNode, GreenNode, SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
+        AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken, TextRange, TextSize, TokenAtOffset,
         ast::{AstNode, ExternIdx},
     };
 
@@ -184,6 +184,28 @@ pub(crate) mod syntax {
                     | SyntaxKind::BLOCK_TRY_TABLE
             )
         })
+    }
+
+    pub fn infer_def_poi(node: AmberNode) -> TextRange {
+        if node.kind() == SyntaxKind::REF_TYPE {
+            node.text_range()
+        } else {
+            match node
+                .children_with_tokens()
+                .try_fold(node.text_range(), |range, node_or_token| match node_or_token {
+                    NodeOrToken::Node(..) => ControlFlow::Break(range),
+                    NodeOrToken::Token(token) => {
+                        if matches!(token.kind(), SyntaxKind::KEYWORD | SyntaxKind::IDENT) {
+                            ControlFlow::Continue(token.text_range())
+                        } else {
+                            ControlFlow::Continue(range)
+                        }
+                    }
+                }) {
+                ControlFlow::Continue(range) => range,
+                ControlFlow::Break(range) => range,
+            }
+        }
     }
 
     #[derive(Clone)]

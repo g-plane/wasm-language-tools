@@ -2,7 +2,7 @@ use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
     deprecation,
-    helpers::LineIndexExt,
+    helpers::{self, LineIndexExt},
     types_analyzer::{self, NamedSig},
 };
 use lspt::{
@@ -39,13 +39,7 @@ impl LanguageService {
                 )),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range())?,
-                selection_range: line_index.convert(
-                    symbol_table
-                        .def_poi
-                        .get(&symbol.key)
-                        .copied()
-                        .unwrap_or_else(|| symbol.key.text_range()),
-                )?,
+                selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
                 data: None,
             }]),
             SymbolKind::Call if symbol.key.text_range() == parent_range => {
@@ -65,13 +59,7 @@ impl LanguageService {
                         )),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range())?,
-                        selection_range: line_index.convert(
-                            symbol_table
-                                .def_poi
-                                .get(&symbol.key)
-                                .copied()
-                                .unwrap_or_else(|| symbol.key.text_range()),
-                        )?,
+                        selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
                         data: None,
                     }])
                 })
@@ -124,13 +112,7 @@ impl LanguageService {
                                 )),
                                 uri: params.item.uri.clone(),
                                 range: line_index.convert(symbol.key.text_range())?,
-                                selection_range: line_index.convert(
-                                    symbol_table
-                                        .def_poi
-                                        .get(&symbol.key)
-                                        .copied()
-                                        .unwrap_or_else(|| symbol.key.text_range()),
-                                )?,
+                                selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
                                 data: None,
                             },
                             from_ranges: vec![line_index.convert(call_key.text_range())?],
@@ -174,13 +156,7 @@ impl LanguageService {
                         )),
                         uri: params.item.uri.clone(),
                         range: line_index.convert(def_symbol.key.text_range())?,
-                        selection_range: line_index.convert(
-                            symbol_table
-                                .def_poi
-                                .get(&def_symbol.key)
-                                .copied()
-                                .unwrap_or_else(|| def_symbol.key.text_range()),
-                        )?,
+                        selection_range: line_index.convert(helpers::syntax::infer_def_poi(def_symbol.amber()))?,
                         data: None,
                     },
                     from_ranges: vec![line_index.convert(ref_symbol.key.text_range())?],

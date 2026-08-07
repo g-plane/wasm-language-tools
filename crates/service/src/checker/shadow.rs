@@ -2,7 +2,7 @@ use super::{Diagnostic, RelatedInformation};
 use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
-    helpers::{BumpCollectionsExt, BumpHashMap},
+    helpers::{self, BumpCollectionsExt, BumpHashMap},
     idx::Idx,
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -47,7 +47,7 @@ pub fn check(
                                         && other.idx.name.is_some_and(|other| other == name)
                                         && symbol.key.text_range().contains_range(other.key.text_range())
                                 })
-                                .filter_map(|other| symbol_table.def_poi.get(&other.key).copied()),
+                                .map(|other| helpers::syntax::infer_def_poi(other.amber())),
                         );
                 }
                 map
@@ -56,9 +56,8 @@ pub fn check(
             .filter(|(_, ranges)| !ranges.is_empty())
             .filter_map(|((symbol, name), ranges)| {
                 let name = name.ident(db);
-                let range = symbol_table.def_poi.get(&symbol.key)?;
                 Some(Diagnostic {
-                    range: *range,
+                    range: helpers::syntax::infer_def_poi(symbol.amber()),
                     severity,
                     code: DIAGNOSTIC_CODE.into(),
                     message: format!("`{name}` is shadowed"),

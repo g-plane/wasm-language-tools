@@ -438,11 +438,12 @@ fn create_type_def_hover(
                 let _ = write!(content, "(cont {})", heap_ty.render(db));
                 if let HeapType::Type(idx) = heap_ty
                     && let Some(def_symbol) = symbol_table.find_def_by_idx(*idx, SymbolKind::Type, symbol.region)
-                    && let Some(poi) = symbol_table.def_poi.get(&def_symbol.key)
                     && let Some(sig) = def_types
                         .get(&def_symbol.key)
                         .and_then(|def_type| def_type.comp.as_func())
-                    && let Some(pos) = document.line_index(db).convert(poi.start())
+                    && let Some(pos) = document
+                        .line_index(db)
+                        .convert(helpers::syntax::infer_def_poi(def_symbol.amber()).start())
                 {
                     appendix = Some(format!(
                         "where [`{}`]({uri}#{},{}):\n```wat\n(type (func{}{}))\n```",

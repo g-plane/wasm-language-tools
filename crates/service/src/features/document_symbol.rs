@@ -2,7 +2,7 @@ use crate::{
     LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
     deprecation,
-    helpers::LineIndexExt,
+    helpers::{self, LineIndexExt},
     mutability,
     types_analyzer::{self, CompositeType},
 };
@@ -24,7 +24,7 @@ impl LanguageService {
                 .values()
                 .filter_map(|symbol| {
                     let range = line_index.convert(symbol.key.text_range())?;
-                    let selection_range = line_index.convert(*symbol_table.def_poi.get(&symbol.key)?)?;
+                    let selection_range = line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?;
                     let tags = if deprecation.contains_key(&symbol.key) {
                         Some(vec![SymbolTag::Deprecated])
                     } else {

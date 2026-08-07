@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers::LineIndexExt,
+    helpers::{self, LineIndexExt},
     idx::Idx,
     types_analyzer,
 };
@@ -93,8 +93,8 @@ impl LanguageService {
                                 num: Some(num),
                                 name: None,
                             } = symbol.idx
-                            && let Some(range) = symbol_table.def_poi.get(&symbol.key)
-                            && let Some(position) = line_index.convert(range.end())
+                            && let Some(position) =
+                                line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()).end())
                         {
                             inlay_hints.push(InlayHint {
                                 position,
@@ -152,8 +152,8 @@ impl LanguageService {
                                 num: Some(num),
                                 name: None,
                             } = symbol.idx
-                            && let Some(range) = symbol_table.def_poi.get(&symbol.key)
-                            && let Some(position) = line_index.convert(range.end())
+                            && let Some(position) =
+                                line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()).end())
                         {
                             inlay_hints.push(InlayHint {
                                 position,

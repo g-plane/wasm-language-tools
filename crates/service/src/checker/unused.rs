@@ -3,7 +3,7 @@ use crate::{
     LintLevel,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers::{BumpCollectionsExt, BumpHashSet},
+    helpers::{self, BumpCollectionsExt, BumpHashSet},
     imex,
 };
 use bumpalo::Bump;
@@ -50,10 +50,8 @@ pub fn check(
             if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) {
                 None
             } else {
-                symbol_table
-                    .def_poi
-                    .get(&symbol.key)
-                    .map(|range| report(db, *range, severity, symbol))
+                let range = helpers::syntax::infer_def_poi(symbol.amber());
+                Some(report(db, range, severity, symbol))
             }
         }
         SymbolKind::Param => {
@@ -64,10 +62,8 @@ pub fn check(
             {
                 None
             } else {
-                symbol_table
-                    .def_poi
-                    .get(&symbol.key)
-                    .map(|range| report(db, *range, severity, symbol))
+                let range = helpers::syntax::infer_def_poi(symbol.amber());
+                Some(report(db, range, severity, symbol))
             }
         }
         _ => None,

@@ -638,12 +638,10 @@ pub fn check(
                             "result types of exception tag `{}` must be empty",
                             symbol.idx.render(ctx.db)
                         ),
-                        related_information: ctx.symbol_table.def_poi.get(&symbol.key).map(|range| {
-                            vec![RelatedInformation {
-                                range: *range,
-                                message: format!("tag `{}` defined here", symbol.idx.render(ctx.db)),
-                            }]
-                        }),
+                        related_information: Some(vec![RelatedInformation {
+                            range: helpers::syntax::infer_def_poi(symbol.amber()),
+                            message: format!("tag `{}` defined here", symbol.idx.render(ctx.db)),
+                        }]),
                         ..Default::default()
                     });
                 }

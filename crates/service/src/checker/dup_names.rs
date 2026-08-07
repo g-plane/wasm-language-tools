@@ -2,7 +2,7 @@ use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{IdxKind, SymbolKind, SymbolTable},
     document::Document,
-    helpers::{BumpCollectionsExt, BumpHashMap},
+    helpers::{self, BumpCollectionsExt, BumpHashMap},
     imex,
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -48,25 +48,21 @@ pub fn check(
             .filter(|(_, symbols)| symbols.len() > 1)
             .flat_map(|((name, _, kind), symbols)| {
                 let name = name.ident(db);
-                symbols.iter().filter_map(move |symbol| {
-                    symbol_table.def_poi.get(&symbol.key).map(|range| Diagnostic {
-                        range: *range,
-                        code: DIAGNOSTIC_CODE.into(),
-                        message: format!("duplicated {kind} name `{name}` in this scope"),
-                        related_information: Some(
-                            symbols
-                                .iter()
-                                .filter(|other| *other != symbol)
-                                .filter_map(|symbol| {
-                                    symbol_table.def_poi.get(&symbol.key).map(|range| RelatedInformation {
-                                        range: *range,
-                                        message: format!("already defined here as `{name}`"),
-                                    })
-                                })
-                                .collect(),
-                        ),
-                        ..Default::default()
-                    })
+                symbols.iter().map(move |symbol| Diagnostic {
+                    range: helpers::syntax::infer_def_poi(symbol.amber()),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!("duplicated {kind} name `{name}` in this scope"),
+                    related_information: Some(
+                        symbols
+                            .iter()
+                            .filter(|other| *other != symbol)
+                            .map(|symbol| RelatedInformation {
+                                range: helpers::syntax::infer_def_poi(symbol.amber()),
+                                message: format!("already defined here as `{name}`"),
+                            })
+                            .collect(),
+                    ),
+                    ..Default::default()
                 })
             }),
     );

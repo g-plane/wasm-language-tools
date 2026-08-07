@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolTable},
-    helpers::LineIndexExt,
+    helpers::{self, LineIndexExt},
 };
 use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams};
 use wat_syntax::SyntaxKind;
@@ -26,9 +26,8 @@ impl LanguageService {
                     acc
                 }
             })
-            .and_then(|ref_key| symbol_table.resolved.get(ref_key))
-            .and_then(|def_key| symbol_table.def_poi.get(def_key))
-            .and_then(|range| line_index.convert(*range))
+            .and_then(|ref_key| symbol_table.find_def(*ref_key))
+            .and_then(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
             .map(|range| {
                 Definition::Location(Location {
                     uri: params.text_document.uri.clone(),
@@ -76,10 +75,9 @@ impl LanguageService {
                             .and_then(|node| node.children_by_kind(SyntaxKind::INDEX).next()),
                         _ => None,
                     })
-                    .and_then(|type_idx| symbol_table.resolved.get(&type_idx.to_ptr().into()))
+                    .and_then(|type_idx| symbol_table.find_def(type_idx.to_ptr().into()))
             })
-            .and_then(|key| symbol_table.def_poi.get(key))
-            .and_then(|range| line_index.convert(*range))
+            .and_then(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
             .map(|range| {
                 Definition::Location(Location {
                     uri: params.text_document.uri.clone(),

@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{IdxKind, SymbolKind, SymbolTable},
-    helpers::LineIndexExt,
+    helpers::{self, LineIndexExt},
 };
 use lspt::{CodeLens, CodeLensParams, Command, Location};
 use serde::{Deserialize, Serialize};
@@ -62,14 +62,7 @@ impl LanguageService {
             .find(|symbol| IdxKind::from(symbol.kind) == data.kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)
-            .filter_map(|symbol| {
-                let range = symbol_table
-                    .def_poi
-                    .get(&symbol.key)
-                    .copied()
-                    .unwrap_or_else(|| symbol.key.text_range());
-                line_index.convert(range)
-            })
+            .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
             .map(|range| Location {
                 uri: data.uri.clone(),
                 range,

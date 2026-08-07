@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
-    helpers::LineIndexExt,
+    helpers::{self, LineIndexExt},
 };
 use lspt::{Location, ReferenceParams};
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -60,14 +60,7 @@ impl LanguageService {
             | SymbolKind::ElemDef => Some(
                 symbol_table
                     .find_references_on_def(symbol, params.context.include_declaration)
-                    .filter_map(|symbol| {
-                        let range = symbol_table
-                            .def_poi
-                            .get(&symbol.key)
-                            .copied()
-                            .unwrap_or_else(|| symbol.key.text_range());
-                        line_index.convert(range)
-                    })
+                    .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
                     .map(|range| Location {
                         uri: uri.clone(),
                         range,
@@ -86,14 +79,7 @@ impl LanguageService {
             | SymbolKind::ElemRef => Some(
                 symbol_table
                     .find_references_on_ref(symbol, params.context.include_declaration)
-                    .filter_map(|symbol| {
-                        let range = symbol_table
-                            .def_poi
-                            .get(&symbol.key)
-                            .copied()
-                            .unwrap_or_else(|| symbol.key.text_range());
-                        line_index.convert(range)
-                    })
+                    .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
                     .map(|range| Location {
                         uri: uri.clone(),
                         range,
@@ -103,14 +89,7 @@ impl LanguageService {
             SymbolKind::BlockDef => Some(
                 symbol_table
                     .find_block_references(key, params.context.include_declaration)
-                    .filter_map(|symbol| {
-                        let range = symbol_table
-                            .def_poi
-                            .get(&symbol.key)
-                            .copied()
-                            .unwrap_or_else(|| symbol.key.text_range());
-                        line_index.convert(range)
-                    })
+                    .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
                     .map(|range| Location {
                         uri: uri.clone(),
                         range,
@@ -120,14 +99,7 @@ impl LanguageService {
             SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
                 symbol_table
                     .find_block_references(*def_key, params.context.include_declaration)
-                    .filter_map(|symbol| {
-                        let range = symbol_table
-                            .def_poi
-                            .get(&symbol.key)
-                            .copied()
-                            .unwrap_or_else(|| symbol.key.text_range());
-                        line_index.convert(range)
-                    })
+                    .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
                     .map(|range| Location {
                         uri: uri.clone(),
                         range,
