@@ -25,7 +25,7 @@ pub fn act(
 
     let index = type_use.index()?;
     let index = index.syntax();
-    let type_def_key = symbol_table.resolved.get(&SymbolKey::new(index))?;
+    let type_def_key = symbol_table.resolved.get(&SymbolKey::from(index))?;
     let CompType::Func(func_type) = TypeDef::cast(type_def_key.to_node(root)?)?.sub_type()?.comp_type()? else {
         return None;
     };

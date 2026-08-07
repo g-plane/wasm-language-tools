@@ -58,10 +58,10 @@ pub fn act(
         .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
     if symbol_table
         .resolved
-        .get(&SymbolKey::new(
+        .get(&SymbolKey::from(
             &call_instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?,
         ))
-        .is_none_or(|def_key| *def_key != SymbolKey::new(&func))
+        .is_none_or(|def_key| *def_key != SymbolKey::from(&func))
     {
         return None;
     }

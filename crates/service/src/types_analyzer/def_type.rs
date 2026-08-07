@@ -31,7 +31,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                 is_final = sub_type.keyword().is_none() || sub_type.final_keyword().is_some();
                 if let Some(index) = sub_type.indexes().next() {
                     let index = index.syntax();
-                    inherits = symbol_table.resolved.get(&SymbolKey::new(index)).and_then(|key| {
+                    inherits = symbol_table.resolved.get(&SymbolKey::from(index)).and_then(|key| {
                         Idx::from_green_for_ref(index.green(), db).map(|idx| Inherits { symbol: *key, idx })
                     });
                 }
@@ -185,7 +185,7 @@ pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) 
             ModuleField::Type(type_def) => {
                 let node = type_def.syntax();
                 Some(RecTypeGroup {
-                    type_defs: vec![SymbolKey::new(node)],
+                    type_defs: vec![SymbolKey::from(node)],
                     range: node.text_range(),
                 })
             }

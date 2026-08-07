@@ -1087,7 +1087,7 @@ impl<'db> SymbolTable<'db> {
 
     pub fn get_declared(&self, module: &SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
         self.modules
-            .get(&SymbolKey::new(module))
+            .get(&SymbolKey::from(module))
             .into_iter()
             .flat_map(move |module| match kind {
                 SymbolKind::Func => &*module.funcs,
@@ -1184,8 +1184,9 @@ impl<'db> SymbolTable<'db> {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 /// Wrapper type for allowing `SyntaxNodePtr` to be stored in Salsa database.
 pub struct SymbolKey(SyntaxNodePtr);
-impl SymbolKey {
-    pub fn new(node: &SyntaxNode) -> Self {
+impl From<&SyntaxNode<'_>> for SymbolKey {
+    #[inline]
+    fn from(node: &SyntaxNode) -> Self {
         SymbolKey(SyntaxNodePtr::new(node))
     }
 }

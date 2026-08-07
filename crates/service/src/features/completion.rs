@@ -531,7 +531,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                         node.children().next()
                     };
                     if let Some(immediate) = first_immediate {
-                        ctx.push(CmpCtx::Field(SymbolKey::new(&immediate)));
+                        ctx.push(CmpCtx::Field(SymbolKey::from(&immediate)));
                     }
                 }
             }
@@ -728,7 +728,7 @@ fn get_cmp_list(
                 else {
                     return items;
                 };
-                let func_key = SymbolKey::new(&func);
+                let func_key = SymbolKey::from(&func);
                 let preferred_type = guess_preferred_type(db, document, token);
                 let param_region = if let Some(type_use) = helpers::syntax::pick_type_idx_from_func(func.amber())
                     && let Some(type_def) = symbol_table.resolved.get(&type_use.to_ptr().into())

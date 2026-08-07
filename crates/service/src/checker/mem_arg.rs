@@ -32,7 +32,7 @@ pub fn check(
     } else {
         ctx.symbol_table
             .modules
-            .get(&SymbolKey::new(ctx.module))?
+            .get(&SymbolKey::from(ctx.module))?
             .memories
             .first()
             .and_then(|key| ctx.symbol_table.symbols.get(key))

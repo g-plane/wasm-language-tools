@@ -11,7 +11,7 @@ pub fn act(
     line_index: &LineIndex,
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
-    let def_key = SymbolKey::new(node);
+    let def_key = SymbolKey::from(node);
     let ident_token = support::token(node, SyntaxKind::IDENT)?;
     let module = node.parent()?;
     let exports = imex::get_exports(db, document);

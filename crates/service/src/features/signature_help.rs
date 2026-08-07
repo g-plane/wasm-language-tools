@@ -35,7 +35,7 @@ impl LanguageService {
             let (signature, func) = match parent_instr.instr_name()?.text() {
                 "call" | "return_call" => {
                     let first_immediate = parent_instr.immediates().next()?;
-                    let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
+                    let func = symbol_table.find_def(SymbolKey::from(first_immediate.syntax()))?;
                     (
                         NamedSig::from_func(db, document, symbol_table.get_type_node_of(func)),
                         Some(func),

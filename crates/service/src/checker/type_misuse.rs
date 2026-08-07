@@ -196,7 +196,7 @@ pub fn check(
             }
         }
         Some(("cont", "bind")) => {
-            let module = SymbolKey::new(ctx.module);
+            let module = SymbolKey::from(ctx.module);
             let fst = immediates.next()?.to_ptr();
             let fst_symbol = ctx.symbol_table.find_def(fst.into())?;
             let fst_sig = match &ctx.def_types.get(&fst_symbol.key)?.comp {
@@ -359,7 +359,7 @@ pub fn check(
                 let table_symbol = ctx
                     .symbol_table
                     .modules
-                    .get(&SymbolKey::new(ctx.module))?
+                    .get(&SymbolKey::from(ctx.module))?
                     .tables
                     .first()
                     .and_then(|key| ctx.symbol_table.symbols.get(key))?;
@@ -661,7 +661,7 @@ pub fn check(
                     }
                     CompositeType::Cont(HeapType::Type(idx)) => {
                         let ct_sig =
-                            find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, SymbolKey::new(ctx.module))?
+                            find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, SymbolKey::from(ctx.module))?
                                 .as_func()?;
                         diagnostics.extend(
                             immediates.filter_map(|immediate| check_on_clause(ctx, immediate, &ct_sig.results)),
@@ -671,7 +671,7 @@ pub fn check(
                 }
             }
             "switch" => {
-                let module = SymbolKey::new(ctx.module);
+                let module = SymbolKey::from(ctx.module);
                 let ct = immediates.next()?.to_ptr();
                 let ct_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(ct))?;
                 let ct_def_symbol = ctx.symbol_table.find_def(ct_ref_symbol.key)?;
@@ -929,7 +929,7 @@ fn check_return_call_result_type(
     let func = ctx
         .symbol_table
         .modules
-        .get(&SymbolKey::new(ctx.module))?
+        .get(&SymbolKey::from(ctx.module))?
         .funcs
         .iter()
         .find(|key| key.text_range().contains_range(instr.text_range()))
@@ -953,7 +953,7 @@ fn check_return_call_result_type(
 }
 
 fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValType]) -> Option<Diagnostic> {
-    let module = SymbolKey::new(ctx.module);
+    let module = SymbolKey::from(ctx.module);
     // Though `resume_throw` will run this check for the second immediate which is tagidx,
     // it won't report diagnostic because there're no `ON_CLAUSE` children.
     let on_clause = immediate.children_by_kind(SyntaxKind::ON_CLAUSE).next()?;
@@ -1081,7 +1081,7 @@ fn check_cast(ctx: &DiagnosticCtx, instr: AmberNode, immediate: AmberNode) -> Op
     let is_cont = match ref_type.heap_ty {
         HeapType::Cont | HeapType::NoCont => true,
         HeapType::Type(idx) => matches!(
-            find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, idx, SymbolKey::new(ctx.module))?,
+            find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, idx, SymbolKey::from(ctx.module))?,
             CompositeType::Cont(..)
         ),
         _ => false,

@@ -15,7 +15,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let index = helpers::syntax::extract_index_from_export(node)?;
-    let def_node = symbol_table.resolved.get(&SymbolKey::new(&index))?.to_node(root)?;
+    let def_node = symbol_table.resolved.get(&SymbolKey::from(&index))?.to_node(root)?;
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(

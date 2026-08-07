@@ -60,7 +60,7 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
                                 None
                             }
                         });
-                    (SymbolKey::new(&node), reason)
+                    (SymbolKey::from(&node), reason)
                 })
         })
         .collect()

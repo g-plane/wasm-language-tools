@@ -68,7 +68,7 @@ impl LanguageService {
                 ) && symbol_table.get_type_node_of(symbol).text_range() == range
             })?
         } else {
-            symbol_table.symbols.get(&SymbolKey::new(&parent))?
+            symbol_table.symbols.get(&SymbolKey::from(&parent))?
         };
         let idx_kind = IdxKind::from(symbol.kind);
         let text_edits = symbol_table

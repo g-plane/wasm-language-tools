@@ -43,7 +43,7 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
 
-        let key = SymbolKey::new(&current_node);
+        let key = SymbolKey::from(&current_node);
         let symbol = symbol_table.symbols.get(&key)?;
         match symbol.kind {
             SymbolKind::Module => None,

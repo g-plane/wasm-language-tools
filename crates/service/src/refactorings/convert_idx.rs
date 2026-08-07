@@ -15,7 +15,7 @@ pub fn act(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
-    let ref_key = SymbolKey::new(node);
+    let ref_key = SymbolKey::from(node);
     let ref_idx = symbol_table.symbols.get(&ref_key)?.idx;
     let def_idx = symbol_table.find_def(ref_key)?.idx;
     let def_num = def_idx.num?;

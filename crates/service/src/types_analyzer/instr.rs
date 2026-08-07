@@ -118,7 +118,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             params: ctx
                 .symbol_table
                 .modules
-                .get(&SymbolKey::new(ctx.module))
+                .get(&SymbolKey::from(ctx.module))
                 .and_then(|module| {
                     module
                         .funcs
@@ -868,7 +868,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                         .and_then(|key| ctx.def_types.get(key)),
                 )
                 .map(|(fst, snd)| {
-                    let module = SymbolKey::new(ctx.module);
+                    let module = SymbolKey::from(ctx.module);
                     let applied = if let Some(fst_sig) =
                         try_deref_cont_to_func(ctx.symbol_table, ctx.def_types, &fst.comp, module)
                         && let Some(snd_sig) =
@@ -916,7 +916,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     ctx.symbol_table,
                     ctx.def_types,
                     &def_type.comp,
-                    SymbolKey::new(ctx.module),
+                    SymbolKey::from(ctx.module),
                 )
                 .map(|sig| {
                     let mut sig = ResolvedSig::from_named_sig_in(sig.clone(), bump);
@@ -962,7 +962,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                         ctx.symbol_table,
                         ctx.def_types,
                         &def_type.comp,
-                        SymbolKey::new(ctx.module),
+                        SymbolKey::from(ctx.module),
                     )
                 })
                 .map(|sig| BumpVec::from_iter_in(sig.results.iter().map(|ty| OperandType::Val(ty.clone())), bump))
@@ -995,7 +995,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                             ctx.symbol_table,
                             ctx.def_types,
                             &def_type.comp,
-                            SymbolKey::new(ctx.module),
+                            SymbolKey::from(ctx.module),
                         )
                     })
                     .map(|sig| BumpVec::from_iter_in(sig.results.iter().map(|ty| OperandType::Val(ty.clone())), bump))
@@ -1016,7 +1016,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 results: BumpVec::new_in(bump),
             }),
         "switch" => {
-            let module = SymbolKey::new(ctx.module);
+            let module = SymbolKey::from(ctx.module);
             instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()

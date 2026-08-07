@@ -37,7 +37,7 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
                 if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
                     if let Some(name) = module_field.children_by_kind(SyntaxKind::NAME).next()
                         && let Some(def_key) = helpers::syntax::extract_index_from_export(&module_field)
-                            .and_then(|index| symbol_table.resolved.get(&SymbolKey::new(&index)))
+                            .and_then(|index| symbol_table.resolved.get(&SymbolKey::from(&index)))
                     {
                         exports.push(Export {
                             def_key: *def_key,
@@ -51,7 +51,7 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
                             .children_by_kind(SyntaxKind::EXPORT)
                             .filter_map(|export| export.children_by_kind(SyntaxKind::NAME).next())
                             .map(|name| Export {
-                                def_key: SymbolKey::new(&module_field),
+                                def_key: SymbolKey::from(&module_field),
                                 name: name.to_string(),
                                 range: name.text_range(),
                             }),
