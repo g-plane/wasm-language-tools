@@ -4,7 +4,7 @@ use wat_syntax::{AmberNode, SyntaxKind};
 const DIAGNOSTIC_CODE: &str = "import-with-def";
 
 pub fn check(ctx: &mut DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
-    if !ctx.imports.contains(&node.to_ptr().into()) {
+    if !ctx.imports.contains(&node.into()) {
         return None;
     }
     let first = node

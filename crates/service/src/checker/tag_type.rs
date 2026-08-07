@@ -12,7 +12,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
         && ctx
             .symbol_table
             .resolved
-            .get(&index.to_ptr().into())
+            .get(&index.into())
             .and_then(|def_key| ctx.def_types.get(def_key))
             .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {

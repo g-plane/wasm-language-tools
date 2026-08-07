@@ -23,7 +23,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
             if let Some(def_key) = cat
                 .children_by_kind(SyntaxKind::INDEX)
                 .next()
-                .and_then(|index| ctx.symbol_table.resolved.get(&index.to_ptr().into()))
+                .and_then(|index| ctx.symbol_table.resolved.get(&index.into()))
             {
                 let matched = match (matches.get(def_key), &default_match) {
                     (Some(catch), Some(catch_all)) => {

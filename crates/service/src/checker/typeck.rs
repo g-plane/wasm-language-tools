@@ -18,7 +18,7 @@ const DIAGNOSTIC_CODE: &str = "type-check";
 
 pub fn check_func(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: AmberNode) {
     {
-        let func_key = node.to_ptr().into();
+        let func_key = node.into();
         let results = BumpVec::from_iter_in(
             Sig::from_func(ctx.db, ctx.document, node)
                 .results
@@ -51,7 +51,7 @@ pub fn check_global(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, 
     let ty = extract_global_type(ctx.db, node.green())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
-    let imported = ctx.imports.contains(&node.to_ptr().into());
+    let imported = ctx.imports.contains(&node.into());
     check_block_like(
         diagnostics,
         ctx,
@@ -80,7 +80,7 @@ pub fn check_table(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, n
         return;
     }
     let ty = OperandType::Val(ty);
-    let imported = ctx.imports.contains(&node.to_ptr().into());
+    let imported = ctx.imports.contains(&node.into());
     check_block_like(
         diagnostics,
         ctx,

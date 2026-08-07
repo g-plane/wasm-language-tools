@@ -75,7 +75,7 @@ impl LanguageService {
                             .and_then(|node| node.children_by_kind(SyntaxKind::INDEX).next()),
                         _ => None,
                     })
-                    .and_then(|type_idx| symbol_table.find_def(type_idx.to_ptr().into()))
+                    .and_then(|type_idx| symbol_table.find_def(type_idx.into()))
             })
             .and_then(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
             .map(|range| {

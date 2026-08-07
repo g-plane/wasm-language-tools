@@ -8,7 +8,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     let index = node.children_by_kind(SyntaxKind::INDEX).next()?;
     if ctx
         .symbol_table
-        .find_def(index.to_ptr().into())
+        .find_def(index.into())
         .map(|func| Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(func)))
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {

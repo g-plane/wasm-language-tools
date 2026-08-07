@@ -9,7 +9,7 @@ use crate::{
     document::Document,
     idx::Idx,
 };
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
+use wat_syntax::{AmberNode, SyntaxKind, SyntaxNode, ast::support};
 
 pub(crate) fn resolve_param_types<'db>(
     db: &'db dyn salsa::Database,
@@ -56,7 +56,7 @@ pub(crate) fn resolve_br_types<'db>(
 pub(super) fn resolve_array_type_with_idx<'db>(
     symbol_table: &SymbolTable,
     def_types: &DefTypes<'db>,
-    immediate: SyntaxNodePtr,
+    immediate: AmberNode,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     symbol_table
         .resolved
@@ -111,8 +111,8 @@ pub(crate) fn resolve_field_type<'db>(
 pub(super) fn resolve_field_type_with_struct_idx<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-    struct_ref: SyntaxNodePtr,
-    field_ref: SyntaxNodePtr,
+    struct_ref: AmberNode,
+    field_ref: AmberNode,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     let symbol_table = SymbolTable::of(db, document);
     let struct_def_symbol = symbol_table.find_def(struct_ref.into())?;

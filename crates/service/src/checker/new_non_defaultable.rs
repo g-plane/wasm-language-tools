@@ -12,7 +12,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
         return None;
     }
     let immediate = node.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
-    let def_symbol = ctx.symbol_table.find_def(immediate.to_ptr().into())?;
+    let def_symbol = ctx.symbol_table.find_def(immediate.into())?;
     match &ctx.def_types.get(&def_symbol.key)?.comp {
         CompositeType::Struct(Fields(fields)) => {
             let non_defaultables = fields

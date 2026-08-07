@@ -30,7 +30,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "call" | "return_call" | "throw" | "suspend" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+            .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
             .map(|func| {
                 ResolvedSig::from_sig_in(
                     Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(func)),
@@ -44,7 +44,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 [instr
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
-                    .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+                    .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
                     .and_then(|symbol| extract_type(ctx.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -55,7 +55,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 [instr
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
-                    .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+                    .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
                     .and_then(|symbol| extract_type(ctx.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -66,7 +66,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let ty = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+                .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
                 .and_then(|symbol| extract_type(ctx.db, &symbol.green))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
@@ -80,7 +80,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 [instr
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
-                    .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+                    .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
                     .and_then(|symbol| extract_global_type(ctx.db, ctx.symbol_table.get_type_node_of(symbol).green()))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -91,7 +91,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 [instr
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
-                    .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+                    .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
                     .and_then(|symbol| extract_global_type(ctx.db, ctx.symbol_table.get_type_node_of(symbol).green()))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -146,7 +146,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             params: instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump)),
             results: BumpVec::new_in(bump),
@@ -155,7 +155,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let results = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             let params = BumpVec::from_iter_in(
@@ -171,7 +171,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut params = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             params.push(OperandType::Val(ValType::I32));
@@ -189,7 +189,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut results = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             let params = BumpVec::from_iter_in(
@@ -212,7 +212,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut params = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             let last = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = params.pop() {
@@ -231,7 +231,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             let mut types = immediates
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             types.pop();
@@ -255,7 +255,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             let mut types = immediates
                 .next()
-                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
+                .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             types.pop();
@@ -310,7 +310,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                         .next()
                         .is_some()
                 })
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -320,7 +320,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "struct.new" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
             .and_then(|key| ctx.def_types.get(key))
             .map(|def_type| {
                 let params = if let CompositeType::Struct(fields) = &def_type.comp {
@@ -352,7 +352,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "struct.new_default" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+            .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::new_in(bump),
                 results: BumpVec::from_iter_in(
@@ -373,7 +373,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .next()
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
-                    resolve_field_type_with_struct_idx(ctx.db, ctx.document, struct_ref.to_ptr(), field_ref.to_ptr())
+                    resolve_field_type_with_struct_idx(ctx.db, ctx.document, struct_ref, field_ref)
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: BumpVec::from_iter_in(
@@ -394,7 +394,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             params: instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map(|symbol| {
                     BumpVec::from_iter_in(
                         [OperandType::Val(ValType::Ref(RefType {
@@ -413,7 +413,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .next()
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
-                    resolve_field_type_with_struct_idx(ctx.db, ctx.document, struct_ref.to_ptr(), field_ref.to_ptr())
+                    resolve_field_type_with_struct_idx(ctx.db, ctx.document, struct_ref, field_ref)
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: BumpVec::from_iter_in(
@@ -437,7 +437,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut sig = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate.to_ptr()))
+                .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate))
                 .map(|(idx, ty)| ResolvedSig {
                     params: BumpVec::from_iter_in([ty.unwrap_or(OperandType::Any)], bump),
                     results: BumpVec::from_iter_in(
@@ -458,7 +458,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.new_default" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+            .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
                 results: BumpVec::from_iter_in(
@@ -477,7 +477,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             immediates
                 .next()
-                .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate.to_ptr()))
+                .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate))
                 .map(|(idx, ty)| {
                     let count = immediates
                         .next()
@@ -514,7 +514,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.new_data" | "array.new_elem" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+            .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in(iter::repeat_n(OperandType::Val(ValType::I32), 2), bump),
                 results: BumpVec::from_iter_in(
@@ -532,7 +532,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.get" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate.to_ptr()))
+            .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate))
             .map(|(idx, ty)| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -553,7 +553,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.get_s" | "array.get_u" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+            .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -574,7 +574,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.set" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate.to_ptr()))
+            .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate))
             .map(|(idx, ty)| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -593,7 +593,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.fill" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate.to_ptr()))
+            .and_then(|immediate| resolve_array_type_with_idx(ctx.symbol_table, ctx.def_types, immediate))
             .map(|(idx, ty)| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -614,12 +614,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             immediates
                 .next()
-                .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-                .zip(
-                    immediates
-                        .next()
-                        .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into())),
-                )
+                .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
+                .zip(immediates.next().and_then(|idx| ctx.symbol_table.find_def(idx.into())))
                 .map(|(dst, src)| ResolvedSig {
                     params: BumpVec::from_iter_in(
                         [
@@ -644,7 +640,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "array.init_data" | "array.init_elem" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
+            .and_then(|idx| ctx.symbol_table.find_def(idx.into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -779,7 +775,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let immediate = instr.children_by_kind(SyntaxKind::IMMEDIATE).next();
             let heap_ty = immediate
                 .as_ref()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(SymbolKey::from(*immediate)))
                 .and_then(|def_symbol| def_symbol.amber().children_by_kind(SyntaxKind::TYPE_USE).next())
                 .and_then(|type_use| type_use.children_by_kind(SyntaxKind::INDEX).next())
                 .and_then(|index| Idx::from_green_for_ref(index.green(), ctx.db))
@@ -805,7 +801,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "call_ref" | "return_call_ref" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
             .and_then(|key| ctx.def_types.get(key))
             .map(|def_type| {
                 let mut sig = def_type
@@ -829,7 +825,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "cont.new" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
             .and_then(|key| ctx.def_types.get(key))
             .map(|def_type| {
                 let param = if let CompositeType::Cont(heap_ty) = &def_type.comp {
@@ -859,12 +855,12 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             immediates
                 .next()
-                .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
                 .and_then(|key| ctx.def_types.get(key))
                 .zip(
                     immediates
                         .next()
-                        .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+                        .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
                         .and_then(|key| ctx.def_types.get(key)),
                 )
                 .map(|(fst, snd)| {
@@ -909,7 +905,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "resume" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
             .and_then(|key| ctx.def_types.get(key))
             .and_then(|def_type| {
                 try_deref_cont_to_func(
@@ -935,11 +931,11 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             let ct = immediates
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()));
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()));
             let params = BumpVec::from_iter_in(
                 immediates
                     .next()
-                    .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                    .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                     .into_iter()
                     .flat_map(|symbol| {
                         Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(symbol))
@@ -972,7 +968,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "resume_throw_ref" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
             .map(|symbol| {
                 let params = BumpVec::from_iter_in(
                     [
@@ -1020,7 +1016,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .and_then(|def_symbol| {
                     ctx.def_types
                         .get(&def_symbol.key)
@@ -1065,7 +1061,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1079,7 +1075,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1092,7 +1088,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1105,7 +1101,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1118,7 +1114,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1131,7 +1127,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1144,7 +1140,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1157,7 +1153,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1170,7 +1166,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1183,7 +1179,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1196,7 +1192,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
             ResolvedSig {
                 params: BumpVec::from_iter_in(
@@ -1214,13 +1210,13 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             let at1 = immediates
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
             let at2 = immediates
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1242,7 +1238,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1264,7 +1260,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1277,7 +1273,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1290,7 +1286,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
                 .map_or(ValType::I32, |symbol| {
                     extract_addr_type(ctx.symbol_table.get_type_node_of(symbol).green())
                 });
@@ -1302,7 +1298,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "table.get" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
             .map(|symbol| {
                 let green = ctx.symbol_table.get_type_node_of(symbol).green();
                 let at = extract_addr_type(green);
@@ -1320,7 +1316,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "table.set" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
             .map(|symbol| {
                 let green = ctx.symbol_table.get_type_node_of(symbol).green();
                 let at = extract_addr_type(green);
@@ -1338,7 +1334,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "table.grow" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
             .map(|symbol| {
                 let green = ctx.symbol_table.get_type_node_of(symbol).green();
                 let at = extract_addr_type(green);
@@ -1356,7 +1352,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "table.fill" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
             .map(|symbol| {
                 let green = ctx.symbol_table.get_type_node_of(symbol).green();
                 let at = extract_addr_type(green);

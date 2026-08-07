@@ -13,7 +13,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     let (label_index, results) = match node.kind() {
         SyntaxKind::CATCH => {
             let mut indexes = node.children_by_kind(SyntaxKind::INDEX);
-            let tag = ctx.symbol_table.find_def(indexes.next()?.to_ptr().into())?;
+            let tag = ctx.symbol_table.find_def(indexes.next()?.into())?;
             let mut results = BumpVec::from_iter_in(
                 Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag)).params,
                 ctx.bump,
@@ -42,7 +42,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         }
         _ => return None,
     };
-    let ref_key = SymbolKey::from(label_index.to_ptr());
+    let ref_key = SymbolKey::from(label_index);
     let block = ctx.symbol_table.find_def(ref_key)?;
     let block_sig = Sig::from_func(ctx.db, ctx.document, block.amber());
     if results.len() != block_sig.results.len()

@@ -82,11 +82,8 @@ fn find_struct_field<'db>(
     instr: AmberNode,
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
     let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
-    let struct_def_key = ctx.symbol_table.resolved.get(&immediates.next()?.to_ptr().into())?;
-    let field_ref_symbol = ctx
-        .symbol_table
-        .symbols
-        .get(&SymbolKey::from(immediates.next()?.to_ptr()))?;
+    let struct_def_key = ctx.symbol_table.resolved.get(&immediates.next()?.into())?;
+    let field_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(immediates.next()?))?;
     if let Some(CompositeType::Struct(Fields(fields))) =
         ctx.def_types.get(struct_def_key).map(|def_type| &def_type.comp)
     {
@@ -100,7 +97,7 @@ fn find_struct_field<'db>(
 }
 
 fn find_array<'db>(ctx: &'db DiagnosticCtx, instr: AmberNode) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
-    let ref_key = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?.to_ptr().into();
+    let ref_key = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?.into();
     let ref_symbol = ctx.symbol_table.symbols.get(&ref_key)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = ctx
         .def_types

@@ -200,7 +200,7 @@ fn compute_token_modifier(
     if matches!(
         token.kind(),
         SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
-    ) && let Some(symbol) = symbol_table.symbols.get(&SymbolKey::from(parent.to_ptr()))
+    ) && let Some(symbol) = symbol_table.symbols.get(&SymbolKey::from(parent))
     {
         match symbol.kind {
             SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {
@@ -239,7 +239,7 @@ pub(crate) enum SemanticTokenType {
 
 fn is_ref_of_param(node: AmberNode, symbol_table: &SymbolTable) -> bool {
     symbol_table
-        .find_def(node.to_ptr().into())
+        .find_def(node.into())
         .is_some_and(|symbol| symbol.kind == SymbolKind::Param)
 }
 

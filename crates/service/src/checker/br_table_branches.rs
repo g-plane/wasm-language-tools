@@ -16,14 +16,14 @@ pub fn check(
     }
     let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
     let expected = BumpVec::from_iter_in(
-        immediates.next().and_then(|immediate| {
-            resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.to_ptr().into())
-        })?,
+        immediates
+            .next()
+            .and_then(|immediate| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.into()))?,
         ctx.bump,
     );
     diagnostics.extend(immediates.filter_map(|immediate| {
         let received = BumpVec::from_iter_in(
-            resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.to_ptr().into())?,
+            resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.into())?,
             ctx.bump,
         );
         if received != expected {

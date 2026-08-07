@@ -10,7 +10,6 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
             .next()?
             .children_by_kind(SyntaxKind::INDEX)
             .next()?
-            .to_ptr()
             .into(),
     )?;
     let table_ref_type =

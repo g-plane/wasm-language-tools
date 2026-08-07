@@ -16,7 +16,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, imports: &[SymbolKey], node: Amb
                 | SyntaxKind::MODULE_FIELD_MEMORY
                 | SyntaxKind::MODULE_FIELD_GLOBAL
                 | SyntaxKind::MODULE_FIELD_TAG
-                    if !imports.contains(&child.to_ptr().into()) =>
+                    if !imports.contains(&child.into()) =>
                 {
                     *has_non_import = true;
                     Some(None)

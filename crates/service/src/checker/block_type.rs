@@ -12,7 +12,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     if ctx
         .symbol_table
         .resolved
-        .get(&index.to_ptr().into())
+        .get(&index.into())
         .and_then(|key| ctx.def_types.get(key))
         .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {

@@ -8,7 +8,7 @@ use crate::{
         resolve_br_types,
     },
 };
-use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNodePtr};
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -21,12 +21,12 @@ pub fn check(
     let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
     match instr_name.text().split_once('.') {
         Some(("struct", _)) => {
-            if let Some(diagnostic) = check_type_matches(ctx, "struct", immediates.next()?.to_ptr()) {
+            if let Some(diagnostic) = check_type_matches(ctx, "struct", immediates.next()?) {
                 diagnostics.push(diagnostic);
             }
         }
         Some(("array", "copy")) => {
-            let dst = immediates.next()?.to_ptr();
+            let dst = immediates.next()?;
             let dst_symbol = ctx.symbol_table.find_def(dst.into())?;
             let dst_type = match &ctx.def_types.get(&dst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -44,7 +44,7 @@ pub fn check(
                 }
             };
 
-            let src = immediates.next()?.to_ptr();
+            let src = immediates.next()?;
             let src_symbol = ctx.symbol_table.find_def(src.into())?;
             let src_type = match &ctx.def_types.get(&src_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -94,7 +94,7 @@ pub fn check(
             }
         }
         Some(("array", "new_elem" | "init_elem")) => {
-            let array = immediates.next()?.to_ptr();
+            let array = immediates.next()?;
             let array_symbol = ctx.symbol_table.find_def(array.into())?;
             let array_type = match &ctx.def_types.get(&array_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -114,7 +114,7 @@ pub fn check(
             .clone()
             .into();
 
-            let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
+            let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.into())?;
             let elem_type = extract_elem_ref_type(ctx.db, &elem_symbol.green)?;
 
             if !ValType::Ref(elem_type.clone()).matches(&array_type, ctx.db, ctx.document, ctx.module_id) {
@@ -143,7 +143,7 @@ pub fn check(
             }
         }
         Some(("array", "new_data" | "init_data")) => {
-            let array = immediates.next()?.to_ptr();
+            let array = immediates.next()?;
             let array_symbol = ctx.symbol_table.find_def(array.into())?;
             let FieldType {
                 storage: array_type, ..
@@ -181,7 +181,7 @@ pub fn check(
             }
         }
         Some(("array", _)) => {
-            if let Some(diagnostic) = check_type_matches(ctx, "array", immediates.next()?.to_ptr()) {
+            if let Some(diagnostic) = check_type_matches(ctx, "array", immediates.next()?) {
                 diagnostics.push(diagnostic);
             }
         }
@@ -191,13 +191,13 @@ pub fn check(
             }
         }
         Some(("cont", "new")) => {
-            if let Some(diagnostic) = check_type_matches(ctx, "cont", immediates.next()?.to_ptr()) {
+            if let Some(diagnostic) = check_type_matches(ctx, "cont", immediates.next()?) {
                 diagnostics.push(diagnostic);
             }
         }
         Some(("cont", "bind")) => {
             let module = SymbolKey::from(ctx.module);
-            let fst = immediates.next()?.to_ptr();
+            let fst = immediates.next()?;
             let fst_symbol = ctx.symbol_table.find_def(fst.into())?;
             let fst_sig = match &ctx.def_types.get(&fst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -219,7 +219,7 @@ pub fn check(
                 CompositeType::Cont(..) => None,
             };
 
-            let snd = immediates.next()?.to_ptr();
+            let snd = immediates.next()?;
             let snd_symbol = ctx.symbol_table.find_def(snd.into())?;
             let snd_sig = match &ctx.def_types.get(&snd_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -315,11 +315,11 @@ pub fn check(
             }
         }
         Some(("table", "copy")) => {
-            let dst = immediates.next()?.to_ptr();
+            let dst = immediates.next()?;
             let dst_symbol = ctx.symbol_table.find_def(dst.into())?;
             let dst_type = extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(dst_symbol).green())?;
 
-            let src = immediates.next()?.to_ptr();
+            let src = immediates.next()?;
             let src_symbol = ctx.symbol_table.find_def(src.into())?;
             let src_type = extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(src_symbol).green())?;
 
@@ -349,10 +349,10 @@ pub fn check(
             }
         }
         Some(("table", "init")) => {
-            let symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
+            let symbol = ctx.symbol_table.find_def(immediates.next()?.into())?;
             let (table_symbol, table_type, elem_symbol, elem_type) = if symbol.kind == SymbolKind::TableDef {
                 let table_type = extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(symbol).green())?;
-                let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
+                let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.into())?;
                 let elem_type = extract_elem_ref_type(ctx.db, &elem_symbol.green)?;
                 (symbol, table_type, elem_symbol, elem_type)
             } else {
@@ -395,7 +395,7 @@ pub fn check(
         }
         _ => match instr_name.text() {
             "call_ref" => {
-                if let Some(diagnostic) = check_type_matches(ctx, "func", immediates.next()?.to_ptr()) {
+                if let Some(diagnostic) = check_type_matches(ctx, "func", immediates.next()?) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -441,7 +441,7 @@ pub fn check(
                 }
             }
             "br_on_non_null" => {
-                let immediate = immediates.next()?.to_ptr();
+                let immediate = immediates.next()?;
                 let last = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.into())
                     .and_then(|mut types| types.next_back());
                 if !matches!(last, Some(OperandType::Val(ValType::Ref(..))))
@@ -460,7 +460,7 @@ pub fn check(
             }
             "br_on_cast" => {
                 let label = immediates.next()?;
-                let rt_label_type = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, label.to_ptr().into())
+                let rt_label_type = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, label.into())
                     .and_then(|mut types| types.next_back());
                 let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = rt_label_type {
                     rt_label
@@ -518,7 +518,7 @@ pub fn check(
             }
             "br_on_cast_fail" => {
                 let label = immediates.next()?;
-                let rt_label_type = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, label.to_ptr().into())
+                let rt_label_type = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, label.into())
                     .and_then(|mut types| types.next_back());
                 let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = rt_label_type {
                     rt_label
@@ -584,7 +584,7 @@ pub fn check(
                 if let Some(immediate) = node.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && let Some(diagnostic) = ctx
                         .symbol_table
-                        .find_def(immediate.to_ptr().into())
+                        .find_def(immediate.into())
                         .map(|func| Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(func)))
                         .and_then(|sig| check_return_call_result_type(ctx, node, immediate, &sig.results))
                 {
@@ -593,13 +593,13 @@ pub fn check(
             }
             "return_call_ref" => {
                 let immediate = immediates.next()?;
-                if let Some(diagnostic) = check_type_matches(ctx, "func", immediate.to_ptr()) {
+                if let Some(diagnostic) = check_type_matches(ctx, "func", immediate) {
                     diagnostics.push(diagnostic);
                 }
                 if let Some(diagnostic) = ctx
                     .symbol_table
                     .resolved
-                    .get(&immediate.to_ptr().into())
+                    .get(&immediate.into())
                     .and_then(|key| ctx.def_types.get(key))
                     .and_then(|def_type| def_type.comp.as_func())
                     .and_then(|sig| check_return_call_result_type(ctx, node, immediate, &sig.results))
@@ -626,7 +626,7 @@ pub fn check(
             }
             "throw" => {
                 if let Some(immediate) = immediates.next()
-                    && let Some(symbol) = ctx.symbol_table.find_def(immediate.to_ptr().into())
+                    && let Some(symbol) = ctx.symbol_table.find_def(immediate.into())
                     && !Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(symbol))
                         .results
                         .is_empty()
@@ -647,7 +647,7 @@ pub fn check(
                 }
             }
             "resume" | "resume_throw" | "resume_throw_ref" => {
-                let ct = immediates.next()?.to_ptr();
+                let ct = immediates.next()?;
                 let ct_symbol = ctx.symbol_table.find_def(ct.into())?;
                 match &ctx.def_types.get(&ct_symbol.key)?.comp {
                     CompositeType::Func(..) => {
@@ -672,7 +672,7 @@ pub fn check(
             }
             "switch" => {
                 let module = SymbolKey::from(ctx.module);
-                let ct = immediates.next()?.to_ptr();
+                let ct = immediates.next()?;
                 let ct_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(ct))?;
                 let ct_def_symbol = ctx.symbol_table.find_def(ct_ref_symbol.key)?;
                 let ct_sig = match &ctx.def_types.get(&ct_def_symbol.key)?.comp {
@@ -695,10 +695,7 @@ pub fn check(
                     CompositeType::Cont(..) => None,
                 }?;
 
-                let tag_ref_symbol = ctx
-                    .symbol_table
-                    .symbols
-                    .get(&SymbolKey::from(immediates.next()?.to_ptr()))?;
+                let tag_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(immediates.next()?))?;
                 let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
                 let tag_sig = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag_def_symbol));
                 if !tag_sig.params.is_empty() {
@@ -859,11 +856,7 @@ pub fn check(
     Some(())
 }
 
-fn check_type_matches(
-    ctx: &DiagnosticCtx,
-    expected_kind: &'static str,
-    immediate: SyntaxNodePtr,
-) -> Option<Diagnostic> {
+fn check_type_matches(ctx: &DiagnosticCtx, expected_kind: &'static str, immediate: AmberNode) -> Option<Diagnostic> {
     let def_symbol = ctx.symbol_table.find_def(immediate.into())?;
     let def_type = ctx.def_types.get(&def_symbol.key)?;
     let kind = match def_type.comp {
@@ -888,7 +881,7 @@ fn check_table_ref_type(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnost
                 .next()
                 .is_some()
         })
-        .map(|immediate| immediate.to_ptr().into())
+        .map(|immediate| immediate.into())
         && let Some(ref_symbol) = ctx.symbol_table.symbols.get(&ref_key)
         && ctx
             .symbol_table
@@ -958,14 +951,11 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
     // it won't report diagnostic because there're no `ON_CLAUSE` children.
     let on_clause = immediate.children_by_kind(SyntaxKind::ON_CLAUSE).next()?;
     let mut indexes = on_clause.children_by_kind(SyntaxKind::INDEX);
-    let tag_ref_symbol = ctx
-        .symbol_table
-        .symbols
-        .get(&SymbolKey::from(indexes.next()?.to_ptr()))?;
+    let tag_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(indexes.next()?))?;
     let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
     let tag_sig = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag_def_symbol));
     if let Some(label_index) = indexes.next() {
-        let block_symbol = ctx.symbol_table.find_def(label_index.to_ptr().into())?;
+        let block_symbol = ctx.symbol_table.find_def(label_index.into())?;
         let block_sig = Sig::from_func(ctx.db, ctx.document, block_symbol.amber());
         if let Some((
             ValType::Ref(RefType {
@@ -1101,14 +1091,14 @@ fn check_cast(ctx: &DiagnosticCtx, instr: AmberNode, immediate: AmberNode) -> Op
 fn build_diagnostic(
     expected_kind: &'static str,
     actual_kind: &str,
-    ptr: SyntaxNodePtr,
+    node: AmberNode,
     def_symbol: &Symbol,
     db: &dyn salsa::Database,
 ) -> Diagnostic {
     debug_assert!(matches!(expected_kind, "func" | "struct" | "array" | "cont"));
     debug_assert!(matches!(actual_kind, "func" | "struct" | "array" | "cont"));
     Diagnostic {
-        range: ptr.text_range(),
+        range: node.text_range(),
         code: DIAGNOSTIC_CODE.into(),
         message: format!(
             "expected type is {expected_kind}, but type of `{}` is {actual_kind}",
