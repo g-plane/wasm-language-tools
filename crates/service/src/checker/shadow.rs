@@ -54,9 +54,9 @@ pub fn check(
             })
             .iter()
             .filter(|(_, ranges)| !ranges.is_empty())
-            .filter_map(|((symbol, name), ranges)| {
+            .map(|((symbol, name), ranges)| {
                 let name = name.ident(db);
-                Some(Diagnostic {
+                Diagnostic {
                     range: helpers::syntax::infer_def_poi(symbol.amber()),
                     severity,
                     code: DIAGNOSTIC_CODE.into(),
@@ -71,7 +71,7 @@ pub fn check(
                             .collect(),
                     ),
                     ..Default::default()
-                })
+                }
             }),
     );
 
