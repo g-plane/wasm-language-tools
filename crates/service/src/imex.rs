@@ -10,8 +10,8 @@ use wat_syntax::{AmberNode, SyntaxKind, SyntaxNodePtr, TextRange};
 pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Box<[SymbolKey]> {
     SymbolTable::of(db, document)
         .symbols
-        .iter()
-        .filter(|(_, symbol)| match symbol.key.kind() {
+        .values()
+        .filter(|symbol| match symbol.key.kind() {
             SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM => true,
             SyntaxKind::MODULE_FIELD_FUNC
             | SyntaxKind::MODULE_FIELD_GLOBAL
@@ -20,7 +20,7 @@ pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Box<[
             | SyntaxKind::MODULE_FIELD_TAG => symbol.green.children().any(|child| child.kind() == SyntaxKind::IMPORT),
             _ => false,
         })
-        .map(|(key, _)| *key)
+        .map(|symbol| symbol.key)
         .collect()
 }
 
