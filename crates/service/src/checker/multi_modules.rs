@@ -1,11 +1,11 @@
 use super::Diagnostic;
 use crate::config::LintLevel;
 use lspt::DiagnosticSeverity;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "multiple-modules";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: AmberNode) {
     let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
@@ -13,8 +13,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: &Sy
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
     diagnostics.extend(
-        root.amber()
-            .children_by_kind(SyntaxKind::MODULE)
+        root.children_by_kind(SyntaxKind::MODULE)
             .skip(1)
             .map(|module| Diagnostic {
                 range: module.text_range(),

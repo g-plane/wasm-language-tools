@@ -157,7 +157,7 @@ pub(crate) mod syntax {
         }
     }
 
-    pub fn extract_index_from_export<'a>(module_field_export: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
+    pub fn extract_index_from_export<'a>(module_field_export: AmberNode<'a>) -> Option<AmberNode<'a>> {
         module_field_export
             .children_by_kind(ExternIdx::can_cast)
             .next()

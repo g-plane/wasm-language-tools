@@ -9,20 +9,20 @@ use crate::{
     document::Document,
     idx::Idx,
 };
-use wat_syntax::{AmberNode, SyntaxKind, SyntaxNode, ast::support};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 pub(crate) fn resolve_param_types<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-    instr: &SyntaxNode,
+    instr: AmberNode,
 ) -> Option<Vec<OperandType<'db>>> {
     debug_assert!(instr.kind() == SyntaxKind::PLAIN_INSTR);
-    let instr_name = support::token(instr, SyntaxKind::INSTR_NAME)?;
+    let instr_name = instr.tokens_by_kind(SyntaxKind::INSTR_NAME).next()?;
     let instr_name = instr_name.text();
     if matches!(instr_name, "call" | "return_call") {
         let symbol_table = SymbolTable::of(db, document);
         let idx = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
-        let func = symbol_table.find_def(SymbolKey::from(&idx))?;
+        let func = symbol_table.find_def(SymbolKey::from(idx))?;
         Some(
             Sig::from_func(db, document, symbol_table.get_type_node_of(func))
                 .params

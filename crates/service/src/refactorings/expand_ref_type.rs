@@ -2,10 +2,10 @@ use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
+use wat_syntax::{AmberNode, SyntaxKind};
 
-pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
-    let token = support::token(node, SyntaxKind::TYPE_KEYWORD)?;
+pub fn act(uri: &str, line_index: &LineIndex, node: AmberNode) -> Option<CodeAction> {
+    let token = node.tokens_by_kind(SyntaxKind::TYPE_KEYWORD).next()?;
     let type_keyword = token.text();
     let heap_ty = match type_keyword {
         "anyref" => "any",

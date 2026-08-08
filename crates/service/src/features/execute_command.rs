@@ -1,6 +1,6 @@
 use crate::{LanguageService, cfa, helpers::LineIndexExt};
 use lspt::{ExecuteCommandParams, Position};
-use wat_syntax::{SyntaxKind, SyntaxNode, TextRange};
+use wat_syntax::{AmberNode, SyntaxKind, TextRange};
 
 impl LanguageService {
     /// Handler for `workspace/executeCommand` request.
@@ -14,7 +14,7 @@ impl LanguageService {
 
                 let line_index = document.line_index(self);
                 let range = TextRange::empty(line_index.convert(position)?);
-                let func = SyntaxNode::new_root(document.root(self))
+                let func = AmberNode::new_root(document.root(self))
                     .child_at_range(range)
                     .and_then(|module| module.child_at_range(range))
                     .filter(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;

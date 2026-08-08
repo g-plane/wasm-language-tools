@@ -62,9 +62,9 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
 
     let mut diagnostics = Vec::with_capacity(4);
     syntax::check(db, &mut diagnostics, document);
-    multi_modules::check(&mut diagnostics, config.lint.multi_modules, &root);
+    multi_modules::check(&mut diagnostics, config.lint.multi_modules, root.amber());
     root.children().enumerate().for_each(|(module_id, module)| {
-        if let Some(diagnostic) = implicit_module::check(config.lint.implicit_module, &module) {
+        if let Some(diagnostic) = implicit_module::check(config.lint.implicit_module, module.amber()) {
             diagnostics.push(diagnostic);
         }
         let mut ctx = DiagnosticCtx {

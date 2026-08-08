@@ -4,7 +4,7 @@ use crate::{
     helpers,
 };
 use rustc_hash::FxHashMap;
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange};
+use wat_syntax::{AmberNode, SyntaxKind, SyntaxNodePtr, TextRange};
 
 #[salsa::tracked]
 pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Box<[SymbolKey]> {
@@ -29,19 +29,19 @@ pub(crate) type ExportMap = FxHashMap<SyntaxNodePtr, Box<[Export]>>;
 #[salsa::tracked]
 pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> ExportMap {
     let symbol_table = SymbolTable::of(db, document);
-    SyntaxNode::new_root(document.root(db))
+    AmberNode::new_root(document.root(db))
         .children()
         .map(|module| {
             let mut exports = Vec::new();
             module.children().for_each(|module_field| {
                 if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
                     if let Some(name) = module_field.children_by_kind(SyntaxKind::NAME).next()
-                        && let Some(def_key) = helpers::syntax::extract_index_from_export(&module_field)
-                            .and_then(|index| symbol_table.resolved.get(&SymbolKey::from(&index)))
+                        && let Some(def_key) = helpers::syntax::extract_index_from_export(module_field)
+                            .and_then(|index| symbol_table.resolved.get(&index.into()))
                     {
                         exports.push(Export {
                             def_key: *def_key,
-                            name: name.to_string(),
+                            name: name.green().to_string(),
                             range: name.text_range(),
                         });
                     }
@@ -51,14 +51,14 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
                             .children_by_kind(SyntaxKind::EXPORT)
                             .filter_map(|export| export.children_by_kind(SyntaxKind::NAME).next())
                             .map(|name| Export {
-                                def_key: SymbolKey::from(&module_field),
-                                name: name.to_string(),
+                                def_key: module_field.into(),
+                                name: name.green().to_string(),
                                 range: name.text_range(),
                             }),
                     );
                 }
             });
-            (SyntaxNodePtr::new(&module), exports.into_boxed_slice())
+            (module.to_ptr(), exports.into_boxed_slice())
         })
         .collect()
 }

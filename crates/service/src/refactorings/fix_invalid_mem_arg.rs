@@ -5,9 +5,9 @@ use lspt::{
 };
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{AmberNode, SyntaxKind};
 
-pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode, context: &CodeActionContext) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, node: AmberNode, context: &CodeActionContext) -> Option<CodeAction> {
     let text_edits = node
         .tokens_by_kind(SyntaxKind::is_trivia)
         .filter_map(|token| line_index.convert(token.text_range()))

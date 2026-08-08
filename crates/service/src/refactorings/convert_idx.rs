@@ -6,14 +6,14 @@ use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::SyntaxNode;
+use wat_syntax::AmberNode;
 
 pub fn act(
     db: &dyn salsa::Database,
     uri: &str,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    node: AmberNode,
 ) -> Option<CodeAction> {
     let ref_key = SymbolKey::from(node);
     let ref_idx = symbol_table.symbols.get(&ref_key)?.idx;

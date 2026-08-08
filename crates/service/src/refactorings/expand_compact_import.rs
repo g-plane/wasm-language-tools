@@ -4,17 +4,17 @@ use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::{collections::HashMap, fmt::Write};
 use wat_syntax::{
-    SyntaxKind, SyntaxNode,
+    AmberNode, SyntaxKind,
     ast::{AstNode, ExternType},
 };
 
-pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
-    let module_name = node.children_by_kind(SyntaxKind::MODULE_NAME).next()?;
+pub fn act(uri: &str, line_index: &LineIndex, node: AmberNode) -> Option<CodeAction> {
+    let module_name = node.children_by_kind(SyntaxKind::MODULE_NAME).next()?.green();
     let extern_type = node.children_by_kind(ExternType::can_cast).next();
     let imports = node
         .children_by_kind(SyntaxKind::IMPORT_ITEM)
         .filter_map(|import_item| {
-            let name = import_item.children_by_kind(SyntaxKind::NAME).next()?;
+            let name = import_item.children_by_kind(SyntaxKind::NAME).next()?.green();
             let mut new_text = format!("(import {module_name} {name}");
             if let Some(extern_type) = import_item
                 .children_by_kind(ExternType::can_cast)
@@ -22,7 +22,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeA
                 .as_ref()
                 .or(extern_type.as_ref())
             {
-                let _ = write!(&mut new_text, " {extern_type}");
+                let _ = write!(&mut new_text, " {}", extern_type.green());
             }
             new_text.push(')');
             Some(new_text)

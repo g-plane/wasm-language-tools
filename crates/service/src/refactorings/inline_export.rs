@@ -1,21 +1,15 @@
 use crate::{
-    binder::{SymbolKey, SymbolTable},
+    binder::SymbolTable,
     helpers::{self, LineIndexExt},
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode, TextRange, ast::support};
+use wat_syntax::{AmberNode, SyntaxKind, TextRange};
 
-pub fn act(
-    uri: &str,
-    line_index: &LineIndex,
-    root: &SyntaxNode,
-    symbol_table: &SymbolTable,
-    node: &SyntaxNode,
-) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, symbol_table: &SymbolTable, node: AmberNode) -> Option<CodeAction> {
     let index = helpers::syntax::extract_index_from_export(node)?;
-    let def_node = symbol_table.resolved.get(&SymbolKey::from(&index))?.to_node(root)?;
+    let def_node = symbol_table.find_def(index.into())?.amber();
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
@@ -27,12 +21,14 @@ pub fn act(
             },
             TextEdit {
                 range: line_index.convert(TextRange::empty(
-                    support::token(&def_node, SyntaxKind::IDENT)
-                        .or_else(|| support::token(&def_node, SyntaxKind::KEYWORD))?
+                    def_node
+                        .tokens_by_kind(SyntaxKind::IDENT)
+                        .next()
+                        .or_else(|| def_node.tokens_by_kind(SyntaxKind::KEYWORD).next())?
                         .text_range()
                         .end(),
                 ))?,
-                new_text: format!(" (export {})", node.children_by_kind(SyntaxKind::NAME).next()?),
+                new_text: format!(" (export {})", node.children_by_kind(SyntaxKind::NAME).next()?.green()),
             },
         ],
     );

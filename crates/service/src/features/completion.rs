@@ -1430,7 +1430,7 @@ fn guess_preferred_type<'db>(
             let index = grand_instr
                 .children_by_kind(SyntaxKind::PLAIN_INSTR)
                 .position(|instr| instr == parent_instr)?;
-            let types = types_analyzer::resolve_param_types(service, document, &grand_instr)?;
+            let types = types_analyzer::resolve_param_types(service, document, grand_instr.amber())?;
             if let Some(OperandType::Val(val_type)) = types.get(index) {
                 Some(val_type.clone())
             } else {

@@ -2,9 +2,9 @@ use crate::{helpers::LineIndexExt, types_analyzer::RefType};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
+use wat_syntax::{AmberNode, SyntaxKind};
 
-pub fn act(db: &dyn salsa::Database, uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
+pub fn act(db: &dyn salsa::Database, uri: &str, line_index: &LineIndex, node: AmberNode) -> Option<CodeAction> {
     if !RefType::from_green(node.green(), db)?.nullable {
         return None;
     }
@@ -12,7 +12,7 @@ pub fn act(db: &dyn salsa::Database, uri: &str, line_index: &LineIndex, node: &S
     let token = node
         .children_by_kind(SyntaxKind::HEAP_TYPE)
         .next()
-        .and_then(|heap_ty| support::token(&heap_ty, SyntaxKind::TYPE_KEYWORD))?;
+        .and_then(|heap_ty| heap_ty.tokens_by_kind(SyntaxKind::TYPE_KEYWORD).next())?;
     let ref_type = match token.text() {
         "any" => "anyref",
         "eq" => "eqref",
