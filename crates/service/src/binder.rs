@@ -1074,15 +1074,23 @@ impl<'db> SymbolTable<'db> {
         self.resolved.get(&key).and_then(|def_key| self.symbols.get(def_key))
     }
 
-    pub fn find_def_by_idx(
-        &'db self,
-        idx: Idx<'db>,
-        def_kind: SymbolKind,
-        region: SymbolKey,
-    ) -> Option<&'db Symbol<'db>> {
-        self.symbols
-            .values()
-            .find(|symbol| symbol.kind == def_kind && symbol.region == region && idx.is_defined_by(&symbol.idx))
+    pub fn find_def_by_idx(&'db self, idx: Idx<'db>, kind: SymbolKind, module: SymbolKey) -> Option<&'db Symbol<'db>> {
+        std::debug_assert_matches!(kind, SymbolKind::Type | SymbolKind::Func);
+        let module = self.modules.get(&module)?;
+        let declared = match kind {
+            SymbolKind::Type => &module.types,
+            SymbolKind::Func => &module.funcs,
+            _ => return None,
+        };
+        if let Some(num) = idx.num {
+            declared.get(num as usize).and_then(|key| self.symbols.get(key))
+        } else if let Some(name) = idx.name {
+            declared
+                .iter()
+                .find_map(|key| self.symbols.get(key).filter(|symbol| symbol.idx.name == Some(name)))
+        } else {
+            None
+        }
     }
 
     pub fn get_declared(&self, module: &SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
