@@ -176,7 +176,7 @@ impl<'db> CompositeType<'db> {
 }
 
 #[salsa::tracked]
-pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) -> Vec<RecTypeGroup> {
+pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) -> Box<[RecTypeGroup]> {
     let root = Root::cast(SyntaxNode::new_root(document.root(db))).expect("expected root tree");
     let symbol_table = SymbolTable::of(db, document);
     root.modules()
@@ -185,7 +185,7 @@ pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) 
             ModuleField::Type(type_def) => {
                 let node = type_def.syntax();
                 Some(RecTypeGroup {
-                    type_defs: vec![SymbolKey::from(node)],
+                    type_defs: Box::from([SymbolKey::from(node)]),
                     range: node.text_range(),
                 })
             }
@@ -210,7 +210,7 @@ pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) 
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct RecTypeGroup {
-    pub(crate) type_defs: Vec<SymbolKey>,
+    pub(crate) type_defs: Box<[SymbolKey]>,
     pub(crate) range: TextRange,
 }
 impl RecTypeGroup {
