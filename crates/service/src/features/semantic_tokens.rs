@@ -200,7 +200,7 @@ fn compute_token_modifier(
     if matches!(
         token.kind(),
         SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
-    ) && let Some(symbol) = symbol_table.symbols.get(&SymbolKey::from(parent))
+    ) && let Some(symbol) = symbol_table.symbols.get(SymbolKey::from(parent))
     {
         match symbol.kind {
             SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {

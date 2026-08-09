@@ -41,7 +41,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
                             .filter_map(|idx| {
                                 ctx.symbol_table
                                     .symbols
-                                    .values()
+                                    .iter()
                                     .find(|symbol| {
                                         symbol.kind == SymbolKind::FieldDef
                                             && symbol.region == def_symbol.key

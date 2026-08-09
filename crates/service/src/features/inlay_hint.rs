@@ -23,7 +23,7 @@ impl LanguageService {
 
             let range = line_index.convert(params.range)?;
             let mut inlay_hints = Vec::new();
-            for symbol in symbol_table.symbols.values() {
+            for symbol in symbol_table.symbols.iter() {
                 match symbol.kind {
                     SymbolKind::LocalRef => {
                         if options.types

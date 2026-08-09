@@ -212,7 +212,7 @@ fn create_symbol_hover(
 ) -> Option<MarkupContent> {
     symbol_table
         .symbols
-        .get(&SymbolKey::from(node))
+        .get(SymbolKey::from(node))
         .and_then(|symbol| match symbol.kind {
             SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, symbol)),
             SymbolKind::LocalRef => symbol_table

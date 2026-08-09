@@ -25,7 +25,7 @@ pub fn check(
     let deprecation = deprecation::get_deprecation(db, document);
     let deprecated_usage = symbol_table
         .symbols
-        .values()
+        .iter()
         .filter(|symbol| {
             matches!(
                 symbol.kind,

@@ -19,7 +19,7 @@ pub fn check(
     diagnostics.extend(
         symbol_table
             .symbols
-            .values()
+            .iter()
             .filter(|symbol| {
                 matches!(
                     symbol.kind,

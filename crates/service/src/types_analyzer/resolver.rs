@@ -84,10 +84,10 @@ pub(crate) fn resolve_field_type<'db>(
 ) -> Option<FieldType<'db>> {
     let symbol_table = SymbolTable::of(db, document);
     let def_types = get_def_types(db, document);
-    let symbol = symbol_table.symbols.get(&key)?;
+    let symbol = symbol_table.symbols.get(key)?;
     let field_def_symbol = match symbol.kind {
         SymbolKind::FieldDef => symbol,
-        SymbolKind::FieldRef => symbol_table.symbols.values().find(|other| {
+        SymbolKind::FieldRef => symbol_table.symbols.iter().find(|other| {
             other.kind == SymbolKind::FieldDef && other.region == region && symbol.idx.is_defined_by(&other.idx)
         })?,
         _ => return None,

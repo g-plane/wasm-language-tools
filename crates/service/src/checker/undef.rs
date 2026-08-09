@@ -7,7 +7,7 @@ pub fn check(db: &dyn salsa::Database, diagnostics: &mut Vec<Diagnostic>, symbol
     diagnostics.extend(
         symbol_table
             .symbols
-            .values()
+            .iter()
             .filter(|symbol| match symbol.kind {
                 SymbolKind::Module
                 | SymbolKind::Func

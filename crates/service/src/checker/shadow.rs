@@ -26,7 +26,7 @@ pub fn check(
     diagnostics.extend(
         symbol_table
             .symbols
-            .values()
+            .iter()
             .fold(BumpHashMap::new_in(bump), |mut map, symbol| {
                 if let Symbol {
                     kind: SymbolKind::BlockDef,
@@ -40,7 +40,7 @@ pub fn check(
                         .extend(
                             symbol_table
                                 .symbols
-                                .values()
+                                .iter()
                                 .filter(|other| {
                                     *other != symbol
                                         && other.kind == SymbolKind::BlockDef

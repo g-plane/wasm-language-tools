@@ -194,7 +194,7 @@ pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) 
                 Some(RecTypeGroup {
                     type_defs: symbol_table
                         .symbols
-                        .values()
+                        .iter()
                         .filter(|symbol| {
                             symbol.kind == SymbolKind::Type && rec_range.contains_range(symbol.key.text_range())
                         })
@@ -339,7 +339,7 @@ pub(crate) fn find_comp_type_by_idx<'db>(
 ) -> Option<&'db CompositeType<'db>> {
     symbol_table
         .symbols
-        .values()
+        .iter()
         .find(|symbol| symbol.kind == SymbolKind::Type && symbol.region == module && idx.is_defined_by(&symbol.idx))
         .and_then(|symbol| def_types.get(&symbol.key))
         .map(|def_type| &def_type.comp)

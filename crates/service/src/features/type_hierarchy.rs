@@ -24,7 +24,7 @@ impl LanguageService {
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent().text_range();
 
-        symbol_table.symbols.values().find_map(|symbol| match symbol.kind {
+        symbol_table.symbols.iter().find_map(|symbol| match symbol.kind {
             SymbolKind::Type if symbol.key.text_range() == parent_range => Some(vec![TypeHierarchyItem {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Class,
@@ -82,13 +82,13 @@ impl LanguageService {
         let type_def_range = line_index.convert(params.item.range)?;
         let type_def = symbol_table
             .symbols
-            .values()
+            .iter()
             .find(|symbol| symbol.key.text_range() == type_def_range)?;
 
         def_types
             .get(&type_def.key)
             .and_then(|def_type| def_type.inherits.as_ref())
-            .and_then(|inherits| symbol_table.symbols.get(&inherits.symbol))
+            .and_then(|inherits| symbol_table.symbols.get(inherits.symbol))
             .and_then(|symbol| {
                 Some(vec![TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
@@ -123,7 +123,7 @@ impl LanguageService {
         let type_def_range = line_index.convert(params.item.range)?;
         let key = symbol_table
             .symbols
-            .values()
+            .iter()
             .find(|symbol| symbol.key.text_range() == type_def_range)?
             .key;
 

@@ -18,7 +18,7 @@ pub fn check(
                 let inherits = sub_type.inherits.as_ref()?;
                 let super_type = def_types.get(&inherits.symbol)?;
                 let def_symbol = symbol_table.symbols.get(key)?;
-                let module_id = symbol_table.symbols.get(&def_symbol.region)?.idx.num?;
+                let module_id = symbol_table.symbols.get(def_symbol.region)?.idx.num?;
 
                 if super_type
                     .idx

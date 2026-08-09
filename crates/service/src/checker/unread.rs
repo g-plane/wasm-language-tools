@@ -53,7 +53,7 @@ pub fn check(
         {
             diagnostics.extend(
                 detect_unread(bb, local.key, mark, symbol_table, bump)
-                    .filter_map(|key| symbol_table.symbols.get(&key))
+                    .filter_map(|key| symbol_table.symbols.get(key))
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
                         severity,

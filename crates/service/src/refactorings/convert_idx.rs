@@ -16,7 +16,7 @@ pub fn act(
     node: AmberNode,
 ) -> Option<CodeAction> {
     let ref_key = SymbolKey::from(node);
-    let ref_idx = symbol_table.symbols.get(&ref_key)?.idx;
+    let ref_idx = symbol_table.symbols.get(ref_key)?.idx;
     let def_idx = symbol_table.find_def(ref_key)?.idx;
     let def_num = def_idx.num?;
     let def_name = def_idx.name?;

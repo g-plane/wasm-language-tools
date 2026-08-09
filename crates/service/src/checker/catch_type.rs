@@ -57,7 +57,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
             message: format!(
                 "result type `[{}]` should match result type of block `{}`",
                 results.iter().map(|ty| ty.render(ctx.db)).join(", "),
-                ctx.symbol_table.symbols.get(&ref_key)?.idx.render(ctx.db),
+                ctx.symbol_table.symbols.get(ref_key)?.idx.render(ctx.db),
             ),
             ..Default::default()
         })

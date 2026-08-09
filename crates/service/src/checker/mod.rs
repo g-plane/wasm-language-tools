@@ -233,12 +233,12 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
     });
     symbol_table
         .symbols
-        .values()
+        .iter()
         .filter(|symbol| symbol.kind == SymbolKind::Local)
         .filter_map(|symbol| {
             symbol_table
                 .symbols
-                .get(&symbol.region)
+                .get(symbol.region)
                 .map(|func| (symbol, func.amber()))
         })
         .for_each(|(local, func)| {

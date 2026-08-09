@@ -740,7 +740,7 @@ fn get_cmp_list(
                 items.extend(
                     symbol_table
                         .symbols
-                        .values()
+                        .iter()
                         .filter(|symbol| match symbol.kind {
                             SymbolKind::Param => symbol.region == param_region,
                             SymbolKind::Local => symbol.region == func_key,
@@ -968,7 +968,7 @@ fn get_cmp_list(
                 items.extend(
                     symbol_table
                         .symbols
-                        .values()
+                        .iter()
                         .filter(|symbol| {
                             matches!(symbol.kind, SymbolKind::BlockDef | SymbolKind::Func)
                                 && symbol.key.text_range().contains_range(token.text_range())

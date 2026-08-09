@@ -57,7 +57,7 @@ impl LanguageService {
         let parent = token.parent();
         let symbol = if ExternType::can_cast(parent.kind()) {
             let range = parent.text_range();
-            symbol_table.symbols.values().find(|symbol| {
+            symbol_table.symbols.iter().find(|symbol| {
                 matches!(
                     symbol.kind,
                     SymbolKind::Func
@@ -68,12 +68,12 @@ impl LanguageService {
                 ) && symbol_table.get_type_node_of(symbol).text_range() == range
             })?
         } else {
-            symbol_table.symbols.get(&SymbolKey::from(&parent))?
+            symbol_table.symbols.get(SymbolKey::from(&parent))?
         };
         let idx_kind = IdxKind::from(symbol.kind);
         let text_edits = symbol_table
             .symbols
-            .values()
+            .iter()
             .filter(|sym| match &sym.kind {
                 SymbolKind::Func
                 | SymbolKind::Call

@@ -36,7 +36,7 @@ pub fn check(
         ),
         bump,
     );
-    diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| match symbol.kind {
+    diagnostics.extend(symbol_table.symbols.iter().filter_map(|symbol| match symbol.kind {
         SymbolKind::Func
         | SymbolKind::Local
         | SymbolKind::Type

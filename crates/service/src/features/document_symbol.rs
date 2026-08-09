@@ -21,7 +21,7 @@ impl LanguageService {
 
             let mut symbols_map = symbol_table
                 .symbols
-                .values()
+                .iter()
                 .filter_map(|symbol| {
                     let range = line_index.convert(symbol.key.text_range())?;
                     let selection_range = line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?;
@@ -177,7 +177,7 @@ impl LanguageService {
                 .collect::<FxHashMap<_, _>>();
             symbol_table
                 .symbols
-                .values()
+                .iter()
                 .filter(|symbol| symbol.region.kind() != SyntaxKind::ROOT)
                 .rev()
                 .for_each(|symbol| {

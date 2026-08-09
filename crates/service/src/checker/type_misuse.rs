@@ -445,7 +445,7 @@ pub fn check(
                 let last = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.into())
                     .and_then(|mut types| types.next_back());
                 if !matches!(last, Some(OperandType::Val(ValType::Ref(..))))
-                    && let Some(symbol) = ctx.symbol_table.symbols.get(&SymbolKey::from(immediate))
+                    && let Some(symbol) = ctx.symbol_table.symbols.get(SymbolKey::from(immediate))
                 {
                     diagnostics.push(Diagnostic {
                         range: immediate.text_range(),
@@ -673,7 +673,7 @@ pub fn check(
             "switch" => {
                 let module = SymbolKey::from(ctx.module);
                 let ct = immediates.next()?;
-                let ct_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(ct))?;
+                let ct_ref_symbol = ctx.symbol_table.symbols.get(SymbolKey::from(ct))?;
                 let ct_def_symbol = ctx.symbol_table.find_def(ct_ref_symbol.key)?;
                 let ct_sig = match &ctx.def_types.get(&ct_def_symbol.key)?.comp {
                     CompositeType::Func(..) => {
@@ -695,7 +695,7 @@ pub fn check(
                     CompositeType::Cont(..) => None,
                 }?;
 
-                let tag_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(immediates.next()?))?;
+                let tag_ref_symbol = ctx.symbol_table.symbols.get(SymbolKey::from(immediates.next()?))?;
                 let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
                 let tag_sig = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag_def_symbol));
                 if !tag_sig.params.is_empty() {
@@ -882,7 +882,7 @@ fn check_table_ref_type(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnost
                 .is_some()
         })
         .map(|immediate| immediate.into())
-        && let Some(ref_symbol) = ctx.symbol_table.symbols.get(&ref_key)
+        && let Some(ref_symbol) = ctx.symbol_table.symbols.get(ref_key)
         && ctx
             .symbol_table
             .find_def(ref_key)
@@ -951,7 +951,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
     // it won't report diagnostic because there're no `ON_CLAUSE` children.
     let on_clause = immediate.children_by_kind(SyntaxKind::ON_CLAUSE).next()?;
     let mut indexes = on_clause.children_by_kind(SyntaxKind::INDEX);
-    let tag_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(indexes.next()?))?;
+    let tag_ref_symbol = ctx.symbol_table.symbols.get(SymbolKey::from(indexes.next()?))?;
     let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
     let tag_sig = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag_def_symbol));
     if let Some(label_index) = indexes.next() {

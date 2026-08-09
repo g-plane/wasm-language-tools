@@ -28,7 +28,7 @@ pub(crate) fn get_mutabilities(
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
         .symbols
-        .values()
+        .iter()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalDef => {
                 let ty = symbol_table.get_type_node_of(symbol);
@@ -101,7 +101,7 @@ pub(crate) fn get_mutation_actions(
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
         .symbols
-        .values()
+        .iter()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalRef => {
                 let parent = symbol.key.to_node(&root)?.parent()?;

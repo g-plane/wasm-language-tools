@@ -44,7 +44,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let key = SymbolKey::from(&current_node);
-        let symbol = symbol_table.symbols.get(&key)?;
+        let symbol = symbol_table.symbols.get(key)?;
         match symbol.kind {
             SymbolKind::Module => None,
             SymbolKind::Func

@@ -15,7 +15,7 @@ impl LanguageService {
             let symbol_table = SymbolTable::of(db, document);
             symbol_table
                 .symbols
-                .values()
+                .iter()
                 .filter(|symbol| {
                     matches!(
                         symbol.kind,
@@ -58,7 +58,7 @@ impl LanguageService {
         let range = line_index.convert(params.range)?;
         let def_symbol = symbol_table
             .symbols
-            .values()
+            .iter()
             .find(|symbol| IdxKind::from(symbol.kind) == data.kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)

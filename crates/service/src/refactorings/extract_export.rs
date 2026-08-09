@@ -15,10 +15,10 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let parent = node.parent()?;
-    let def_symbol = symbol_table.symbols.get(&SymbolKey::from(&parent))?;
+    let def_symbol = symbol_table.symbols.get(SymbolKey::from(&parent))?;
     let last_module_field = symbol_table
         .symbols
-        .get(&def_symbol.region)?
+        .get(def_symbol.region)?
         .amber()
         .children()
         .next_back()?;

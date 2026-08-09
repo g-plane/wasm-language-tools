@@ -43,7 +43,7 @@ impl LanguageService {
                 SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                     let symbol_table = SymbolTable::of(db, document);
                     let key = SymbolKey::from(&token.parent());
-                    if let Some(symbol) = symbol_table.symbols.get(&key) {
+                    if let Some(symbol) = symbol_table.symbols.get(key) {
                         match symbol.kind {
                             SymbolKind::Module => None,
                             SymbolKind::Func

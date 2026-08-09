@@ -6,7 +6,7 @@ const DIAGNOSTIC_CODE: &str = "cont-type";
 
 pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     let index = node.children_by_kind(SyntaxKind::INDEX).next()?;
-    let ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(index))?;
+    let ref_symbol = ctx.symbol_table.symbols.get(SymbolKey::from(index))?;
     let def_key = ctx.symbol_table.resolved.get(&ref_symbol.key)?;
     if matches!(ctx.def_types.get(def_key)?.comp, CompositeType::Func(..)) {
         None

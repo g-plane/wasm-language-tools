@@ -23,7 +23,7 @@ impl LanguageService {
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent().text_range();
 
-        symbol_table.symbols.values().find_map(|symbol| match symbol.kind {
+        symbol_table.symbols.iter().find_map(|symbol| match symbol.kind {
             SymbolKind::Func if symbol.key.text_range() == parent_range => Some(vec![CallHierarchyItem {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Function,
@@ -91,7 +91,7 @@ impl LanguageService {
             .filter_map(|call_key| {
                 symbol_table
                     .symbols
-                    .values()
+                    .iter()
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(call_key.text_range())
                     })
@@ -136,7 +136,7 @@ impl LanguageService {
         let call_def_range = line_index.convert(params.item.range)?;
         let mut items = symbol_table
             .symbols
-            .values()
+            .iter()
             .filter(|symbol| symbol.kind == SymbolKind::Call && call_def_range.contains_range(symbol.key.text_range()))
             .filter_map(|symbol| symbol_table.find_def(symbol.key).map(|def_symbol| (def_symbol, symbol)))
             .filter_map(|(def_symbol, ref_symbol)| {

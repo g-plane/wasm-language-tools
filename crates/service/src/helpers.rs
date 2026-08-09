@@ -97,7 +97,7 @@ fn clean_underscores(s: &str) -> Cow<'_, str> {
 
 pub fn get_doc_comment(def_symbol: &Symbol, symbol_table: &SymbolTable) -> Option<String> {
     let node = def_symbol.amber();
-    symbol_table.symbols.get(&def_symbol.region).map(|module| {
+    symbol_table.symbols.get(def_symbol.region).map(|module| {
         module
             .amber()
             .children_with_tokens()
