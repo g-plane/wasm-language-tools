@@ -256,15 +256,7 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
         });
     undef::check(db, &mut diagnostics, symbol_table);
     dup_names::check(db, &mut diagnostics, document, symbol_table, &mut bump);
-    unused::check(
-        db,
-        &mut diagnostics,
-        document,
-        config.lint.unused,
-        symbol_table,
-        imports,
-        &bump,
-    );
+    unused::check(db, &mut diagnostics, config.lint.unused, symbol_table, imports, &bump);
     shadow::check(db, &mut diagnostics, config.lint.shadow, symbol_table, &mut bump);
     mutated_immutable::check(db, &mut diagnostics, document, symbol_table);
     needless_mut::check(db, &mut diagnostics, config.lint.needless_mut, document, symbol_table);

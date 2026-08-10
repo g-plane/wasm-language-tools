@@ -2,9 +2,7 @@ use super::Diagnostic;
 use crate::{
     LintLevel,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
-    document::Document,
     helpers::{self, BumpCollectionsExt, BumpHashSet},
-    imex,
 };
 use bumpalo::Bump;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
@@ -15,7 +13,6 @@ const DIAGNOSTIC_CODE: &str = "unused";
 pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
-    document: Document,
     lint_level: LintLevel,
     symbol_table: &SymbolTable,
     imports: &[SymbolKey],
@@ -27,15 +24,7 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    let exports = imex::get_exports(db, document);
-    let used = BumpHashSet::from_iter_in(
-        symbol_table.resolved.values().copied().chain(
-            exports
-                .values()
-                .flat_map(|exports| exports.iter().map(|export| export.def_key)),
-        ),
-        bump,
-    );
+    let used = BumpHashSet::from_iter_in(symbol_table.resolved.values().copied(), bump);
     diagnostics.extend(symbol_table.symbols.iter().filter_map(|symbol| match symbol.kind {
         SymbolKind::Func
         | SymbolKind::Local
@@ -47,7 +36,7 @@ pub fn check(
         | SymbolKind::TagDef
         | SymbolKind::DataDef
         | SymbolKind::ElemDef => {
-            if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) {
+            if used.contains(&symbol.key) || has_export(symbol) || is_prefixed_with_underscore(db, symbol) {
                 None
             } else {
                 let range = helpers::syntax::infer_def_poi(symbol.amber());
@@ -72,6 +61,10 @@ pub fn check(
 
 fn is_prefixed_with_underscore(db: &dyn salsa::Database, symbol: &Symbol) -> bool {
     symbol.idx.name.is_some_and(|name| name.ident(db).starts_with("$_"))
+}
+
+fn has_export(symbol: &Symbol) -> bool {
+    symbol.amber().children_by_kind(SyntaxKind::EXPORT).next().is_some()
 }
 
 fn report(db: &dyn salsa::Database, range: TextRange, severity: DiagnosticSeverity, symbol: &Symbol) -> Diagnostic {
