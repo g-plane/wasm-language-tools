@@ -1416,9 +1416,9 @@ impl fmt::Debug for Symbols<'_> {
 /// Items are in the same order of symbols, so an index in this slice is equivalent to the index in symbols.
 ///
 /// Item type of this slice is `Option`, and there're three kinds of semantics.
-/// - `Some`: a use can be resolved to a definition;
-/// - `None`: a use can't be resolved to a definition, a.k.a. undefined;
-/// - `None`: not applicable, which is the case for a definition itself.
+/// - `Some(def_index)`: a use can be resolved to a definition;
+/// - `None` for a ref-kind symbol: a use can't be resolved to a definition, a.k.a. undefined;
+/// - `None` for a def-kind symbol: not applicable.
 ///
 /// Invariant: index of a definition can never be zero, since `symbols[0]` always corresponds to the first module.
 /// Leveraging this, we can use `NonZeroU32` to get smaller type size.
