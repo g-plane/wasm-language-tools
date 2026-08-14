@@ -47,6 +47,7 @@ impl<'db, 'bump> Builder<'db, 'bump> {
         self.visit_block_like(node, exit);
         self.finish_exit(exit);
 
+        self.graph.nodes.shrink_to_fit();
         self.graph
     }
 

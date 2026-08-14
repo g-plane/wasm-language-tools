@@ -187,8 +187,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
 
     let root = AmberNode::new_root(document.root(db));
     let mut symbols = Symbols {
-        values: Vec::new(),
-        indices: HashTable::new(),
+        values: Vec::with_capacity(usize::max(64, usize::from(root.text_range().len()) / 80)),
+        indices: HashTable::with_capacity(usize::max(64, usize::from(root.text_range().len()) / 128)),
         build_hasher: FxBuildHasher,
     };
     let mut resolved = Vec::new();
@@ -1050,6 +1050,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         );
     });
 
+    symbols.values.shrink_to_fit();
     SymbolTable {
         symbols,
         resolved: resolved.into_boxed_slice(),
