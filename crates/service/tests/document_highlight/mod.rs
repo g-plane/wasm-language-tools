@@ -627,7 +627,7 @@ fn block_ref_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 7, 18));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]

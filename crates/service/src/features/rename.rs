@@ -104,21 +104,18 @@ impl LanguageService {
                 SymbolKind::BlockDef => {
                     symbol == *sym
                         || symbol_table
-                            .resolved
-                            .get(&symbol.key)
-                            .is_some_and(|def_key| *def_key == sym.key)
+                            .find_def(symbol.key)
+                            .is_some_and(|def_symbol| def_symbol.key == sym.key)
                 }
                 SymbolKind::BlockRef => {
                     if symbol.kind == SymbolKind::BlockDef {
                         symbol_table
-                            .resolved
-                            .get(&sym.key)
-                            .is_some_and(|def_key| *def_key == symbol.key)
-                    } else if let (Some(a), Some(b)) = (
-                        symbol_table.resolved.get(&symbol.key),
-                        symbol_table.resolved.get(&sym.key),
-                    ) {
-                        a == b
+                            .find_def(sym.key)
+                            .is_some_and(|def_symbol| def_symbol.key == symbol.key)
+                    } else if let (Some(a), Some(b)) =
+                        (symbol_table.find_def(symbol.key), symbol_table.find_def(sym.key))
+                    {
+                        a.key == b.key
                     } else {
                         false
                     }

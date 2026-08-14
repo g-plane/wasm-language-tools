@@ -54,6 +54,7 @@ impl LanguageService {
             | SymbolKind::GlobalDef
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
+            | SymbolKind::BlockDef
             | SymbolKind::FieldDef
             | SymbolKind::TagDef
             | SymbolKind::DataDef
@@ -73,6 +74,7 @@ impl LanguageService {
             | SymbolKind::GlobalRef
             | SymbolKind::MemoryRef
             | SymbolKind::TableRef
+            | SymbolKind::BlockRef
             | SymbolKind::FieldRef
             | SymbolKind::TagRef
             | SymbolKind::DataRef
@@ -86,30 +88,6 @@ impl LanguageService {
                     })
                     .collect(),
             ),
-            SymbolKind::BlockDef => Some(
-                symbol_table
-                    .find_block_references(key, params.context.include_declaration)
-                    .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
-                    .map(|range| Location {
-                        uri: uri.clone(),
-                        range,
-                    })
-                    .collect(),
-            ),
-            SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
-                symbol_table
-                    .find_block_references(*def_key, params.context.include_declaration)
-                    .filter_map(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
-                    .map(|range| Location {
-                        uri: uri.clone(),
-                        range,
-                    })
-                    .collect()
-            }),
         }
-        .map(|mut references: Vec<_>| {
-            references.sort_unstable_by_key(|location| location.range.start);
-            references
-        })
     }
 }

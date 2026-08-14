@@ -320,8 +320,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "struct.new" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
-            .and_then(|key| ctx.def_types.get(key))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
+            .and_then(|symbol| ctx.def_types.get(&symbol.key))
             .map(|def_type| {
                 let params = if let CompositeType::Struct(fields) = &def_type.comp {
                     BumpVec::from_iter_in(
@@ -801,8 +801,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "call_ref" | "return_call_ref" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
-            .and_then(|key| ctx.def_types.get(key))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
+            .and_then(|symbol| ctx.def_types.get(&symbol.key))
             .map(|def_type| {
                 let mut sig = def_type
                     .comp
@@ -825,8 +825,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "cont.new" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
-            .and_then(|key| ctx.def_types.get(key))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
+            .and_then(|symbol| ctx.def_types.get(&symbol.key))
             .map(|def_type| {
                 let param = if let CompositeType::Cont(heap_ty) = &def_type.comp {
                     OperandType::Val(ValType::Ref(RefType {
@@ -855,13 +855,13 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             immediates
                 .next()
-                .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
-                .and_then(|key| ctx.def_types.get(key))
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
+                .and_then(|symbol| ctx.def_types.get(&symbol.key))
                 .zip(
                     immediates
                         .next()
-                        .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
-                        .and_then(|key| ctx.def_types.get(key)),
+                        .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
+                        .and_then(|symbol| ctx.def_types.get(&symbol.key)),
                 )
                 .map(|(fst, snd)| {
                     let module = SymbolKey::from(ctx.module);
@@ -905,8 +905,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "resume" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
-            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.into()))
-            .and_then(|key| ctx.def_types.get(key))
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.into()))
+            .and_then(|symbol| ctx.def_types.get(&symbol.key))
             .and_then(|def_type| {
                 try_deref_cont_to_func(
                     ctx.symbol_table,

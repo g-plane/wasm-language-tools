@@ -598,9 +598,8 @@ pub fn check(
                 }
                 if let Some(diagnostic) = ctx
                     .symbol_table
-                    .resolved
-                    .get(&immediate.into())
-                    .and_then(|key| ctx.def_types.get(key))
+                    .find_def(immediate.into())
+                    .and_then(|symbol| ctx.def_types.get(&symbol.key))
                     .and_then(|def_type| def_type.comp.as_func())
                     .and_then(|sig| check_return_call_result_type(ctx, node, immediate, &sig.results))
                 {

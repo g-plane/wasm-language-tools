@@ -31,8 +31,11 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                 is_final = sub_type.keyword().is_none() || sub_type.final_keyword().is_some();
                 if let Some(index) = sub_type.indexes().next() {
                     let index = index.syntax();
-                    inherits = symbol_table.resolved.get(&SymbolKey::from(index)).and_then(|key| {
-                        Idx::from_green_for_ref(index.green(), db).map(|idx| Inherits { symbol: *key, idx })
+                    inherits = symbol_table.find_def(SymbolKey::from(index)).and_then(|symbol| {
+                        Idx::from_green_for_ref(index.green(), db).map(|idx| Inherits {
+                            symbol: symbol.key,
+                            idx,
+                        })
                     });
                 }
             }

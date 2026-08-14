@@ -31,8 +31,8 @@ impl<'db> NamedSig<'db> {
             let def_types = get_def_types(db, document);
             node.children_by_kind(SyntaxKind::INDEX)
                 .next()
-                .and_then(|idx| symbol_table.resolved.get(&idx.into()))
-                .and_then(|def_key| def_types.get(def_key))
+                .and_then(|idx| symbol_table.find_def(idx.into()))
+                .and_then(|def_symbol| def_types.get(&def_symbol.key))
                 .and_then(|def_type| def_type.comp.as_func().cloned())
                 .unwrap_or_default()
         }
@@ -123,8 +123,8 @@ impl<'db> Sig<'db> {
             let def_types = get_def_types(db, document);
             node.children_by_kind(SyntaxKind::INDEX)
                 .next()
-                .and_then(|idx| symbol_table.resolved.get(&idx.into()))
-                .and_then(|def_key| def_types.get(def_key))
+                .and_then(|idx| symbol_table.find_def(idx.into()))
+                .and_then(|def_symbol| def_types.get(&def_symbol.key))
                 .and_then(|def_type| def_type.comp.as_func())
                 .map(|sig| Self {
                     params: sig.params.iter().map(|(ty, _)| ty.clone()).collect(),

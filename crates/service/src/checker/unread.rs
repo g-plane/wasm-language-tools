@@ -109,9 +109,8 @@ fn detect_unread(
                     && last.is_some()
                     && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && symbol_table
-                        .resolved
-                        .get(&immediate.into())
-                        .is_some_and(|key| *key == def_key)
+                        .find_def(immediate.into())
+                        .is_some_and(|symbol| symbol.key == def_key)
                 {
                     *last = None;
                 }
@@ -119,9 +118,8 @@ fn detect_unread(
             Some("local.set" | "local.tee") => {
                 if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && symbol_table
-                        .resolved
-                        .get(&immediate.into())
-                        .is_some_and(|key| *key == def_key)
+                        .find_def(immediate.into())
+                        .is_some_and(|symbol| symbol.key == def_key)
                 {
                     set.push(Some(immediate.into()));
                 }
@@ -157,9 +155,8 @@ impl BlockMark {
                     if !kill
                         && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                         && symbol_table
-                            .resolved
-                            .get(&immediate.into())
-                            .is_some_and(|key| *key == def_key)
+                            .find_def(immediate.into())
+                            .is_some_and(|symbol| symbol.key == def_key)
                     {
                         r#gen = true;
                     }
@@ -167,9 +164,8 @@ impl BlockMark {
                 Some("local.set" | "local.tee") => {
                     if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                         && symbol_table
-                            .resolved
-                            .get(&immediate.into())
-                            .is_some_and(|key| *key == def_key)
+                            .find_def(immediate.into())
+                            .is_some_and(|symbol| symbol.key == def_key)
                     {
                         kill = true;
                     }

@@ -20,12 +20,12 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
     let mut matches = FxHashMap::<_, AmberNode>::default();
     node.children_by_kind(Cat::can_cast).for_each(|cat| match cat.kind() {
         SyntaxKind::CATCH => {
-            if let Some(def_key) = cat
+            if let Some(def_symbol) = cat
                 .children_by_kind(SyntaxKind::INDEX)
                 .next()
-                .and_then(|index| ctx.symbol_table.resolved.get(&index.into()))
+                .and_then(|index| ctx.symbol_table.find_def(index.into()))
             {
-                let matched = match (matches.get(def_key), &default_match) {
+                let matched = match (matches.get(&def_symbol.key), &default_match) {
                     (Some(catch), Some(catch_all)) => {
                         if catch.text_range().start() < catch_all.text_range().start() {
                             catch
@@ -36,7 +36,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
                     (Some(catch), None) => catch,
                     (None, Some(catch_all)) => catch_all,
                     (None, None) => {
-                        matches.insert(def_key, cat);
+                        matches.insert(def_symbol.key, cat);
                         return;
                     }
                 };

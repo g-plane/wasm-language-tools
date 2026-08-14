@@ -24,39 +24,48 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    let used = BumpHashSet::from_iter_in(symbol_table.resolved.values().copied(), bump);
-    diagnostics.extend(symbol_table.symbols.iter().filter_map(|symbol| match symbol.kind {
-        SymbolKind::Func
-        | SymbolKind::Local
-        | SymbolKind::Type
-        | SymbolKind::GlobalDef
-        | SymbolKind::MemoryDef
-        | SymbolKind::TableDef
-        | SymbolKind::FieldDef
-        | SymbolKind::TagDef
-        | SymbolKind::DataDef
-        | SymbolKind::ElemDef => {
-            if used.contains(&symbol.key) || has_export(symbol) || is_prefixed_with_underscore(db, symbol) {
-                None
-            } else {
-                let range = helpers::syntax::infer_def_poi(symbol.amber());
-                Some(report(db, range, severity, symbol))
-            }
-        }
-        SymbolKind::Param => {
-            if used.contains(&symbol.key)
-                || is_prefixed_with_underscore(db, symbol)
-                || imports.contains(&symbol.region)
-                || symbol.region.kind() == SyntaxKind::TYPE_DEF
-            {
-                None
-            } else {
-                let range = helpers::syntax::infer_def_poi(symbol.amber());
-                Some(report(db, range, severity, symbol))
-            }
-        }
-        _ => None,
-    }));
+    let used = BumpHashSet::from_iter_in(
+        symbol_table.iter_resolved().map(|(_, def_index)| def_index as usize),
+        bump,
+    );
+    diagnostics.extend(
+        symbol_table
+            .symbols
+            .iter()
+            .enumerate()
+            .filter_map(|(i, symbol)| match symbol.kind {
+                SymbolKind::Func
+                | SymbolKind::Local
+                | SymbolKind::Type
+                | SymbolKind::GlobalDef
+                | SymbolKind::MemoryDef
+                | SymbolKind::TableDef
+                | SymbolKind::FieldDef
+                | SymbolKind::TagDef
+                | SymbolKind::DataDef
+                | SymbolKind::ElemDef => {
+                    if used.contains(&i) || has_export(symbol) || is_prefixed_with_underscore(db, symbol) {
+                        None
+                    } else {
+                        let range = helpers::syntax::infer_def_poi(symbol.amber());
+                        Some(report(db, range, severity, symbol))
+                    }
+                }
+                SymbolKind::Param => {
+                    if used.contains(&i)
+                        || is_prefixed_with_underscore(db, symbol)
+                        || imports.contains(&symbol.region)
+                        || symbol.region.kind() == SyntaxKind::TYPE_DEF
+                    {
+                        None
+                    } else {
+                        let range = helpers::syntax::infer_def_poi(symbol.amber());
+                        Some(report(db, range, severity, symbol))
+                    }
+                }
+                _ => None,
+            }),
+    );
 }
 
 fn is_prefixed_with_underscore(db: &dyn salsa::Database, symbol: &Symbol) -> bool {

@@ -119,9 +119,8 @@ fn detect_uninit(
             "local.get" => {
                 if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && symbol_table
-                        .resolved
-                        .get(&immediate.into())
-                        .is_some_and(|key| *key == def_key)
+                        .find_def(immediate.into())
+                        .is_some_and(|symbol| symbol.key == def_key)
                     && !mark.r#in.get()
                 {
                     Some(immediate.into())
@@ -132,9 +131,8 @@ fn detect_uninit(
             "local.set" | "local.tee" => {
                 if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && symbol_table
-                        .resolved
-                        .get(&immediate.into())
-                        .is_some_and(|key| *key == def_key)
+                        .find_def(immediate.into())
+                        .is_some_and(|symbol| symbol.key == def_key)
                 {
                     *mark.r#in.get_mut() = true;
                 }
@@ -169,8 +167,8 @@ impl BlockMark {
                         instr
                             .children_by_kind(SyntaxKind::IMMEDIATE)
                             .next()
-                            .and_then(|immediate| symbol_table.resolved.get(&immediate.into()))
-                            .is_some_and(|key| *key == def_key)
+                            .and_then(|immediate| symbol_table.find_def(immediate.into()))
+                            .is_some_and(|symbol| symbol.key == def_key)
                     }),
             ),
         }

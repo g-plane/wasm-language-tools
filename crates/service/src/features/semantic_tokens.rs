@@ -210,9 +210,8 @@ fn compute_token_modifier(
                     .map_or(0, |_| 1)
             }
             SymbolKind::GlobalRef | SymbolKind::TypeUse | SymbolKind::FieldRef => symbol_table
-                .resolved
-                .get(&symbol.key)
-                .and_then(|def_key| mutability::get_mutabilities(db, document).get(def_key))
+                .find_def(symbol.key)
+                .and_then(|def_symbol| mutability::get_mutabilities(db, document).get(&def_symbol.key))
                 .and_then(|mutability| mutability.mut_keyword)
                 .map_or(0, |_| 1),
             _ => 0,

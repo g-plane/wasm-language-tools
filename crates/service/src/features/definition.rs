@@ -1,6 +1,6 @@
 use crate::{
     LanguageService,
-    binder::{SymbolKey, SymbolTable},
+    binder::{SymbolKey, SymbolKind, SymbolTable},
     helpers::{self, LineIndexExt},
 };
 use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams};
@@ -14,19 +14,35 @@ impl LanguageService {
         let position = line_index.convert(params.position)?;
         let symbol_table = SymbolTable::of(self, document);
         symbol_table
-            .resolved
-            .keys()
-            .fold::<Option<&SymbolKey>, _>(None, |acc, ref_key| {
+            .symbols
+            .iter()
+            .filter(|symbol| {
+                matches!(
+                    symbol.kind,
+                    SymbolKind::Call
+                        | SymbolKind::LocalRef
+                        | SymbolKind::TypeUse
+                        | SymbolKind::GlobalRef
+                        | SymbolKind::MemoryRef
+                        | SymbolKind::TableRef
+                        | SymbolKind::FieldRef
+                        | SymbolKind::BlockRef
+                        | SymbolKind::TagRef
+                        | SymbolKind::DataRef
+                        | SymbolKind::ElemRef
+                )
+            })
+            .fold::<Option<SymbolKey>, _>(None, |acc, ref_symbol| {
                 // find deepest ref-symbol node
-                if ref_key.text_range().contains_inclusive(position)
-                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_key.text_range()))
+                if ref_symbol.key.text_range().contains_inclusive(position)
+                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_symbol.key.text_range()))
                 {
-                    Some(ref_key)
+                    Some(ref_symbol.key)
                 } else {
                     acc
                 }
             })
-            .and_then(|ref_key| symbol_table.find_def(*ref_key))
+            .and_then(|ref_key| symbol_table.find_def(ref_key))
             .and_then(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
             .map(|range| {
                 Definition::Location(Location {
@@ -43,19 +59,35 @@ impl LanguageService {
         let position = line_index.convert(params.position)?;
         let symbol_table = SymbolTable::of(self, document);
         symbol_table
-            .resolved
-            .keys()
-            .fold::<Option<&SymbolKey>, _>(None, |acc, ref_key| {
+            .symbols
+            .iter()
+            .filter(|symbol| {
+                matches!(
+                    symbol.kind,
+                    SymbolKind::Call
+                        | SymbolKind::LocalRef
+                        | SymbolKind::TypeUse
+                        | SymbolKind::GlobalRef
+                        | SymbolKind::MemoryRef
+                        | SymbolKind::TableRef
+                        | SymbolKind::FieldRef
+                        | SymbolKind::BlockRef
+                        | SymbolKind::TagRef
+                        | SymbolKind::DataRef
+                        | SymbolKind::ElemRef
+                )
+            })
+            .fold::<Option<SymbolKey>, _>(None, |acc, ref_symbol| {
                 // find deepest ref-symbol node
-                if ref_key.text_range().contains_inclusive(position)
-                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_key.text_range()))
+                if ref_symbol.key.text_range().contains_inclusive(position)
+                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_symbol.key.text_range()))
                 {
-                    Some(ref_key)
+                    Some(ref_symbol.key)
                 } else {
                     acc
                 }
             })
-            .and_then(|ref_key| symbol_table.find_def(*ref_key))
+            .and_then(|ref_key| symbol_table.find_def(ref_key))
             .and_then(|symbol| {
                 symbol
                     .amber()

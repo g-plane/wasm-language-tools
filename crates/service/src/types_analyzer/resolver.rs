@@ -59,9 +59,8 @@ pub(super) fn resolve_array_type_with_idx<'db>(
     immediate: AmberNode,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     symbol_table
-        .resolved
-        .get(&immediate.into())
-        .and_then(|key| def_types.get(key))
+        .find_def(immediate.into())
+        .and_then(|symbol| def_types.get(&symbol.key))
         .map(|def_type| {
             if let CompositeType::Array(field) = &def_type.comp {
                 (

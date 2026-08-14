@@ -114,7 +114,7 @@ pub(crate) fn get_mutation_actions(
                     SyntaxKind::EXTERN_IDX_GLOBAL => MutationActionKind::Export,
                     _ => return None,
                 };
-                let target = symbol_table.resolved.get(&symbol.key).copied();
+                let target = symbol_table.find_def(symbol.key).map(|symbol| symbol.key);
                 Some((symbol.key, MutationAction { target, kind }))
             }
             SymbolKind::FieldRef => {
@@ -124,7 +124,7 @@ pub(crate) fn get_mutation_actions(
                     "struct.set" => MutationActionKind::Set,
                     _ => return None,
                 };
-                let target = symbol_table.resolved.get(&symbol.key).copied();
+                let target = symbol_table.find_def(symbol.key).map(|symbol| symbol.key);
                 Some((symbol.key, MutationAction { target, kind }))
             }
             SymbolKind::TypeUse => {
@@ -142,7 +142,7 @@ pub(crate) fn get_mutation_actions(
                     }
                     _ => return None,
                 };
-                let target = symbol_table.resolved.get(&symbol.key).copied();
+                let target = symbol_table.find_def(symbol.key).map(|symbol| symbol.key);
                 Some((symbol.key, MutationAction { target, kind }))
             }
             _ => None,

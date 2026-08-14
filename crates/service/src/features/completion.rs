@@ -731,9 +731,9 @@ fn get_cmp_list(
                 let func_key = SymbolKey::from(&func);
                 let preferred_type = guess_preferred_type(db, document, token);
                 let param_region = if let Some(type_use) = helpers::syntax::pick_type_idx_from_func(func.amber())
-                    && let Some(type_def) = symbol_table.resolved.get(&type_use.into())
+                    && let Some(type_def) = symbol_table.find_def(type_use.into())
                 {
-                    *type_def
+                    type_def.key
                 } else {
                     func_key
                 };
@@ -1013,9 +1013,8 @@ fn get_cmp_list(
             CmpCtx::Field(struct_ref_key) => {
                 let def_types = types_analyzer::get_def_types(db, document);
                 if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
-                    .resolved
-                    .get(&struct_ref_key)
-                    .and_then(|key| def_types.get(key))
+                    .find_def(struct_ref_key)
+                    .and_then(|symbol| def_types.get(&symbol.key))
                     .map(|def_type| &def_type.comp)
                 {
                     items.extend(fields.iter().map(|(ty, idx)| {

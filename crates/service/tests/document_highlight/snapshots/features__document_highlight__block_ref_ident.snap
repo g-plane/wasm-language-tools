@@ -20,11 +20,11 @@ expression: response
     "range": {
       "start": {
         "line": 7,
-        "character": 24
+        "character": 17
       },
       "end": {
         "line": 7,
-        "character": 26
+        "character": 18
       }
     },
     "kind": 2
@@ -33,11 +33,11 @@ expression: response
     "range": {
       "start": {
         "line": 7,
-        "character": 17
+        "character": 24
       },
       "end": {
         "line": 7,
-        "character": 18
+        "character": 26
       }
     },
     "kind": 2

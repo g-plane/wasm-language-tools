@@ -79,21 +79,24 @@ impl LanguageService {
         let deprecation = deprecation::get_deprecation(self, document);
         let callee_def_range = line_index.convert(params.item.range)?;
         let mut items = symbol_table
-            .resolved
-            .iter()
-            .filter_map(|(ref_key, def_key)| {
-                if def_key.text_range() == callee_def_range {
-                    Some(ref_key)
+            .iter_resolved()
+            .filter_map(|(ref_index, def_index)| {
+                if symbol_table
+                    .symbols
+                    .get_index(def_index)
+                    .is_some_and(|symbol| symbol.key.text_range() == callee_def_range)
+                {
+                    symbol_table.symbols.get_index(ref_index)
                 } else {
                     None
                 }
             })
-            .filter_map(|call_key| {
+            .filter_map(|call| {
                 symbol_table
                     .symbols
                     .iter()
                     .find(|symbol| {
-                        symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(call_key.text_range())
+                        symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(call.key.text_range())
                     })
                     .and_then(|symbol| {
                         Some(CallHierarchyIncomingCall {
@@ -115,7 +118,7 @@ impl LanguageService {
                                 selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
                                 data: None,
                             },
-                            from_ranges: vec![line_index.convert(call_key.text_range())?],
+                            from_ranges: vec![line_index.convert(call.key.text_range())?],
                         })
                     })
             })

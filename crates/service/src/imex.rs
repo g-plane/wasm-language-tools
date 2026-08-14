@@ -36,11 +36,11 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
             module.children().for_each(|module_field| {
                 if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
                     if let Some(name) = module_field.children_by_kind(SyntaxKind::NAME).next()
-                        && let Some(def_key) = helpers::syntax::extract_index_from_export(module_field)
-                            .and_then(|index| symbol_table.resolved.get(&index.into()))
+                        && let Some(def_symbol) = helpers::syntax::extract_index_from_export(module_field)
+                            .and_then(|index| symbol_table.find_def(index.into()))
                     {
                         exports.push(Export {
-                            def_key: *def_key,
+                            def_key: def_symbol.key,
                             name: name.green().to_string(),
                             range: name.text_range(),
                         });

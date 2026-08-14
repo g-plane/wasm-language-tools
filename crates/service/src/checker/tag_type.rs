@@ -11,9 +11,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
     if let Some(index) = type_use.children_by_kind(SyntaxKind::INDEX).next()
         && ctx
             .symbol_table
-            .resolved
-            .get(&index.into())
-            .and_then(|def_key| ctx.def_types.get(def_key))
+            .find_def(index.into())
+            .and_then(|def_symbol| ctx.def_types.get(&def_symbol.key))
             .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {
         diagnostics.push(Diagnostic {

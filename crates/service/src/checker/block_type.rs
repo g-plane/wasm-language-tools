@@ -11,9 +11,8 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         .and_then(|type_use| type_use.children_by_kind(SyntaxKind::INDEX).next())?;
     if ctx
         .symbol_table
-        .resolved
-        .get(&index.into())
-        .and_then(|key| ctx.def_types.get(key))
+        .find_def(index.into())
+        .and_then(|symbol| ctx.def_types.get(&symbol.key))
         .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {
         Some(Diagnostic {

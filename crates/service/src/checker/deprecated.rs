@@ -41,9 +41,8 @@ pub fn check(
         })
         .filter_map(|symbol| {
             symbol_table
-                .resolved
-                .get(&symbol.key)
-                .and_then(|def_key| deprecation.get(def_key))
+                .find_def(symbol.key)
+                .and_then(|def_symbol| deprecation.get(&def_symbol.key))
                 .map(|reason| Diagnostic {
                     range: symbol.key.text_range(),
                     severity,
