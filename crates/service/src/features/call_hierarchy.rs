@@ -78,7 +78,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         let deprecation = deprecation::get_deprecation(self, document);
         let callee_def_range = line_index.convert(params.item.range)?;
-        let mut items = symbol_table
+        let items = symbol_table
             .iter_resolved()
             .filter_map(|(ref_index, def_index)| {
                 if symbol_table
@@ -122,8 +122,7 @@ impl LanguageService {
                         })
                     })
             })
-            .collect::<Vec<_>>();
-        items.sort_unstable_by_key(|item| item.from.range.start);
+            .collect();
         Some(items)
     }
 
@@ -137,7 +136,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         let deprecation = deprecation::get_deprecation(self, document);
         let call_def_range = line_index.convert(params.item.range)?;
-        let mut items = symbol_table
+        let items = symbol_table
             .symbols
             .iter()
             .filter(|symbol| symbol.kind == SymbolKind::Call && call_def_range.contains_range(symbol.key.text_range()))
@@ -165,8 +164,7 @@ impl LanguageService {
                     from_ranges: vec![line_index.convert(ref_symbol.key.text_range())?],
                 })
             })
-            .collect::<Vec<_>>();
-        items.sort_unstable_by_key(|item| item.to.range.start);
+            .collect();
         Some(items)
     }
 }
