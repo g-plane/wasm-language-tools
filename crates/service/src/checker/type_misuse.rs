@@ -358,11 +358,10 @@ pub fn check(
             } else {
                 let table_symbol = ctx
                     .symbol_table
-                    .modules
-                    .get(&SymbolKey::from(ctx.module))?
+                    .find_module(ctx.module_id)?
                     .tables
                     .first()
-                    .and_then(|key| ctx.symbol_table.symbols.get(key))?;
+                    .and_then(|index| ctx.symbol_table.symbols.get_index(*index))?;
                 let table_type =
                     extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(table_symbol).green())?;
                 let elem_type = extract_elem_ref_type(ctx.db, &symbol.green)?;
@@ -920,12 +919,11 @@ fn check_return_call_result_type(
 ) -> Option<Diagnostic> {
     let func = ctx
         .symbol_table
-        .modules
-        .get(&SymbolKey::from(ctx.module))?
+        .find_module(ctx.module_id)?
         .funcs
         .iter()
-        .find(|key| key.text_range().contains_range(instr.text_range()))
-        .and_then(|key| ctx.symbol_table.symbols.get(key))?;
+        .filter_map(|index| ctx.symbol_table.symbols.get_index(*index))
+        .find(|symbol| symbol.key.text_range().contains_range(instr.text_range()))?;
     let expected = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(func)).results;
     if actual.len() == expected.len()
         && actual

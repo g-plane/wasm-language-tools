@@ -24,7 +24,7 @@ use wat_syntax::{
 pub(crate) struct SymbolTable<'db> {
     pub symbols: Symbols<'db>,
     resolved: Resolved,
-    pub modules: FxHashMap<SymbolKey, ModuleDefSymbols>,
+    modules: Box<[ModuleDefSymbols]>,
     type_nodes: FxHashMap<SymbolKey, (GreenNode, TextRange)>,
 }
 fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
@@ -192,7 +192,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         build_hasher: FxBuildHasher,
     };
     let mut resolved = Vec::new();
-    let mut modules = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
+    let mut modules = Vec::with_capacity(1);
     let mut type_nodes = FxHashMap::default();
     let bump = Bump::new();
     let mut pre_resolved = BumpHashMap::new_in(&bump);
@@ -1035,26 +1035,24 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
         });
 
-        modules.insert(
-            module_key,
-            ModuleDefSymbols {
-                funcs: funcs.into_iter().map(|(key, ..)| key).collect(),
-                types: types.into_iter().map(|(key, ..)| key).collect(),
-                globals: globals.into_iter().map(|(key, ..)| key).collect(),
-                memories: memories.into_iter().map(|(key, ..)| key).collect(),
-                tables: tables.into_iter().map(|(key, ..)| key).collect(),
-                tags: tags.into_iter().map(|(key, ..)| key).collect(),
-                datas: datas.into_iter().map(|(key, ..)| key).collect(),
-                elems: elems.into_iter().map(|(key, ..)| key).collect(),
-            },
-        );
+        modules.push(ModuleDefSymbols {
+            key: module_key,
+            funcs: funcs.into_iter().map(|(.., index)| index).collect(),
+            types: types.into_iter().map(|(.., index)| index).collect(),
+            globals: globals.into_iter().map(|(.., index)| index).collect(),
+            memories: memories.into_iter().map(|(.., index)| index).collect(),
+            tables: tables.into_iter().map(|(.., index)| index).collect(),
+            tags: tags.into_iter().map(|(.., index)| index).collect(),
+            datas: datas.into_iter().map(|(.., index)| index).collect(),
+            elems: elems.into_iter().map(|(.., index)| index).collect(),
+        });
     });
 
     symbols.values.shrink_to_fit();
     SymbolTable {
         symbols,
         resolved: resolved.into_boxed_slice(),
-        modules,
+        modules: modules.into_boxed_slice(),
         type_nodes,
     }
 }
@@ -1073,28 +1071,40 @@ impl<'db> SymbolTable<'db> {
             .map(|index| index.get())
     }
 
-    pub fn find_def_by_idx(&'db self, idx: Idx<'db>, kind: SymbolKind, module: SymbolKey) -> Option<&'db Symbol<'db>> {
+    pub fn find_def_by_idx(
+        &'db self,
+        idx: Idx<'db>,
+        kind: SymbolKind,
+        module_key: SymbolKey,
+    ) -> Option<&'db Symbol<'db>> {
         std::debug_assert_matches!(kind, SymbolKind::Type | SymbolKind::Func);
-        let module = self.modules.get(&module)?;
+        let module = self.modules.iter().find(|module| module.key == module_key)?;
         let declared = match kind {
             SymbolKind::Type => &module.types,
             SymbolKind::Func => &module.funcs,
             _ => return None,
         };
         if let Some(num) = idx.num {
-            declared.get(num as usize).and_then(|key| self.symbols.get(key))
-        } else if let Some(name) = idx.name {
             declared
-                .iter()
-                .find_map(|key| self.symbols.get(key).filter(|symbol| symbol.idx.name == Some(name)))
+                .get(num as usize)
+                .and_then(|index| self.symbols.values.get(*index as usize))
+        } else if let Some(name) = idx.name {
+            declared.iter().find_map(|index| {
+                self.symbols
+                    .values
+                    .get(*index as usize)
+                    .filter(|symbol| symbol.idx.name == Some(name))
+            })
         } else {
             None
         }
     }
 
     pub fn get_declared(&self, module: &SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
+        let module_key = SymbolKey::from(module);
         self.modules
-            .get(&SymbolKey::from(module))
+            .iter()
+            .find(|module| module.key == module_key)
             .into_iter()
             .flat_map(move |module| match kind {
                 SymbolKind::Func => &*module.funcs,
@@ -1107,7 +1117,7 @@ impl<'db> SymbolTable<'db> {
                 SymbolKind::ElemDef => &*module.elems,
                 _ => &[],
             })
-            .filter_map(|key| self.symbols.get(key))
+            .filter_map(|index| self.symbols.values.get(*index as usize))
     }
 
     pub fn find_references_on_def(
@@ -1153,10 +1163,11 @@ impl<'db> SymbolTable<'db> {
             .filter_map(|(symbol_index, _)| self.symbols.values.get(symbol_index))
     }
 
-    pub fn find_module(&self, module_id: u32) -> Option<&Symbol<'db>> {
-        self.symbols
-            .iter()
-            .find(|symbol| symbol.kind == SymbolKind::Module && symbol.idx.num == Some(module_id))
+    pub fn find_module(&self, module_id: u32) -> Option<&ModuleDefSymbols> {
+        self.modules.get(module_id as usize)
+    }
+    pub fn iter_modules(&self) -> slice::Iter<'_, ModuleDefSymbols> {
+        self.modules.iter()
     }
 
     pub fn get_type_node_of(&'db self, symbol: &'db Symbol) -> AmberNode<'db> {
@@ -1427,12 +1438,13 @@ type Resolved = Box<[Option<NonZeroU32>]>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ModuleDefSymbols {
-    pub funcs: Vec<SymbolKey>,
-    pub types: Vec<SymbolKey>,
-    pub globals: Vec<SymbolKey>,
-    pub memories: SmallVec<[SymbolKey; 1]>,
-    pub tables: SmallVec<[SymbolKey; 1]>,
-    pub tags: Vec<SymbolKey>,
-    pub datas: Vec<SymbolKey>,
-    pub elems: Vec<SymbolKey>,
+    pub key: SymbolKey,
+    pub funcs: Box<[u32]>,
+    pub types: Box<[u32]>,
+    pub globals: Box<[u32]>,
+    pub memories: SmallVec<[u32; 1]>,
+    pub tables: SmallVec<[u32; 1]>,
+    pub tags: Box<[u32]>,
+    pub datas: Box<[u32]>,
+    pub elems: Box<[u32]>,
 }

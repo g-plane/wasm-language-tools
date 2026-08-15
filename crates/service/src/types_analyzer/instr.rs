@@ -117,15 +117,14 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "return" => ResolvedSig {
             params: ctx
                 .symbol_table
-                .modules
-                .get(&SymbolKey::from(ctx.module))
+                .find_module(ctx.module_id)
                 .and_then(|module| {
                     module
                         .funcs
                         .iter()
-                        .find(|key| key.text_range().contains_range(instr.text_range()))
+                        .filter_map(|index| ctx.symbol_table.symbols.get_index(*index))
+                        .find(|func| func.key.text_range().contains_range(instr.text_range()))
                 })
-                .and_then(|key| ctx.symbol_table.symbols.get(key))
                 .map(|func| {
                     BumpVec::from_iter_in(
                         Sig::from_func(ctx.db, ctx.document, func.amber())

@@ -19,11 +19,10 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
     let root = SyntaxNode::new_root(document.root(db));
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
-        .modules
-        .values()
+        .iter_modules()
         .flat_map(|module| &module.types)
-        .filter_map(|key| {
-            let symbol = symbol_table.symbols.get(key)?;
+        .filter_map(|index| {
+            let symbol = symbol_table.symbols.get_index(*index)?;
             let node = symbol.key.to_node(&root).and_then(TypeDef::cast)?;
             let mut is_final = false;
             let mut inherits = None;

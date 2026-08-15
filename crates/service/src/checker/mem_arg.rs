@@ -1,6 +1,5 @@
 use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
-    binder::SymbolKey,
     helpers,
     types_analyzer::{self, ValType},
 };
@@ -31,11 +30,10 @@ pub fn check(
         ctx.symbol_table.find_def(immediate.into())
     } else {
         ctx.symbol_table
-            .modules
-            .get(&SymbolKey::from(ctx.module))?
+            .find_module(ctx.module_id)?
             .memories
             .first()
-            .and_then(|key| ctx.symbol_table.symbols.get(key))
+            .and_then(|index| ctx.symbol_table.symbols.get_index(*index))
     };
     let mut has_align = false;
     let mut has_offset = false;
