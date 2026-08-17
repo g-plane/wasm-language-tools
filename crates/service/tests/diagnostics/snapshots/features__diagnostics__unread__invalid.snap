@@ -164,6 +164,22 @@ expression: response
       "code": "unread",
       "source": "wat",
       "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 59,
+          "character": 14
+        },
+        "end": {
+          "line": 59,
+          "character": 16
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `$x` is set but never read"
     }
   ]
 }

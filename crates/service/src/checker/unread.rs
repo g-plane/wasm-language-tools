@@ -137,13 +137,16 @@ fn detect_unread(
 
 #[derive(Default)]
 struct BlockMark {
+    /// If true, local has been read by `local.get` in this flow node and can be propagated to incoming flow nodes.
     in_gen: Cell<bool>,
+    /// If true, local has been read by `local.get` from outcoming flow nodes.
     out_gen: Cell<bool>,
+    /// If true, local has been set by `local.set` or `local.tee`.
     kill: bool,
 }
 impl BlockMark {
     fn new(bb: &BasicBlock, symbol_table: &SymbolTable, def_key: SymbolKey) -> Self {
-        let mut r#gen = false;
+        let mut in_gen = false;
         let mut kill = false;
         bb.instrs().for_each(|instr| {
             match instr
@@ -158,7 +161,7 @@ impl BlockMark {
                             .find_def(immediate.into())
                             .is_some_and(|symbol| symbol.key == def_key)
                     {
-                        r#gen = true;
+                        in_gen = true;
                     }
                 }
                 Some("local.set" | "local.tee") => {
@@ -174,8 +177,8 @@ impl BlockMark {
             }
         });
         Self {
-            in_gen: Cell::new(r#gen),
-            out_gen: Cell::new(r#gen),
+            in_gen: Cell::new(in_gen),
+            out_gen: Cell::new(false),
             kill,
         }
     }

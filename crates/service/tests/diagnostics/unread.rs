@@ -145,7 +145,12 @@ fn invalid() {
     i32.const 2
     local.set $x
     local.get $x
-    drop))
+    drop)
+  (func (local $x i32)
+    local.get $x
+    drop
+    i32.const 42
+    local.set $x))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
