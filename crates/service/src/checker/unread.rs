@@ -7,7 +7,6 @@ use crate::{
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::DiagnosticSeverity;
-use std::cell::Cell;
 use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "unread";
@@ -42,7 +41,7 @@ pub fn check(
             }
         }
     }));
-    hydrate_block_marks(cfg, &mut block_marks);
+    propagate(cfg, &mut block_marks, bump);
     cfg.nodes_with_ids().for_each(|(flow_node, node_id)| {
         if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),
@@ -66,27 +65,45 @@ pub fn check(
     });
 }
 
-fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>) {
-    let mut changed = true;
-    while changed {
-        changed = false;
-        block_marks.iter().for_each(|(node_id, mark)| {
-            cfg.get_node(*node_id)
-                .into_iter()
-                .flat_map(|flow_node| &flow_node.outgoings)
-                .filter_map(|node_id| block_marks.get(node_id))
-                .filter(|outgoing| outgoing.in_gen.get())
-                .for_each(|_| {
-                    if !mark.kill && !mark.in_gen.get() {
-                        mark.in_gen.set(true);
-                        changed = true;
-                    }
-                    if !mark.out_gen.get() {
-                        mark.out_gen.set(true);
-                        changed = true;
-                    }
-                });
-        });
+fn propagate(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>, bump: &Bump) {
+    // Propagate information from successor flow nodes to predecessors flow nodes.
+    // For those flow nodes whose `in_gen` are initially true, they don't need to be added to worklist,
+    // but we should add their incomings to worklist.
+    let mut worklist = BumpVec::from_iter_in(
+        block_marks
+            .iter()
+            .filter(|(_, mark)| mark.in_gen)
+            .filter_map(|(flow_node_id, _)| cfg.get_node(*flow_node_id))
+            .flat_map(|flow_node| &flow_node.incomings)
+            .copied(),
+        bump,
+    );
+    while let Some(flow_node_id) = worklist.pop() {
+        let Some(mark) = block_marks.get_mut(&flow_node_id) else {
+            continue;
+        };
+        // Information flow: successor's `in_gen` --> predecessor's `out_gen`,
+        // so if there're any successor flow nodes whose `in_gen` are true,
+        // current flow node's `out_gen` will be true.
+        // Also, skip a flow node whose `out_gen` is already true.
+        // This can happen when a flow node has multiple outcomings whose `in_gen` are true.
+        if mark.out_gen {
+            continue;
+        } else {
+            mark.out_gen = true;
+        }
+        // Since information is propagated from successors to predecessors by respecting `in_gen`,
+        // if `in_gen` of this flow node is marked true, it will be propagated further.
+        // If this flow node has no local read before first write, `kill` prevents
+        // the read information from propagating through this flow node.
+        // But what about any read before first write?
+        // In such case, `in_gen` is already true before propagation.
+        if !mark.kill && !mark.in_gen {
+            mark.in_gen = true;
+            if let Some(flow_node) = cfg.get_node(flow_node_id) {
+                worklist.extend_from_slice_copy(&flow_node.incomings);
+            }
+        }
     }
 }
 
@@ -127,7 +144,7 @@ fn detect_unread(
             _ => {}
         }
     });
-    if mark.out_gen.get()
+    if mark.out_gen
         && let Some(last) = set.last_mut()
     {
         *last = None;
@@ -137,11 +154,12 @@ fn detect_unread(
 
 #[derive(Default)]
 struct BlockMark {
-    /// If true, local has been read by `local.get` in this flow node and can be propagated to incoming flow nodes.
-    in_gen: Cell<bool>,
+    /// If true, local has been read by `local.get` before first write in this flow node
+    /// and can be propagated to incoming flow nodes.
+    in_gen: bool,
     /// If true, local has been read by `local.get` from outcoming flow nodes.
-    out_gen: Cell<bool>,
-    /// If true, local has been set by `local.set` or `local.tee`.
+    out_gen: bool,
+    /// If true, local has been written by `local.set` or `local.tee` in this flow node.
     kill: bool,
 }
 impl BlockMark {
@@ -155,6 +173,8 @@ impl BlockMark {
                 .map(|token| token.text())
             {
                 Some("local.get") => {
+                    // `in_gen` will be propagated to incomings,
+                    // so it must be before any `local.set` or `local.tee` instructions.
                     if !kill
                         && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                         && symbol_table
@@ -177,8 +197,8 @@ impl BlockMark {
             }
         });
         Self {
-            in_gen: Cell::new(in_gen),
-            out_gen: Cell::new(false),
+            in_gen,
+            out_gen: false,
             kill,
         }
     }
