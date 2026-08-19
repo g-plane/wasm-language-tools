@@ -5,8 +5,7 @@ use crate::{
     helpers::{BumpCollectionsExt, BumpHashMap},
     types_analyzer,
 };
-use bumpalo::Bump;
-use std::cell::Cell;
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "uninit";
@@ -35,7 +34,7 @@ pub fn check(
             }
         }
     }));
-    hydrate_block_marks(cfg, &mut block_marks);
+    propagate(cfg, &mut block_marks, bump);
     cfg.nodes_with_ids().for_each(|(flow_node, node_id)| {
         if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),
@@ -58,53 +57,70 @@ pub fn check(
     });
 }
 
-fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>) {
-    let mut changed = true;
-    while changed {
-        changed = false;
-        block_marks.iter().for_each(|(node_id, mark)| {
-            let Some(current) = cfg.get_node(*node_id) else {
-                return;
-            };
-            let initialized = current
-                .incomings
-                .iter()
-                .filter(|incoming| {
-                    // ignore loop back for assuming the first iteration
-                    if let Some(FlowNode {
-                        kind: FlowNodeKind::BasicBlock(BasicBlock(instrs)),
+fn propagate(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>, bump: &Bump) {
+    // Propagate information from predecessor flow nodes to successor flow nodes.
+    // For those flow nodes whose `out_kill` are initially true, they don't need to be added to worklist,
+    // but we should add their outgoings to worklist.
+    let mut worklist = BumpVec::from_iter_in(
+        block_marks
+            .iter()
+            .filter(|(_, mark)| mark.out_kill)
+            .filter_map(|(flow_node_id, _)| cfg.get_node(*flow_node_id))
+            .flat_map(|flow_node| &flow_node.outgoings)
+            .copied(),
+        bump,
+    );
+    while let Some(flow_node_id) = worklist.pop() {
+        let Some(current) = cfg.get_node(flow_node_id) else {
+            continue;
+        };
+        let initialized = current
+            .incomings
+            .iter()
+            .filter(|incoming| {
+                // ignore loop back for assuming the first iteration
+                if let Some(FlowNode {
+                    kind: FlowNodeKind::BasicBlock(BasicBlock(instrs)),
+                    ..
+                }) = cfg.get_node(**incoming)
+                    && let FlowNode {
+                        kind: FlowNodeKind::BlockEntry(block_entry),
                         ..
-                    }) = cfg.get_node(**incoming)
-                        && let FlowNode {
-                            kind: FlowNodeKind::BlockEntry(block_entry),
-                            ..
-                        } = current
-                    {
-                        // label jumping always happens from the body of a block,
-                        // so it's safe to compare syntax text range
-                        block_entry.kind() != SyntaxKind::BLOCK_LOOP
-                            || instrs
-                                .last()
-                                .is_some_and(|instr| !block_entry.text_range().contains(instr.range.end()))
-                    } else {
-                        true
-                    }
-                })
-                .filter_map(|incoming| block_marks.get(incoming))
-                .map(|mark| mark.out.get())
-                .reduce(|acc, cur| acc && cur)
-                .unwrap_or_default();
-            if initialized {
-                if !mark.r#in.get() {
-                    mark.r#in.set(true);
-                    changed = true;
+                    } = current
+                {
+                    // label jumping always happens from the body of a block,
+                    // so it's safe to compare syntax text range
+                    block_entry.kind() != SyntaxKind::BLOCK_LOOP
+                        || instrs
+                            .last()
+                            .is_some_and(|instr| !block_entry.text_range().contains(instr.range.end()))
+                } else {
+                    true
                 }
-                if !mark.out.get() {
-                    mark.out.set(true);
-                    changed = true;
-                }
-            }
-        });
+            })
+            .filter_map(|incoming| block_marks.get(incoming))
+            .map(|mark| mark.out_kill)
+            .reduce(|acc, cur| acc && cur)
+            .unwrap_or_default();
+        if !initialized {
+            continue;
+        }
+        let Some(mark) = block_marks.get_mut(&flow_node_id) else {
+            continue;
+        };
+        // Information flow: predecessor's `out_kill` --> successor's `in_kill`,
+        // so only if all predecessor flow nodes whose `out_kill` are true,
+        // current flow node's `in_kill` can be true.
+        if mark.in_kill {
+            continue;
+        } else {
+            mark.in_kill = true;
+        }
+        // Set `out_kill` true and add its outgoings to propagate further.
+        if !mark.out_kill {
+            mark.out_kill = true;
+            worklist.extend_from_slice_copy(&current.outgoings);
+        }
     }
 }
 
@@ -121,7 +137,7 @@ fn detect_uninit(
                     && symbol_table
                         .find_def(immediate.into())
                         .is_some_and(|symbol| symbol.key == def_key)
-                    && !mark.r#in.get()
+                    && !mark.in_kill
                 {
                     Some(immediate.into())
                 } else {
@@ -134,7 +150,7 @@ fn detect_uninit(
                         .find_def(immediate.into())
                         .is_some_and(|symbol| symbol.key == def_key)
                 {
-                    *mark.r#in.get_mut() = true;
+                    mark.in_kill = true;
                 }
                 None
             }
@@ -145,32 +161,34 @@ fn detect_uninit(
 
 #[derive(Default)]
 struct BlockMark {
-    r#in: Cell<bool>,
-    out: Cell<bool>,
+    /// If true, local has been written by `local.set` or `local.tee` from incoming flow nodes.
+    in_kill: bool,
+    /// If true, local has been written by `local.set` or `local.tee` in this flow node
+    /// and can be propagated to outgoing flow nodes.
+    out_kill: bool,
 }
 impl BlockMark {
     fn new(bb: &BasicBlock, symbol_table: &SymbolTable, def_key: SymbolKey) -> Self {
         Self {
-            r#in: Cell::new(false),
-            out: Cell::new(
-                bb.instrs()
-                    .filter(|instr| {
-                        matches!(
-                            instr
-                                .tokens_by_kind(SyntaxKind::INSTR_NAME)
-                                .next()
-                                .map(|token| token.text()),
-                            Some("local.set" | "local.tee")
-                        )
-                    })
-                    .any(|instr| {
+            in_kill: false,
+            out_kill: bb
+                .instrs()
+                .filter(|instr| {
+                    matches!(
                         instr
-                            .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .tokens_by_kind(SyntaxKind::INSTR_NAME)
                             .next()
-                            .and_then(|immediate| symbol_table.find_def(immediate.into()))
-                            .is_some_and(|symbol| symbol.key == def_key)
-                    }),
-            ),
+                            .map(|token| token.text()),
+                        Some("local.set" | "local.tee")
+                    )
+                })
+                .any(|instr| {
+                    instr
+                        .children_by_kind(SyntaxKind::IMMEDIATE)
+                        .next()
+                        .and_then(|immediate| symbol_table.find_def(immediate.into()))
+                        .is_some_and(|symbol| symbol.key == def_key)
+                }),
         }
     }
 }
