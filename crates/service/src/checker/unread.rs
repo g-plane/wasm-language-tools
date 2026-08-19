@@ -66,7 +66,7 @@ pub fn check(
 }
 
 fn propagate(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>, bump: &Bump) {
-    // Propagate information from successor flow nodes to predecessors flow nodes.
+    // Propagate information from successor flow nodes to predecessor flow nodes.
     // For those flow nodes whose `in_gen` are initially true, they don't need to be added to worklist,
     // but we should add their incomings to worklist.
     let mut worklist = BumpVec::from_iter_in(
@@ -86,7 +86,7 @@ fn propagate(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, B
         // so if there're any successor flow nodes whose `in_gen` are true,
         // current flow node's `out_gen` will be true.
         // Also, skip a flow node whose `out_gen` is already true.
-        // This can happen when a flow node has multiple outcomings whose `in_gen` are true.
+        // This can happen when a flow node has multiple outgoings whose `in_gen` are true.
         if mark.out_gen {
             continue;
         } else {
@@ -157,7 +157,7 @@ struct BlockMark {
     /// If true, local has been read by `local.get` before first write in this flow node
     /// and can be propagated to incoming flow nodes.
     in_gen: bool,
-    /// If true, local has been read by `local.get` from outcoming flow nodes.
+    /// If true, local has been read by `local.get` from outgoing flow nodes.
     out_gen: bool,
     /// If true, local has been written by `local.set` or `local.tee` in this flow node.
     kill: bool,
