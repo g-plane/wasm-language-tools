@@ -135,7 +135,7 @@ pub fn parse_as(kind: SyntaxKind, source: &str) -> Option<(GreenNode, Vec<Syntax
         .map(|green| (green, parser.errors))
 }
 
-#[inline]
+#[inline(always)]
 /// Checks if a character is a valid identifier character.
 ///
 /// ## Examples
@@ -151,8 +151,7 @@ pub fn parse_as(kind: SyntaxKind, source: &str) -> Option<(GreenNode, Vec<Syntax
 /// assert!(!is_id_char(')'));
 /// ```
 pub fn is_id_char(c: char) -> bool {
-    c.is_ascii_alphanumeric()
-        || c.is_ascii_punctuation() && !matches!(c, '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}')
+    matches!(ID_CHAR_TABLE.get(c as usize), Some(1))
 }
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;
@@ -198,3 +197,13 @@ mod tests {
         assert!(parse_as(SyntaxKind::PLAIN_INSTR, "(param)").is_none());
     }
 }
+
+static ID_CHAR_TABLE: [u8; 256] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1,
+    1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+];
