@@ -326,7 +326,7 @@ impl Parser<'_> {
             .or_else(|| self.parse_ref_type_detailed())
     }
 
-    fn parse_ref_type_detailed(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_ref_type_detailed(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());

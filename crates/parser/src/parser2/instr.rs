@@ -185,64 +185,82 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_immediate(&mut self) -> Option<GreenNode> {
-        self.lexer
-            .eat(INT)
-            .map(|token| {
-                if let Some(i) = helpers::parse_small_int(token.text)
-                    && let Some(node) = green::IMMEDIATE_INT.get(i)
-                {
-                    node.clone()
-                } else if token.text == "-1" {
-                    green::IMMEDIATE_INT_NEG_ONE.clone()
-                } else {
-                    GreenNode::new(IMMEDIATE, [token.into()])
-                }
-            })
-            .or_else(|| {
-                self.lexer
-                    .eat(FLOAT)
-                    .inspect(|token| {
-                        if token.kind == ERROR {
-                            self.report_error_token(token, Message::Description("invalid float literal"));
-                        }
-                    })
-                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
-            })
-            .or_else(|| {
-                self.lexer
-                    .eat(IDENT)
-                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
-            })
-            .or_else(|| {
-                self.lexer
-                    .eat(STRING)
-                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
-            })
-            .or_else(|| {
-                self.lexer
-                    .eat(SHAPE_DESCRIPTOR)
-                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
-            })
-            .or_else(|| {
-                self.try_parse(Self::parse_ref_type)
-                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
-            })
-            .or_else(|| {
-                self.try_parse(Self::parse_type_use)
-                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
-            })
-            .or_else(|| {
-                self.try_parse(Self::parse_mem_arg)
-                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
-            })
-            .or_else(|| {
-                self.try_parse(Self::parse_heap_type::<true>)
-                    .map(|child| GreenNode::new(IMMEDIATE, [child]))
-            })
-            .or_else(|| {
-                self.try_parse(Self::parse_on_clause)
-                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
-            })
+        match self.lexer.peek_byte()? {
+            b'0'..=b'9' | b'-' | b'+' => self
+                .lexer
+                .eat(INT)
+                .map(|token| {
+                    if let Some(i) = helpers::parse_small_int(token.text)
+                        && let Some(node) = green::IMMEDIATE_INT.get(i)
+                    {
+                        node.clone()
+                    } else if token.text == "-1" {
+                        green::IMMEDIATE_INT_NEG_ONE.clone()
+                    } else {
+                        GreenNode::new(IMMEDIATE, [token.into()])
+                    }
+                })
+                .or_else(|| {
+                    self.lexer
+                        .eat(FLOAT)
+                        .inspect(|token| {
+                            if token.kind == ERROR {
+                                self.report_error_token(token, Message::Description("invalid float literal"));
+                            }
+                        })
+                        .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
+                }),
+            b'$' => self
+                .lexer
+                .next(IDENT)
+                .map(|token| GreenNode::new(IMMEDIATE, [token.into()])),
+            b'a' => self
+                .try_parse(Self::parse_mem_arg)
+                .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
+                .or_else(|| {
+                    self.try_parse(Self::parse_ref_type)
+                        .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
+                })
+                .or_else(|| {
+                    self.try_parse(Self::parse_heap_type::<true>)
+                        .map(|child| GreenNode::new(IMMEDIATE, [child]))
+                }),
+            b'o' => self
+                .parse_mem_arg()
+                .map(|child| GreenNode::new(IMMEDIATE, [child.into()])),
+            b'c'..=b's' => self
+                .lexer
+                .eat(FLOAT)
+                .inspect(|token| {
+                    if token.kind == ERROR {
+                        self.report_error_token(token, Message::Description("invalid float literal"));
+                    }
+                })
+                .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
+                .or_else(|| {
+                    self.lexer
+                        .eat(SHAPE_DESCRIPTOR)
+                        .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
+                })
+                .or_else(|| {
+                    self.try_parse(Self::parse_ref_type)
+                        .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
+                })
+                .or_else(|| {
+                    self.try_parse(Self::parse_heap_type::<true>)
+                        .map(|child| GreenNode::new(IMMEDIATE, [child]))
+                }),
+            b'(' => self
+                .try_parse(Self::parse_ref_type_detailed)
+                .or_else(|| self.try_parse(Self::parse_type_use))
+                .or_else(|| self.try_parse(Self::parse_on_clause))
+                .map(|child| GreenNode::new(IMMEDIATE, [child.into()])),
+            b'"' => self
+                .lexer
+                .next(STRING)
+                .map(|token| GreenNode::new(IMMEDIATE, [token.into()])),
+            _ => None,
+        }
     }
 
     pub(super) fn parse_instr(&mut self) -> Option<GreenNode> {
