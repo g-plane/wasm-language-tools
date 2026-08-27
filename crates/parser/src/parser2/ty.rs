@@ -30,7 +30,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
@@ -64,7 +66,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
@@ -131,7 +135,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("field")?;
         self.add_child(green::KW_FIELD.clone());
 
@@ -151,7 +157,9 @@ impl Parser<'_> {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
-            parser.parse_trivias();
+            if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                parser.parse_trivias();
+            }
             parser.lexer.keyword("mut")?;
             parser.add_child(green::KW_MUT.clone());
             Some(mark)
@@ -183,7 +191,9 @@ impl Parser<'_> {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
-            parser.parse_trivias();
+            if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                parser.parse_trivias();
+            }
             parser.lexer.keyword("mut")?;
             parser.add_child(green::KW_MUT.clone());
             Some(mark)
@@ -234,7 +244,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         let keyword = self.lexer.keyword("pagesize")?;
         self.add_child(keyword);
         if !self.retry(|parser| parser.expect(UNSIGNED_INT)) {
@@ -284,7 +296,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("param")?;
         self.add_child(green::KW_PARAM.clone());
 
@@ -316,7 +330,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("ref")?;
         self.add_child(green::KW_REF.clone());
 
@@ -338,7 +354,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("result")?;
         self.add_child(green::KW_RESULT.clone());
 
@@ -362,7 +380,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());

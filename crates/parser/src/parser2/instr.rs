@@ -28,7 +28,9 @@ impl Parser<'_> {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
-            parser.parse_trivias();
+            if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                parser.parse_trivias();
+            }
             parser.lexer.keyword("else")?;
             parser.add_child(green::KW_ELSE.clone());
             Some(mark)
@@ -150,7 +152,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         let keyword = self.lexer.next(KEYWORD)?;
         match keyword.text {
             "catch" | "catch_ref" => {
@@ -245,7 +249,9 @@ impl Parser<'_> {
         if self.lexer.eat(L_PAREN).is_some() {
             let mark = self.start_node();
             self.add_child(green::L_PAREN.clone());
-            self.parse_trivias();
+            if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+                self.parse_trivias();
+            }
             let token = self.expect(INSTR_NAME)?;
             match token.text {
                 "if" => {
@@ -354,7 +360,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("on")?;
         self.add_child(green::KW_ON.clone());
 

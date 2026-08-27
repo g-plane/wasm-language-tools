@@ -7,7 +7,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("data")?;
         self.add_child(green::KW_DATA.clone());
         while self.eat(STRING) {}
@@ -19,7 +21,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("elem")?;
         self.add_child(green::KW_ELEM.clone());
 
@@ -37,7 +41,9 @@ impl Parser<'_> {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
-            parser.parse_trivias();
+            if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                parser.parse_trivias();
+            }
             parser.lexer.keyword("item")?;
             parser.add_child(green::KW_ITEM.clone());
             Some(mark)
@@ -85,7 +91,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         let kind = match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
@@ -132,7 +140,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("item")?;
         self.add_child(green::KW_ITEM.clone());
         if !self.retry(Self::parse_name) {
@@ -165,7 +175,9 @@ impl Parser<'_> {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
-            parser.parse_trivias();
+            if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                parser.parse_trivias();
+            }
             let keyword = parser.lexer.next(KEYWORD)?;
             match keyword.text {
                 "import" => {
@@ -211,7 +223,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("local")?;
         self.add_child(green::KW_LOCAL.clone());
 
@@ -230,7 +244,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("memory")?;
         self.add_child(green::KW_MEMORY.clone());
         if !self.recover(Self::parse_index) {
@@ -244,7 +260,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         let keyword = self.lexer.next(KEYWORD)?;
 
         self.lexer.top_level = false;
@@ -363,7 +381,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         let keyword = self.lexer.next(KEYWORD)?;
         match keyword.text {
             "func" => {
@@ -617,7 +637,9 @@ impl Parser<'_> {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
-            parser.parse_trivias();
+            if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                parser.parse_trivias();
+            }
             parser.lexer.keyword("offset")?;
             parser.add_child(green::KW_OFFSET.clone());
             Some(mark)
@@ -642,7 +664,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("table")?;
         self.add_child(green::KW_TABLE.clone());
 
@@ -666,7 +690,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("type")?;
         self.add_child(green::KW_TYPE.clone());
         Some(self.parse_type_def(mark))
@@ -683,7 +709,9 @@ impl Parser<'_> {
             .try_parse(|parser| {
                 parser.lexer.next(L_PAREN)?;
                 parser.add_child(green::L_PAREN.clone());
-                parser.parse_trivias();
+                if !parser.lexer.peek_byte()?.is_ascii_alphabetic() {
+                    parser.parse_trivias();
+                }
                 parser.lexer.keyword("type")?;
                 parser.add_child(green::KW_TYPE.clone());
                 Some(())
