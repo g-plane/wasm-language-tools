@@ -114,12 +114,12 @@ pub static INSTR_I64_STORE: LazyLock<GreenElement> =
 pub static IMMEDIATE_INT_NEG_ONE: LazyLock<GreenNode> =
     LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "-1").into()]));
 pub static IMMEDIATE_INT: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    let mut buf = String::with_capacity(3);
     (0..=500u16)
         .map(|i| {
-            GreenNode::new(
-                SyntaxKind::IMMEDIATE,
-                [GreenToken::new(SyntaxKind::INT, &format!("{i}")).into()],
-            )
+            buf.clear();
+            let _ = write!(&mut buf, "{i}");
+            GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, &buf).into()])
         })
         .collect()
 });
