@@ -437,17 +437,7 @@ impl Parser<'_> {
     }
 
     fn parse_plain_instr_sequence(&mut self, mark: NodeMark, checkpoint: Checkpoint) -> Option<GreenNode> {
-        while let Some(node) = self.try_parse_with_trivias(|parser| {
-            if parser
-                .lexer
-                .peek(KEYWORD)
-                .is_some_and(|token| matches!(token.text, "end" | "else"))
-            {
-                None
-            } else {
-                parser.parse_immediate()
-            }
-        }) {
+        while let Some(node) = self.try_parse_with_trivias(Self::parse_immediate) {
             self.add_child(node);
         }
         let look_back = self.lexer.look_back(checkpoint.lexer);
