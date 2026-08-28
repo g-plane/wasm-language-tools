@@ -228,7 +228,7 @@ impl Parser<'_> {
             b'o' => self
                 .parse_mem_arg()
                 .map(|child| GreenNode::new(IMMEDIATE, [child.into()])),
-            b'c'..=b's' => self
+            b'c' | b'e' | b'f' | b'i' | b'n' | b's' => self
                 .lexer
                 .eat(FLOAT)
                 .inspect(|token| {
