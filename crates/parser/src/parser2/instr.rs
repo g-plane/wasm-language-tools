@@ -588,7 +588,9 @@ impl Parser<'_> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
+        if !self.lexer.peek_byte()?.is_ascii_alphabetic() {
+            self.parse_trivias();
+        }
         self.lexer.keyword("then")?;
         self.add_child(green::KW_THEN.clone());
         while self.recover(Self::parse_instr) {}
