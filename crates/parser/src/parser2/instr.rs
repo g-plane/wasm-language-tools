@@ -324,6 +324,7 @@ impl Parser<'_> {
 
     pub(super) fn parse_mem_arg(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
+        let checkpoint = self.checkpoint();
         match self.lexer.next(MEM_ARG_KEYWORD)?.text {
             "offset" => self.add_child(green::MEM_ARG_KW_OFFSET.clone()),
             "align" => self.add_child(green::MEM_ARG_KW_ALIGN.clone()),
@@ -371,7 +372,23 @@ impl Parser<'_> {
             self.report_missing(Message::Name("unsigned int"));
         }
 
-        Some(self.finish_node(MEM_ARG, mark))
+        if let Some((keyword, uint)) = self.lexer.look_back(checkpoint.lexer).and_then(|s| s.split_once('='))
+            && let Some(uint) = helpers::parse_small_int(uint)
+        {
+            match keyword {
+                "offset" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::MEM_ARG_OFFSET.get(uint).cloned()
+                }
+                "align" if uint <= 16 => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::MEM_ARG_ALIGN.get(uint).cloned()
+                }
+                _ => Some(self.finish_node(MEM_ARG, mark)),
+            }
+        } else {
+            Some(self.finish_node(MEM_ARG, mark))
+        }
     }
 
     pub(super) fn parse_on_clause(&mut self) -> Option<GreenNode> {
@@ -434,39 +451,144 @@ impl Parser<'_> {
             self.add_child(node);
         }
         let look_back = self.lexer.look_back(checkpoint.lexer);
-        if let Some((instr_name, immediate)) = look_back.and_then(|s| s.split_once(' '))
-            && let Some(i) = helpers::parse_small_int(immediate)
-        {
+        if let Some((instr_name, immediate)) = look_back.and_then(|s| s.split_once(' ')) {
             match instr_name {
-                "local.get" => {
+                "local.get" if let Some(i) = helpers::parse_small_int(immediate) => {
                     self.elements.truncate(checkpoint.elements);
                     green::LOCAL_GET.get(i).cloned()
                 }
-                "i32.const" => {
+                "i32.const" if let Some(i) = helpers::parse_small_int(immediate) => {
                     self.elements.truncate(checkpoint.elements);
                     green::I32_CONST.get(i).cloned()
                 }
-                "local.set" => {
+                "local.set" if let Some(i) = helpers::parse_small_int(immediate) => {
                     self.elements.truncate(checkpoint.elements);
                     green::LOCAL_SET.get(i).cloned()
                 }
-                "local.tee" => {
+                "local.tee" if let Some(i) = helpers::parse_small_int(immediate) => {
                     self.elements.truncate(checkpoint.elements);
                     green::LOCAL_TEE.get(i).cloned()
                 }
-                "br" => {
+                "br" if let Some(i) = helpers::parse_small_int(immediate) => {
                     self.elements.truncate(checkpoint.elements);
                     green::BR.get(i).cloned()
                 }
-                "br_if" => {
+                "br_if" if let Some(i) = helpers::parse_small_int(immediate) => {
                     self.elements.truncate(checkpoint.elements);
                     green::BR_IF.get(i).cloned()
                 }
+                "i32.load"
+                    if let Some(("offset", uint)) = immediate.split_once('=')
+                        && let Some(uint) = helpers::parse_small_int(uint) =>
+                {
+                    self.elements.truncate(checkpoint.elements);
+                    green::I32_LOAD_OFFSET.get(uint).cloned()
+                }
+                "i32.store"
+                    if let Some(("offset", uint)) = immediate.split_once('=')
+                        && let Some(uint) = helpers::parse_small_int(uint) =>
+                {
+                    self.elements.truncate(checkpoint.elements);
+                    green::I32_STORE_OFFSET.get(uint).cloned()
+                }
                 _ => Some(self.finish_node(PLAIN_INSTR, mark)),
             }
-        } else if let Some("i32.add") = look_back {
-            self.elements.truncate(checkpoint.elements);
-            Some(green::I32_ADD.clone())
+        } else if let Some(rest) = look_back.and_then(|s| s.strip_prefix("i32.")) {
+            match rest {
+                "add" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_ADD.clone())
+                }
+                "load" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_LOAD.clone())
+                }
+                "eq" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_EQ.clone())
+                }
+                "eqz" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_EQZ.clone())
+                }
+                "ne" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_NE.clone())
+                }
+                "and" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_AND.clone())
+                }
+                "sub" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_SUB.clone())
+                }
+                "gt_s" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_GT_S.clone())
+                }
+                "gt_u" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_GT_U.clone())
+                }
+                "ge_s" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_GE_S.clone())
+                }
+                "ge_u" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_GE_U.clone())
+                }
+                "lt_s" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_LT_S.clone())
+                }
+                "lt_u" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_LT_U.clone())
+                }
+                "le_s" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_LE_S.clone())
+                }
+                "le_u" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_LE_U.clone())
+                }
+                "mul" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_MUL.clone())
+                }
+                "div_s" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_DIV_S.clone())
+                }
+                "div_u" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_DIV_U.clone())
+                }
+                "shl" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_SHL.clone())
+                }
+                "shr_s" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_SHR_S.clone())
+                }
+                "shr_u" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_SHR_U.clone())
+                }
+                "or" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_OR.clone())
+                }
+                "xor" => {
+                    self.elements.truncate(checkpoint.elements);
+                    Some(green::I32_XOR.clone())
+                }
+                _ => Some(self.finish_node(PLAIN_INSTR, mark)),
+            }
         } else {
             Some(self.finish_node(PLAIN_INSTR, mark))
         }

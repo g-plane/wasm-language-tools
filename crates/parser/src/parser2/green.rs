@@ -1,5 +1,5 @@
 use super::GreenElement;
-use std::sync::LazyLock;
+use std::{fmt::Write, sync::LazyLock};
 use wat_syntax::{GreenNode, GreenToken, SyntaxKind};
 
 pub static L_PAREN: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::L_PAREN, "(").into());
@@ -190,5 +190,189 @@ pub static I32_CONST: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
         })
         .collect()
 });
+pub static I32_LOAD: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::PLAIN_INSTR, [INSTR_I32_LOAD.clone()]));
 pub static I32_ADD: LazyLock<GreenNode> =
     LazyLock::new(|| GreenNode::new(SyntaxKind::PLAIN_INSTR, [INSTR_I32_ADD.clone()]));
+pub static I32_SUB: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.sub").into()],
+    )
+});
+pub static I32_MUL: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.mul").into()],
+    )
+});
+pub static I32_DIV_S: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.div_s").into()],
+    )
+});
+pub static I32_DIV_U: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.div_u").into()],
+    )
+});
+pub static I32_EQ: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.eq").into()],
+    )
+});
+pub static I32_EQZ: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.eqz").into()],
+    )
+});
+pub static I32_NE: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.ne").into()],
+    )
+});
+pub static I32_GT_S: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.gt_s").into()],
+    )
+});
+pub static I32_GT_U: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.gt_u").into()],
+    )
+});
+pub static I32_GE_S: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.ge_s").into()],
+    )
+});
+pub static I32_GE_U: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.ge_u").into()],
+    )
+});
+pub static I32_LT_S: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.lt_s").into()],
+    )
+});
+pub static I32_LT_U: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.lt_u").into()],
+    )
+});
+pub static I32_LE_S: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.le_s").into()],
+    )
+});
+pub static I32_LE_U: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.le_u").into()],
+    )
+});
+pub static I32_AND: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.and").into()],
+    )
+});
+pub static I32_OR: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.or").into()],
+    )
+});
+pub static I32_XOR: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.xor").into()],
+    )
+});
+pub static I32_SHL: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.shl").into()],
+    )
+});
+pub static I32_SHR_S: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.shr_s").into()],
+    )
+});
+pub static I32_SHR_U: LazyLock<GreenNode> = LazyLock::new(|| {
+    GreenNode::new(
+        SyntaxKind::PLAIN_INSTR,
+        [GreenToken::new(SyntaxKind::INSTR_NAME, "i32.shr_u").into()],
+    )
+});
+
+pub static UNSIGNED_INT: LazyLock<Vec<GreenToken>> = LazyLock::new(|| {
+    let mut buf = String::with_capacity(3);
+    (0..=500u16)
+        .map(|i| {
+            buf.clear();
+            let _ = write!(&mut buf, "{i}");
+            GreenToken::new(SyntaxKind::UNSIGNED_INT, &buf)
+        })
+        .collect()
+});
+pub static MEM_ARG_OFFSET: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    UNSIGNED_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::MEM_ARG,
+                [MEM_ARG_KW_OFFSET.clone(), EQ.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static MEM_ARG_ALIGN: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    UNSIGNED_INT
+        .iter()
+        .take(17)
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::MEM_ARG,
+                [MEM_ARG_KW_ALIGN.clone(), EQ.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static I32_LOAD_OFFSET: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    MEM_ARG_OFFSET
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_I32_LOAD.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static I32_STORE_OFFSET: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    MEM_ARG_OFFSET
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_I32_STORE.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
