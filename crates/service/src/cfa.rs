@@ -154,15 +154,23 @@ impl<'db, 'bump> Builder<'db, 'bump> {
                             let condition = self.current;
                             let saved_unreachable = self.unreachable;
 
+                            let mut has_then = false;
                             if let Some(then_block) = instr.children_by_kind(SyntaxKind::BLOCK_IF_THEN).next() {
+                                has_then = true;
                                 self.visit_block_like(then_block, block_exit);
                                 self.current = condition;
                                 self.unreachable = saved_unreachable;
                             }
 
+                            let mut has_else = false;
                             if let Some(else_block) = instr.children_by_kind(SyntaxKind::BLOCK_IF_ELSE).next() {
+                                has_else = true;
                                 self.visit_block_like(else_block, block_exit);
-                            } else if let Some(condition) = condition {
+                            }
+
+                            if (!has_then || !has_else)
+                                && let Some(condition) = condition
+                            {
                                 self.graph.add_edge(condition, block_exit);
                             }
                         }

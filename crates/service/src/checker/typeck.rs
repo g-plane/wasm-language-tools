@@ -245,7 +245,7 @@ fn check_instr<'db, 'bump>(
                         BumpVec::from_iter_in(init_producers.iter().cloned(), ctx.bump),
                         &results,
                     );
-                } else {
+                } else if node.tokens_by_kind(SyntaxKind::L_PAREN).next().is_some() {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),

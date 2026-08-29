@@ -53,15 +53,20 @@ impl<'s> Parser<'s, '_> {
         }
 
         let then_mark = self.start_node();
+        let mut has_then_body = false;
         while self
             .lexer
             .peek(KEYWORD)
             .filter(|token| matches!(token.text, "end" | "else"))
             .is_none()
             && self.recover(Self::parse_instr)
-        {}
-        let node = self.finish_node(BLOCK_IF_THEN, then_mark);
-        self.add_child(node);
+        {
+            has_then_body = true;
+        }
+        if has_then_body {
+            let node = self.finish_node(BLOCK_IF_THEN, then_mark);
+            self.add_child(node);
+        }
 
         if self
             .try_parse_with_trivias(|parser| parser.lexer.keyword("else"))
