@@ -1165,9 +1165,12 @@ dependencies = [
 name = "wat_parser"
 version = "0.11.0"
 dependencies = [
+ "bumpalo",
  "codespan-reporting",
  "criterion",
+ "hashbrown",
  "insta",
+ "rustc-hash",
  "similar-asserts",
  "wat_syntax",
 ]

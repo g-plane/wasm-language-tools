@@ -11,7 +11,7 @@ use wat_syntax::{
     TextRange,
 };
 
-impl Parser<'_> {
+impl<'s> Parser<'s, '_> {
     fn parse_block_if_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
         if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
@@ -197,6 +197,7 @@ impl Parser<'_> {
                     } else if token.text == "-1" {
                         green::IMMEDIATE_INT_NEG_ONE.clone()
                     } else {
+                        let token = self.intern_token(token);
                         GreenNode::new(IMMEDIATE, [token.into()])
                     }
                 })
@@ -210,10 +211,10 @@ impl Parser<'_> {
                         })
                         .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
                 }),
-            b'$' => self
-                .lexer
-                .next(IDENT)
-                .map(|token| GreenNode::new(IMMEDIATE, [token.into()])),
+            b'$' => self.lexer.next(IDENT).map(|token| {
+                let token = self.intern_token(token);
+                GreenNode::new(IMMEDIATE, [token.into()])
+            }),
             b'a' => self
                 .try_parse(Self::parse_mem_arg)
                 .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
@@ -436,7 +437,7 @@ impl Parser<'_> {
         Some(self.finish_node(PLAIN_INSTR, mark))
     }
 
-    fn parse_plain_instr_sequence(&mut self, mark: NodeMark, checkpoint: Checkpoint) -> Option<GreenNode> {
+    fn parse_plain_instr_sequence(&mut self, mark: NodeMark, checkpoint: Checkpoint<'s>) -> Option<GreenNode> {
         while let Some(node) = self.try_parse_with_trivias(Self::parse_immediate) {
             self.add_child(node);
         }
@@ -598,7 +599,7 @@ impl Parser<'_> {
         Some(self.finish_node(BLOCK_IF_THEN, mark))
     }
 
-    fn recognize_instr_name(&mut self, token: Token) {
+    fn recognize_instr_name(&mut self, token: Token<'s>) {
         match token.text {
             "local.get" => self.add_child(green::INSTR_LOCAL_GET.clone()),
             "i32.const" => self.add_child(green::INSTR_I32_CONST.clone()),
@@ -613,7 +614,10 @@ impl Parser<'_> {
             "i64.const" => self.add_child(green::INSTR_I64_CONST.clone()),
             "i64.load" => self.add_child(green::INSTR_I64_LOAD.clone()),
             "i64.store" => self.add_child(green::INSTR_I64_STORE.clone()),
-            _ => self.add_child(token),
+            _ => {
+                let token = self.intern_token(token);
+                self.add_child(token);
+            }
         }
     }
 

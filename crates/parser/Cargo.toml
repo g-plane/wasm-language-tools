@@ -11,6 +11,9 @@ keywords = ["wasm", "parser"]
 exclude = ["/tests"]
 
 [dependencies]
+bumpalo = { workspace = true }
+hashbrown = { workspace = true }
+rustc-hash = { workspace = true }
 wat_syntax = { workspace = true }
 
 [dev-dependencies]

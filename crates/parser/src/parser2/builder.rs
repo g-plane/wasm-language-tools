@@ -1,7 +1,7 @@
 use super::{GreenElement, Parser, lexer};
 use wat_syntax::{GreenNode, SyntaxKind};
 
-impl<'s> Parser<'s> {
+impl<'s> Parser<'s, '_> {
     pub(super) fn start_node(&self) -> NodeMark {
         NodeMark(self.elements.len())
     }

@@ -1,9 +1,9 @@
 use super::{GreenElement, Parser, green, lexer::Token};
 use crate::error::{Message, SyntaxError};
 use std::ops::ControlFlow;
-use wat_syntax::{SyntaxKind, TextRange, TextSize};
+use wat_syntax::{GreenToken, SyntaxKind, TextRange, TextSize};
 
-impl<'s> Parser<'s> {
+impl<'s> Parser<'s, '_> {
     #[must_use]
     pub(super) fn recover<T: Into<GreenElement>>(&mut self, parser: fn(&mut Self) -> Option<T>) -> bool {
         let checkpoint_before_trivias = self.checkpoint();
@@ -130,26 +130,31 @@ impl<'s> Parser<'s> {
 
     pub(super) fn parse_trivias(&mut self) {
         while let Some(token) = self.lexer.trivia() {
-            if token.kind == SyntaxKind::WHITESPACE {
-                if token.text.as_bytes() == b" " {
-                    self.add_child(green::SINGLE_SPACE.clone());
-                } else if let Some(rest) = token.text.strip_prefix('\n')
-                    && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
-                        if count > 1000 || b != b' ' {
-                            ControlFlow::Break(())
-                        } else {
-                            ControlFlow::Continue(count + 1)
-                        }
-                    })
-                    && count.is_multiple_of(2)
-                    && let Some(token) = green::INDENT.get(count / 2)
-                {
-                    self.add_child(token.clone());
-                } else {
+            match token.kind {
+                SyntaxKind::WHITESPACE => {
+                    if token.text.as_bytes() == b" " {
+                        self.add_child(green::SINGLE_SPACE.clone());
+                    } else if let Some(rest) = token.text.strip_prefix('\n')
+                        && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
+                            if count > 1000 || b != b' ' {
+                                ControlFlow::Break(())
+                            } else {
+                                ControlFlow::Continue(count + 1)
+                            }
+                        })
+                        && count.is_multiple_of(2)
+                        && let Some(token) = green::INDENT.get(count / 2)
+                    {
+                        self.add_child(token.clone());
+                    } else {
+                        self.add_child(token);
+                    }
+                }
+                SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT if token.text.len() < 16 => {
+                    let token = self.intern_token(token);
                     self.add_child(token);
                 }
-            } else {
-                self.add_child(token);
+                _ => self.add_child(token),
             }
         }
     }
@@ -221,6 +226,13 @@ impl<'s> Parser<'s> {
         {
             self.errors.push(SyntaxError { range, message });
         }
+    }
+
+    pub(super) fn intern_token(&mut self, token: Token<'s>) -> GreenToken {
+        self.token_interner
+            .entry(token.text)
+            .or_insert_with(|| GreenToken::new(token.kind, token.text))
+            .clone()
     }
 }
 

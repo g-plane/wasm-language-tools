@@ -2,7 +2,7 @@ use super::{GreenElement, Parser, builder::NodeMark, green};
 use crate::error::Message;
 use wat_syntax::{GreenNode, SyntaxKind::*};
 
-impl Parser<'_> {
+impl Parser<'_, '_> {
     pub(super) fn parse_addr_type(&mut self) -> Option<GreenNode> {
         self.lexer.eat(TYPE_KEYWORD).map(|mut token| {
             let token = match token.text {

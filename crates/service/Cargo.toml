@@ -11,7 +11,7 @@ exclude = ["/tests"]
 
 [dependencies]
 bumpalo = { workspace = true }
-hashbrown = { version = "0.17", default-features = false, features = ["inline-more", "allocator-api2"] }
+hashbrown = { workspace = true }
 indexmap = "2.14"
 itertools = "0.15"
 line-index = "0.1"

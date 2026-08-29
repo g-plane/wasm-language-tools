@@ -2,7 +2,7 @@ use super::{GreenElement, Parser, builder::NodeMark, green};
 use crate::error::Message;
 use wat_syntax::{GreenNode, SyntaxKind::*};
 
-impl Parser<'_> {
+impl Parser<'_, '_> {
     pub(super) fn parse_data(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;

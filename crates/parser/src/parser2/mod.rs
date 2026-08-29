@@ -1,5 +1,8 @@
 use self::lexer::Lexer;
 use crate::error::SyntaxError;
+use bumpalo::{Bump, collections::Vec as BumpVec};
+use hashbrown::HashMap;
+use rustc_hash::FxBuildHasher;
 use wat_syntax::{GreenNode, GreenToken, NodeOrToken, SyntaxKind};
 
 mod builder;
@@ -12,7 +15,8 @@ mod ty;
 
 /// Parse the code into green node.
 pub fn parse(source: &str) -> (GreenNode, Vec<SyntaxError>) {
-    let mut parser = Parser::new(source);
+    let bump = Bump::with_capacity(4096);
+    let mut parser = Parser::new(source, &bump);
     (parser.parse_root(), parser.errors)
 }
 
@@ -36,7 +40,8 @@ pub fn parse(source: &str) -> (GreenNode, Vec<SyntaxError>) {
 /// assert!(!errors.is_empty());
 /// ```
 pub fn parse_as(kind: SyntaxKind, source: &str) -> Option<(GreenNode, Vec<SyntaxError>)> {
-    let mut parser = Parser::new(source);
+    let bump = Bump::new();
+    let mut parser = Parser::new(source, &bump);
     let green = match kind {
         SyntaxKind::MODULE_NAME => parser.parse_module_name(),
         SyntaxKind::NAME => parser.parse_name(),
@@ -166,20 +171,22 @@ static ID_CHAR_TABLE: [u8; 256] = [
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;
 
-struct Parser<'s> {
+struct Parser<'s, 'bump> {
     source: &'s str,
     lexer: Lexer<'s>,
     errors: Vec<SyntaxError>,
-    elements: Vec<GreenElement>,
+    elements: BumpVec<'bump, GreenElement>,
+    token_interner: HashMap<&'s str, GreenToken, FxBuildHasher, &'bump Bump>,
 }
 
-impl<'s> Parser<'s> {
-    fn new(source: &'s str) -> Self {
+impl<'s, 'bump> Parser<'s, 'bump> {
+    fn new(source: &'s str, bump: &'bump Bump) -> Self {
         Parser {
             source,
             lexer: Lexer::new(source),
             errors: Vec::new(),
-            elements: Vec::new(),
+            elements: BumpVec::with_capacity_in(16, bump),
+            token_interner: HashMap::with_capacity_and_hasher_in(16, FxBuildHasher, bump),
         }
     }
 
