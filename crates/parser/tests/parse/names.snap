@@ -1485,7 +1485,7 @@ ROOT@0..26351
         KEYWORD@5914..5920 "export"
         WHITESPACE@5920..5921 " "
         NAME@5921..5935
-          STRING@5921..5935 "\"ᅟᅠㅤﾠ\""
+          STRING@5921..5935 "\"\u{115f}\u{1160}\u{3164}\u{ffa0}\""
         R_PAREN@5935..5936 ")"
       WHITESPACE@5936..5937 " "
       TYPE_USE@5937..5949
