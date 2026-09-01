@@ -3,7 +3,17 @@ name: test
 on: [push, pull_request]
 
 jobs:
-  full:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-26.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: taiki-e/install-action@v2
@@ -11,9 +21,7 @@ jobs:
           tool: cargo-deny,dprint
       - uses: actions/checkout@v6
       - run: cargo fmt --check && dprint check
-      - run: cargo clippy --all-targets -- -D warnings
       - run: cargo deny check licenses bans sources
-      - run: cargo test
 
   server:
     runs-on: windows-latest
