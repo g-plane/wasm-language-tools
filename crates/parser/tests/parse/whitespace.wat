@@ -1,0 +1,10 @@
+(module
+  (func
+                      block
+                                      block
+                                                      block
+                                                      end
+                                      end
+                      end
+  )
+)

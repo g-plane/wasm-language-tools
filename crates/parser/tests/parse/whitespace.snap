@@ -1,0 +1,31 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..280
+  MODULE@0..279
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..277
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..38 "\n                      "
+      BLOCK_BLOCK@38..273
+        KEYWORD@38..43 "block"
+        WHITESPACE@43..82 "\n                                      "
+        BLOCK_BLOCK@82..247
+          KEYWORD@82..87 "block"
+          WHITESPACE@87..142 "\n                                                      "
+          BLOCK_BLOCK@142..205
+            KEYWORD@142..147 "block"
+            WHITESPACE@147..202 "\n                                                      "
+            KEYWORD@202..205 "end"
+          WHITESPACE@205..244 "\n                                      "
+          KEYWORD@244..247 "end"
+        WHITESPACE@247..270 "\n                      "
+        KEYWORD@270..273 "end"
+      WHITESPACE@273..276 "\n  "
+      R_PAREN@276..277 ")"
+    WHITESPACE@277..278 "\n"
+    R_PAREN@278..279 ")"
+  WHITESPACE@279..280 "\n"

@@ -1,0 +1,11 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (func
+    block
+      block
+        block
+        end
+      end
+    end))

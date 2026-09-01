@@ -497,12 +497,21 @@ impl<'s> Lexer<'s> {
     }
 
     fn whitespace(&mut self) -> Option<Token<'s>> {
-        let end = self
-            .input
-            .bytes()
-            .position(|b| !matches!(b, b' ' | b'\n' | b'\t' | b'\r'))
-            .unwrap_or(self.input.len());
-        // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+        #[cfg(target_arch = "x86_64")]
+        let end = if std::arch::is_x86_feature_detected!("avx2") {
+            unsafe { crate::arch::x86_64::scan_whitespace_avx2(self.input) }
+        } else {
+            crate::arch::scan_whitespace_scalar(self.input)
+        };
+        #[cfg(target_arch = "aarch64")]
+        let end = if std::arch::is_aarch64_feature_detected!("neon") {
+            unsafe { crate::arch::aarch64::scan_whitespace_neon(self.input) }
+        } else {
+            crate::arch::scan_whitespace_scalar(self.input)
+        };
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+        let end = crate::arch::scan_whitespace_scalar(self.input);
+        // SAFETY: the scan result is guaranteed to be valid UTF-8 boundary
         unsafe {
             Some(Token {
                 kind: SyntaxKind::WHITESPACE,
