@@ -18,7 +18,9 @@ impl<'s> Parser<'s, '_> {
             self.add_child(node);
         }
 
-        while !self.should_exit_block_if_cond() && self.recover(Self::parse_instr) {}
+        while let Some(instr) = self.try_parse_with_trivias(Self::parse_instr) {
+            self.add_child(instr);
+        }
 
         if !self.recover(Self::parse_then_block) {
             self.report_missing(Message::Name("then block"));
@@ -54,13 +56,8 @@ impl<'s> Parser<'s, '_> {
 
         let then_mark = self.start_node();
         let mut has_then_body = false;
-        while self
-            .lexer
-            .peek(KEYWORD)
-            .filter(|token| matches!(token.text, "end" | "else"))
-            .is_none()
-            && self.recover(Self::parse_instr)
-        {
+        while let Some(instr) = self.try_parse_with_trivias(Self::parse_instr) {
+            self.add_child(instr);
             has_then_body = true;
         }
         if has_then_body {
@@ -75,9 +72,9 @@ impl<'s> Parser<'s, '_> {
             let else_mark = self.start_node();
             self.add_child(green::KW_ELSE.clone());
             self.eat(IDENT);
-            while self.lexer.peek(KEYWORD).filter(|token| token.text == "end").is_none()
-                && self.recover(Self::parse_instr)
-            {}
+            while let Some(instr) = self.try_parse_with_trivias(Self::parse_instr) {
+                self.add_child(instr);
+            }
             let node = self.finish_node(BLOCK_IF_ELSE, else_mark);
             self.add_child(node);
         }
@@ -107,8 +104,8 @@ impl<'s> Parser<'s, '_> {
             self.add_child(node);
         }
 
-        while self.lexer.peek(KEYWORD).filter(|token| token.text == "end").is_none() && self.recover(Self::parse_instr)
-        {
+        while let Some(instr) = self.try_parse_with_trivias(Self::parse_instr) {
+            self.add_child(instr);
         }
 
         if !self.recover(Self::parse_end_keyword) {
@@ -142,8 +139,8 @@ impl<'s> Parser<'s, '_> {
             self.add_child(node);
         }
 
-        while self.lexer.peek(KEYWORD).filter(|token| token.text == "end").is_none() && self.recover(Self::parse_instr)
-        {
+        while let Some(instr) = self.try_parse_with_trivias(Self::parse_instr) {
+            self.add_child(instr);
         }
 
         if !self.recover(Self::parse_end_keyword) {
@@ -294,6 +291,7 @@ impl<'s> Parser<'s, '_> {
                     self.add_child(green::KW_TRY_TABLE.clone());
                     self.parse_block_try_table_folded(mark)
                 }
+                "then" | "else" => None,
                 _ => {
                     self.recognize_instr_name(token);
                     self.parse_plain_instr_folded(mark)
@@ -320,6 +318,7 @@ impl<'s> Parser<'s, '_> {
                     self.add_child(green::KW_TRY_TABLE.clone());
                     self.parse_block_try_table_sequence(mark)
                 }
+                "end" | "else" => None,
                 _ => {
                     self.recognize_instr_name(token);
                     self.parse_plain_instr_sequence(mark, checkpoint)
@@ -624,24 +623,5 @@ impl<'s> Parser<'s, '_> {
                 self.add_child(token);
             }
         }
-    }
-
-    fn should_exit_block_if_cond(&mut self) -> bool {
-        let checkpoint = self.lexer.checkpoint();
-        while self.lexer.trivia().is_some() {}
-        if self.lexer.next(L_PAREN).is_none() {
-            self.lexer.reset(checkpoint);
-            return true;
-        }
-        while self.lexer.trivia().is_some() {}
-        let result = matches!(
-            self.lexer.next(KEYWORD),
-            Some(Token {
-                text: "then" | "else",
-                ..
-            })
-        );
-        self.lexer.reset(checkpoint);
-        result
     }
 }
