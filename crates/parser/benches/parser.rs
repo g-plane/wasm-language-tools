@@ -1,5 +1,5 @@
-use criterion::{Criterion, criterion_group, criterion_main};
-use std::hint::black_box;
+use criterion::{Criterion, Throughput, criterion_group, criterion_main};
+use std::{fs, hint::black_box};
 
 static CODE: &str = r#"(module
     (func $f1 (param $p1 i32) (param $p2 i32) (result i32)
@@ -30,11 +30,31 @@ static CODE: &str = r#"(module
 "#;
 
 fn bench_parser(c: &mut Criterion) {
-    c.bench_function("parser", |b| {
+    let mut group = c.benchmark_group("parser");
+    group.throughput(Throughput::Bytes(CODE.len() as u64));
+    group.bench_function("900 bytes", |b| {
         b.iter(|| {
             black_box(wat_parser::parse(CODE));
         });
     });
+
+    fs::read_dir("crates/parser/benches")
+        .unwrap()
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "wat"))
+        .for_each(|entry| {
+            let path = entry.path();
+            let code = fs::read_to_string(&path).unwrap();
+            group.throughput(Throughput::Bytes(code.len() as u64));
+            group.bench_function(
+                format!("{} ({} bytes)", path.file_stem().unwrap().display(), code.len()),
+                |b| {
+                    b.iter(|| {
+                        black_box(wat_parser::parse(&code));
+                    });
+                },
+            );
+        });
 }
 
 criterion_group!(benches, bench_parser);
