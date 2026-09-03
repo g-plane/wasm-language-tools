@@ -132,6 +132,10 @@ impl<'s> Lexer<'s> {
     pub fn peek_byte(&self) -> Option<u8> {
         self.input.as_bytes().first().copied()
     }
+    #[inline]
+    pub fn peek_bytes(&self) -> &[u8] {
+        self.input.as_bytes()
+    }
 
     pub fn keyword(&mut self, keyword: &'static str) -> Option<Token<'s>> {
         debug_assert!(keyword.chars().all(|c| c.is_ascii_lowercase()));
