@@ -1,5 +1,6 @@
 <div align="center"><img src="./media/logo.svg" width="160"></div>
 <h1 align="center">WebAssembly Language Tools</h1>
+<div align="center"><a href="https://app.codspeed.io/g-plane/wasm-language-tools?utm_source=badge"><img src="https://img.shields.io/endpoint?url=https://codspeed.io/badge.json" alt="CodSpeed"/></a></div>
 
 WebAssembly Language Tools aims to provide and improve the editing experience of WebAssembly Text Format.
 It delivers deep and smart static analysis, precise type checking, and full-featured editor integration — plus a configurable formatter — making WebAssembly development fast, safe, and joyful.
