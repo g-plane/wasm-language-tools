@@ -1,4 +1,4 @@
-use self::lexer::Lexer;
+use self::{builder::Checkpoint, lexer::Lexer};
 use crate::error::SyntaxError;
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use hashbrown::HashMap;
@@ -177,6 +177,7 @@ struct Parser<'s, 'bump> {
     errors: Vec<SyntaxError>,
     elements: BumpVec<'bump, GreenElement>,
     token_interner: HashMap<&'s str, GreenToken, FxBuildHasher, &'bump Bump>,
+    reusable_trivias: (BumpVec<'bump, GreenElement>, Option<Checkpoint<'s>>),
 }
 
 impl<'s, 'bump> Parser<'s, 'bump> {
@@ -187,6 +188,7 @@ impl<'s, 'bump> Parser<'s, 'bump> {
             errors: Vec::new(),
             elements: BumpVec::with_capacity_in(16, bump),
             token_interner: HashMap::with_capacity_and_hasher_in(16, FxBuildHasher, bump),
+            reusable_trivias: (BumpVec::with_capacity_in(4, bump), None),
         }
     }
 

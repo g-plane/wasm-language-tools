@@ -1,4 +1,4 @@
-use super::{GreenElement, Parser, green, lexer::Token};
+use super::{GreenElement, Parser, builder::Checkpoint, green, lexer::Token};
 use crate::error::{Message, SyntaxError};
 use std::ops::ControlFlow;
 use wat_syntax::{GreenToken, SyntaxKind, TextRange, TextSize};
@@ -17,6 +17,7 @@ impl<'s> Parser<'s, '_> {
         if self.parse_errors() {
             true
         } else {
+            self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
             self.reset(checkpoint_before_trivias);
             false
         }
@@ -36,6 +37,7 @@ impl<'s> Parser<'s, '_> {
                 self.report_error_token(&token, Message::UnexpectedToken);
                 self.add_child(token);
             } else {
+                self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
                 self.reset(checkpoint_before_trivias);
                 return false;
             }
@@ -51,12 +53,14 @@ impl<'s> Parser<'s, '_> {
         result
     }
     pub(super) fn try_parse_with_trivias<T>(&mut self, parser: impl FnOnce(&mut Self) -> Option<T>) -> Option<T> {
-        let checkpoint = self.checkpoint();
+        let checkpoint_before_trivias = self.checkpoint();
         self.parse_trivias();
+        let checkpoint_after_trivias = self.checkpoint();
         match parser(self) {
             Some(result) => Some(result),
             None => {
-                self.reset(checkpoint);
+                self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
+                self.reset(checkpoint_before_trivias);
                 None
             }
         }
@@ -77,13 +81,15 @@ impl<'s> Parser<'s, '_> {
     /// "Eat" a token with processing the trivias before the token.
     /// After parsed, trivias and token will be added to `children`.
     pub(super) fn eat(&mut self, kind: SyntaxKind) -> bool {
-        let checkpoint = self.checkpoint();
+        let checkpoint_before_trivias = self.checkpoint();
         self.parse_trivias();
+        let checkpoint_after_trivias = self.checkpoint();
         if let Some(token) = self.lexer.eat(kind) {
             self.add_child(token);
             true
         } else {
-            self.reset(checkpoint);
+            self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
+            self.reset(checkpoint_before_trivias);
             false
         }
     }
@@ -95,8 +101,9 @@ impl<'s> Parser<'s, '_> {
             self.add_child(token);
             let mut stack = 1u16;
             loop {
-                let checkpoint = self.checkpoint();
+                let checkpoint_before_trivias = self.checkpoint();
                 self.parse_trivias();
+                let checkpoint_after_trivias = self.checkpoint();
                 if let Some(mut token) = self.lexer.eat(SyntaxKind::L_PAREN) {
                     token.kind = SyntaxKind::ERROR;
                     self.report_error_token(&token, Message::UnexpectedToken);
@@ -114,7 +121,8 @@ impl<'s> Parser<'s, '_> {
                     self.report_error_token(&token, Message::UnexpectedToken);
                     self.add_child(token);
                 } else {
-                    self.reset(checkpoint);
+                    self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
+                    self.reset(checkpoint_before_trivias);
                     break;
                 }
             }
@@ -129,40 +137,46 @@ impl<'s> Parser<'s, '_> {
     }
 
     pub(super) fn parse_trivias(&mut self) {
-        while let Some(token) = self.lexer.trivia() {
-            match token.kind {
-                SyntaxKind::WHITESPACE => {
-                    if token.text.as_bytes() == b" " {
-                        self.add_child(green::SINGLE_SPACE.clone());
-                    } else if let Some(rest) = token.text.strip_prefix('\n')
-                        && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
-                            if count > 1000 || b != b' ' {
-                                ControlFlow::Break(())
-                            } else {
-                                ControlFlow::Continue(count + 1)
-                            }
-                        })
-                        && count.is_multiple_of(2)
-                        && let Some(token) = green::INDENT.get(count / 2)
-                    {
-                        self.add_child(token.clone());
-                    } else {
+        if let Some(checkpoint) = self.reusable_trivias.1.take() {
+            self.reset(checkpoint);
+            self.elements.append(&mut self.reusable_trivias.0);
+        } else {
+            while let Some(token) = self.lexer.trivia() {
+                match token.kind {
+                    SyntaxKind::WHITESPACE => {
+                        if token.text.as_bytes() == b" " {
+                            self.add_child(green::SINGLE_SPACE.clone());
+                        } else if let Some(rest) = token.text.strip_prefix('\n')
+                            && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
+                                if count > 1000 || b != b' ' {
+                                    ControlFlow::Break(())
+                                } else {
+                                    ControlFlow::Continue(count + 1)
+                                }
+                            })
+                            && count.is_multiple_of(2)
+                            && let Some(token) = green::INDENT.get(count / 2)
+                        {
+                            self.add_child(token.clone());
+                        } else {
+                            self.add_child(token);
+                        }
+                    }
+                    SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT if token.text.len() < 16 => {
+                        let token = self.intern_token(token);
                         self.add_child(token);
                     }
+                    _ => self.add_child(token),
                 }
-                SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT if token.text.len() < 16 => {
-                    let token = self.intern_token(token);
-                    self.add_child(token);
-                }
-                _ => self.add_child(token),
             }
         }
     }
 
     pub(super) fn expect_right_paren(&mut self) {
         loop {
-            let checkpoint = self.checkpoint();
+            let checkpoint_before_trivias = self.checkpoint();
             self.parse_trivias();
+            let checkpoint_after_trivias = self.checkpoint();
             if self.lexer.next(SyntaxKind::R_PAREN).is_some() {
                 self.add_child(green::R_PAREN.clone());
                 return;
@@ -170,7 +184,7 @@ impl<'s> Parser<'s, '_> {
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
                 // a trick:
                 // if there're newlines before next left paren, we should exit from current parsing node
-                if let Some(slice) = self.elements.get(checkpoint.elements..)
+                if let Some(slice) = self.elements.get(checkpoint_before_trivias.elements..)
                     && slice.iter().any(|node_or_token| {
                         if let GreenElement::Token(token) = node_or_token {
                             token.text().contains('\n')
@@ -179,13 +193,15 @@ impl<'s> Parser<'s, '_> {
                         }
                     })
                 {
-                    self.reset(checkpoint);
+                    self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
+                    self.reset(checkpoint_before_trivias);
                     self.report_error_token(&token, Message::Char(')'));
                     return;
                 }
             }
             if !self.parse_errors() {
-                self.reset(checkpoint);
+                self.recycle_trivias(checkpoint_before_trivias, checkpoint_after_trivias);
+                self.reset(checkpoint_before_trivias);
                 let start = self.source.len();
                 self.errors.push(SyntaxError {
                     range: TextRange::new(TextSize::new(start as u32), TextSize::new(start as u32)),
@@ -233,6 +249,14 @@ impl<'s> Parser<'s, '_> {
             .entry(token.text)
             .or_insert_with(|| GreenToken::new(token.kind, token.text))
             .clone()
+    }
+
+    fn recycle_trivias(&mut self, before_trivias: Checkpoint<'s>, after_trivias: Checkpoint<'s>) {
+        self.elements.truncate(after_trivias.elements);
+        self.reusable_trivias
+            .0
+            .extend(self.elements.drain(before_trivias.elements..));
+        self.reusable_trivias.1 = Some(after_trivias);
     }
 }
 

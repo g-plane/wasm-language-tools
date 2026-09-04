@@ -249,8 +249,8 @@ impl<'s> Parser<'s, '_> {
                 ..,
             ] => self
                 .try_parse(Self::parse_ref_type_detailed)
-                .or_else(|| self.try_parse(Self::parse_type_use))
                 .or_else(|| self.try_parse(Self::parse_on_clause))
+                .or_else(|| self.try_parse(Self::parse_type_use))
                 .map(|child| GreenNode::new(IMMEDIATE, [child.into()])),
             [b'"', ..] => self
                 .lexer
