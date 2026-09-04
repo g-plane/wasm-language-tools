@@ -158,6 +158,9 @@ impl<'s> Parser<'s, '_> {
                             && let Some(token) = green::INDENT.get(count / 2)
                         {
                             self.add_child(token.clone());
+                        } else if token.text.len() < 4 {
+                            let token = self.intern_token(token);
+                            self.add_child(token);
                         } else {
                             self.add_child(token);
                         }
