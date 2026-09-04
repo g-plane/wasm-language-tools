@@ -424,29 +424,26 @@ impl<'s> Lexer<'s> {
     }
 
     pub fn trivia(&mut self) -> Option<Token<'s>> {
-        let bytes = self.input.as_bytes();
-        match bytes.first() {
-            Some(b' ' | b'\n' | b'\t' | b'\r') => self.whitespace(),
-            Some(b'(') => match bytes.get(1) {
-                Some(b';') => self.block_comment(),
-                Some(b'@') if self.annotation_depth == 0 => self.annot_start(),
-                _ => {
-                    if self.annotation_depth > 0 {
-                        self.annotation_depth += 1;
-                        // SAFETY: `(` is an ASCII char
-                        unsafe {
-                            Some(Token {
-                                kind: SyntaxKind::ANNOT_ELEM,
-                                text: self.split_advance(1),
-                            })
-                        }
-                    } else {
-                        None
+        match self.input.as_bytes() {
+            [b' ' | b'\n' | b'\t' | b'\r', ..] => self.whitespace(),
+            [b'(', b';', ..] => self.block_comment(),
+            [b'(', b'@', ..] if self.annotation_depth == 0 => self.annot_start(),
+            [b'(', ..] => {
+                if self.annotation_depth > 0 {
+                    self.annotation_depth += 1;
+                    // SAFETY: `(` is an ASCII char
+                    unsafe {
+                        Some(Token {
+                            kind: SyntaxKind::ANNOT_ELEM,
+                            text: self.split_advance(1),
+                        })
                     }
+                } else {
+                    None
                 }
-            },
-            Some(b';') if matches!(bytes.get(1), Some(b';')) => self.line_comment(),
-            Some(b')') => {
+            }
+            [b';', b';', ..] => self.line_comment(),
+            [b')', ..] => {
                 match self.annotation_depth {
                     0 => None,
                     1 => {
@@ -471,11 +468,15 @@ impl<'s> Lexer<'s> {
                     }
                 }
             }
-            Some(b'"') if self.annotation_depth > 0 => self.string().map(|text| Token {
+            [b'"', ..] if self.annotation_depth > 0 => self.string().map(|text| Token {
                 kind: SyntaxKind::ANNOT_ELEM,
                 text,
             }),
-            Some(..) => {
+            [] => {
+                self.annotation_depth = 0;
+                None
+            }
+            _ => {
                 if self.annotation_depth > 0 {
                     let end = self
                         .input
@@ -492,10 +493,6 @@ impl<'s> Lexer<'s> {
                 } else {
                     None
                 }
-            }
-            None => {
-                self.annotation_depth = 0;
-                None
             }
         }
     }
