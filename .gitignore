@@ -3,6 +3,7 @@
 .zed
 bindings/pkg/**/*
 !bindings/pkg/package.json
+crates/parser/benches/*.wat
 
 node_modules/
 cache/
