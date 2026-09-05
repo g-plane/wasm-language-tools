@@ -11,12 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Patch criterion to codspeed-criterion-compat
+        shell: pwsh
         run: |
-          cat >> Cargo.toml << 'EOF'
-
-          [patch.crates-io]
-          criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }
-          EOF
+          $path = "Cargo.toml"
+          $contents = Get-Content -Path $path -Raw
+          $old = 'criterion = "0.8"'
+          $new = 'criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }'
+          $contents = $contents.Replace($old, $new)
+          Set-Content -Path $path -Value $contents
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-binstall
