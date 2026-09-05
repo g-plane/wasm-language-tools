@@ -10,6 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Download large files
+        run: |
+          curl -Lo wabt.tar.gz https://github.com/WebAssembly/wabt/releases/download/1.0.41/wabt-1.0.41-linux-x64.tar.gz
+          tar xzf wabt.tar.gz
+          curl -Lo dprint_plugin_malva.wasm https://cdn.jsdelivr.net/npm/dprint-plugin-malva@0.16.0/plugin.wasm
+          wasm2wat dprint_plugin_malva.wasm -o ./crates/parser/benches/dprint_plugin_malva.wat
+          curl -Lo wat_service.wasm https://cdn.jsdelivr.net/npm/@wasm-language-tools/wasm@0.11.0/binding_wasm_bg.wasm
+          wasm2wat wat_service.wasm -o ./crates/parser/benches/wat_service.wat
+          curl -Lo swc.wasm https://cdn.jsdelivr.net/npm/@swc/wasm@1.15.47/wasm_bg.wasm
+          wasm2wat swc.wasm -o ./crates/parser/benches/swc.wat
       - name: Patch criterion to codspeed-criterion-compat
         shell: pwsh
         run: |
