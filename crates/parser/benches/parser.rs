@@ -38,7 +38,7 @@ fn bench_parser(c: &mut Criterion) {
         });
     });
 
-    fs::read_dir("crates/parser/benches")
+    fs::read_dir(concat!(env!("CARGO_MANIFEST_DIR"), "/benches"))
         .unwrap()
         .filter_map(|entry| entry.ok())
         .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "wat"))
