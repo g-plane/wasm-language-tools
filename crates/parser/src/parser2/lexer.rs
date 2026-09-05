@@ -376,10 +376,11 @@ impl<'s> Lexer<'s> {
 
     fn mem_arg_keyword(&mut self) -> Option<Token<'s>> {
         let checkpoint = self.input;
-        self.input = self
-            .input
-            .strip_prefix("offset")
-            .or_else(|| self.input.strip_prefix("align"))?;
+        self.input = match self.input.as_bytes() {
+            [b'o', ..] => self.input.strip_prefix("offset"),
+            [b'a', ..] => self.input.strip_prefix("align"),
+            _ => None,
+        }?;
         if self.input.starts_with(|c: char| c.is_ascii_alphabetic()) {
             None
         } else {
