@@ -15,13 +15,13 @@ jobs:
           cat >> Cargo.toml << 'EOF'
 
           [patch.crates-io]
-          criterion = { package = "codspeed-criterion-compat", version = "*" }
+          criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }
           EOF
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-binstall
       - run: |
-          cargo binstall cargo-codspeed
+          cargo binstall -y cargo-codspeed
           cargo codspeed build
       - uses: CodSpeedHQ/action@v5
         with:
