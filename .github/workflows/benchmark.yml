@@ -1,0 +1,29 @@
+name: benchmark
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Patch criterion to codspeed-criterion-compat
+        run: |
+          cat >> Cargo.toml << 'EOF'
+
+          [patch.crates-io]
+          criterion = { package = "codspeed-criterion-compat", version = "*" }
+          EOF
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-binstall
+      - run: |
+          cargo binstall cargo-codspeed
+          cargo codspeed build
+      - uses: CodSpeedHQ/action@v5
+        with:
+          mode: simulation
+          run: cargo codspeed run
