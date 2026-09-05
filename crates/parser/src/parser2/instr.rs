@@ -220,7 +220,12 @@ impl<'s> Parser<'s, '_> {
             [b'a', b'l', ..] | [b'o', ..] => self
                 .parse_mem_arg()
                 .map(|child| GreenNode::new(IMMEDIATE, [child.into()])),
-            [b'e', b'n', b'd', ..] | [b'e', b'l', b's', b'e', ..] => None,
+            // perf: "early return" by checking bytes sequence characteristic:
+            // - keyword `end` or `else`
+            // - instruction name that starts with `{i,f}{32,64}.`
+            // - instruction name `call`
+            // - keyword `if`
+            [b'e', b'n' | b'l', ..] | [b'i' | b'f', _, _, b'.', ..] | [b'c', b'a', ..] | [b'i', b'f', ..] => None,
             [b'i', b'n', ..] | [b'n', b'a', ..] => self
                 .lexer
                 .eat(FLOAT)
@@ -230,14 +235,13 @@ impl<'s> Parser<'s, '_> {
                     }
                 })
                 .map(|token| GreenNode::new(IMMEDIATE, [token.into()])),
-            [b'a' | b'c' | b'e' | b'f' | b'i' | b'n' | b's', ..] => self
+            [b'i', b'8', b'x', ..] | [b'i' | b'f', _, _, b'x', ..] => self
                 .lexer
                 .eat(SHAPE_DESCRIPTOR)
-                .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
-                .or_else(|| {
-                    self.try_parse(Self::parse_ref_type)
-                        .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
-                })
+                .map(|token| GreenNode::new(IMMEDIATE, [token.into()])),
+            [b'a' | b'c' | b'e' | b'f' | b'i' | b'n' | b's', ..] => self
+                .try_parse(Self::parse_ref_type)
+                .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
                 .or_else(|| {
                     self.try_parse(Self::parse_heap_type::<true>)
                         .map(|child| GreenNode::new(IMMEDIATE, [child]))
