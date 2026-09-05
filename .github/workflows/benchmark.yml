@@ -1,0 +1,44 @@
+name: benchmark
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download large files
+        run: |
+          curl -Lo wabt.tar.gz https://github.com/WebAssembly/wabt/releases/download/1.0.41/wabt-1.0.41-linux-x64.tar.gz
+          tar xzf wabt.tar.gz
+          curl -Lo dprint_plugin_malva.wasm https://cdn.jsdelivr.net/npm/dprint-plugin-malva@0.16.0/plugin.wasm
+          ./wabt-1.0.41/bin/wasm2wat dprint_plugin_malva.wasm -o ./crates/parser/benches/dprint_plugin_malva.wat
+          curl -Lo wat_service.wasm https://cdn.jsdelivr.net/npm/@wasm-language-tools/wasm@0.11.0/binding_wasm_bg.wasm
+          ./wabt-1.0.41/bin/wasm2wat wat_service.wasm -o ./crates/parser/benches/wat_service.wat
+          curl -Lo swc.wasm https://cdn.jsdelivr.net/npm/@swc/wasm@1.15.47/wasm_bg.wasm
+          ./wabt-1.0.41/bin/wasm2wat swc.wasm -o ./crates/parser/benches/swc.wat
+      - name: Patch criterion to codspeed-criterion-compat
+        shell: pwsh
+        run: |
+          $path = "Cargo.toml"
+          $contents = Get-Content -Path $path -Raw
+          $old = 'criterion = "0.8"'
+          $new = 'criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }'
+          $contents = $contents.Replace($old, $new)
+          Set-Content -Path $path -Value $contents
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-binstall
+      - run: |
+          cargo binstall -y cargo-codspeed
+          cargo codspeed build
+      - uses: CodSpeedHQ/action@v5
+        with:
+          mode: simulation
+          run: cargo codspeed run
