@@ -7,7 +7,7 @@ pub static R_PAREN: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(Sy
 pub static EQ: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::EQ, "=").into());
 
 pub static SINGLE_SPACE: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::WHITESPACE, " ").into());
-pub static INDENT: LazyLock<Vec<GreenElement>> = LazyLock::new(|| {
+pub static INDENT: LazyLock<Vec<GreenToken>> = LazyLock::new(|| {
     (0..=500)
         .map(|i| {
             let mut s = String::with_capacity(i * 2 + 1);
@@ -15,7 +15,7 @@ pub static INDENT: LazyLock<Vec<GreenElement>> = LazyLock::new(|| {
             for _ in 0..i {
                 s.push_str("  ");
             }
-            GreenToken::new(SyntaxKind::WHITESPACE, &s).into()
+            GreenToken::new(SyntaxKind::WHITESPACE, &s)
         })
         .collect()
 });

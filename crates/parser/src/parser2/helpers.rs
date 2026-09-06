@@ -1,6 +1,5 @@
 use super::{GreenElement, Parser, builder::Checkpoint, green, lexer::Token};
 use crate::error::{Message, SyntaxError};
-use std::ops::ControlFlow;
 use wat_syntax::{GreenToken, SyntaxKind, TextRange, TextSize};
 
 impl<'s> Parser<'s, '_> {
@@ -147,17 +146,13 @@ impl<'s> Parser<'s, '_> {
                         if token.text.as_bytes() == b" " {
                             self.add_child(green::SINGLE_SPACE.clone());
                         } else if let Some(rest) = token.text.strip_prefix('\n')
-                            && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
-                                if count > 1000 || b != b' ' {
-                                    ControlFlow::Break(())
-                                } else {
-                                    ControlFlow::Continue(count + 1)
-                                }
-                            })
-                            && count.is_multiple_of(2)
-                            && let Some(token) = green::INDENT.get(count / 2)
+                            && let Some(green_token) = green::INDENT.get(rest.len() / 2)
+                            && green_token.text() == token.text
                         {
-                            self.add_child(token.clone());
+                            // fun perf tip:
+                            // string comparison instead of manually counting spaces (even SIMD) above
+                            // can be significantly faster
+                            self.add_child(green_token.clone());
                         } else if token.text.len() < 4 {
                             let token = self.intern_token(token);
                             self.add_child(token);

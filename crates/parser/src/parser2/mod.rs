@@ -206,6 +206,24 @@ mod tests {
     use super::*;
 
     #[test]
+    fn tab_indent() {
+        let text = "(module\n\t(func\n\t\tnop))";
+        assert_eq!(parse(text).0.to_string(), text);
+    }
+
+    #[test]
+    fn crlf() {
+        let text = "(module\r\n  (func\r\n    nop))";
+        assert_eq!(parse(text).0.to_string(), text);
+    }
+
+    #[test]
+    fn odd_indent() {
+        let text = "(module\n (func\n   nop))";
+        assert_eq!(parse(text).0.to_string(), text);
+    }
+
+    #[test]
     fn valid_right_paren_in_parse_as() {
         let (_, errors) = parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(func\n    \n  )").unwrap();
         assert!(errors.is_empty());
