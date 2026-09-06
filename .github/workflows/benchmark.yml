@@ -40,5 +40,5 @@ jobs:
           cargo codspeed build
       - uses: CodSpeedHQ/action@v5
         with:
-          mode: simulation
+          mode: simulation,memory
           run: cargo codspeed run
