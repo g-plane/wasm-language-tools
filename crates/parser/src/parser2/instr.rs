@@ -219,10 +219,19 @@ impl<'s> Parser<'s, '_> {
                         })
                         .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
                 }),
-            [b'$', ..] => self.lexer.next(IDENT).map(|token| {
-                let token = self.intern_token(token);
-                GreenNode::new(IMMEDIATE, [token.into()])
-            }),
+            [b'$', ..] => self
+                .lexer
+                .eat(IDENT)
+                .map(|token| {
+                    let token = self.intern_token(token);
+                    GreenNode::new(IMMEDIATE, [token.into()])
+                })
+                .or_else(|| {
+                    self.lexer
+                        .eat(ERROR)
+                        .inspect(|token| self.report_error_token(token, Message::Description("invalid immediate")))
+                        .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
+                }),
             [b'a', b'l', ..] | [b'o', ..] => self
                 .parse_mem_arg()
                 .map(|child| GreenNode::new(IMMEDIATE, [child.into()])),

@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..44
-  MODULE@0..43
+ROOT@0..85
+  MODULE@0..84
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -16,16 +16,41 @@ ROOT@0..44
         L_PAREN@24..25 "("
         INSTR_NAME@25..34 "local.get"
         WHITESPACE@34..35 " "
-        ERROR@35..36 "$"
+        IMMEDIATE@35..36
+          ERROR@35..36 "$"
         R_PAREN@36..37 ")"
       WHITESPACE@37..40 "\n  "
       R_PAREN@40..41 ")"
-    WHITESPACE@41..42 "\n"
-    R_PAREN@42..43 ")"
-  WHITESPACE@43..44 "\n"
+    WHITESPACE@41..44 "\n  "
+    MODULE_FIELD_FUNC@44..82
+      L_PAREN@44..45 "("
+      KEYWORD@45..49 "func"
+      WHITESPACE@49..54 "\n    "
+      BLOCK_BLOCK@54..78
+        KEYWORD@54..59 "block"
+        WHITESPACE@59..66 "\n      "
+        PLAIN_INSTR@66..70
+          INSTR_NAME@66..68 "br"
+          WHITESPACE@68..69 " "
+          IMMEDIATE@69..70
+            ERROR@69..70 "$"
+        WHITESPACE@70..75 "\n    "
+        END_DELIM@75..78
+          KEYWORD@75..78 "end"
+      WHITESPACE@78..81 "\n  "
+      R_PAREN@81..82 ")"
+    WHITESPACE@82..83 "\n"
+    R_PAREN@83..84 ")"
+  WHITESPACE@84..85 "\n"
 
 error: invalid immediate
   ┌─ names-malformed.wat:3:16
   │
 3 │     (local.get $)
   │                ^
+
+error: invalid immediate
+  ┌─ names-malformed.wat:7:10
+  │
+7 │       br $
+  │          ^
