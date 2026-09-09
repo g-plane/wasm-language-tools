@@ -110,8 +110,8 @@ ROOT@0..1103
             KEYWORD@275..277 "if"
             WHITESPACE@277..278 " "
             IDENT@278..283 "$body"
-            BLOCK_IF_THEN@283..302
-              WHITESPACE@283..294 "\n          "
+            WHITESPACE@283..294 "\n          "
+            BLOCK_IF_THEN@294..302
               PLAIN_INSTR@294..302
                 INSTR_NAME@294..296 "br"
                 WHITESPACE@296..297 " "
@@ -310,8 +310,8 @@ ROOT@0..1103
           WHITESPACE@838..847 "\n        "
           BLOCK_IF@847..1042
             KEYWORD@847..849 "if"
-            BLOCK_IF_THEN@849..868
-              WHITESPACE@849..860 "\n          "
+            WHITESPACE@849..860 "\n          "
+            BLOCK_IF_THEN@860..868
               PLAIN_INSTR@860..868
                 INSTR_NAME@860..862 "br"
                 WHITESPACE@862..863 " "

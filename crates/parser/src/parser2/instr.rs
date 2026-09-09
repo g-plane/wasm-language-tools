@@ -54,6 +54,7 @@ impl<'s> Parser<'s, '_> {
             self.add_child(node);
         }
 
+        self.parse_trivias();
         let then_mark = self.start_node();
         let mut has_then_body = false;
         while let Some(instr) = self.try_parse_with_trivias(Self::parse_instr) {
