@@ -1,0 +1,145 @@
+---
+source: crates/service/tests/diagnostics/asymmetric_ident.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 18
+        },
+        "end": {
+          "line": 3,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "mismatched ident whose enclosing `block` is labeled as `$b1`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 10
+              },
+              "end": {
+                "line": 3,
+                "character": 13
+              }
+            }
+          },
+          "message": "block `$b1` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "mismatched ident whose enclosing `loop` is labeled as `$l1`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 9
+              },
+              "end": {
+                "line": 4,
+                "character": 12
+              }
+            }
+          },
+          "message": "loop `$l1` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 15
+        },
+        "end": {
+          "line": 6,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "mismatched ident whose enclosing `if` is labeled as `$i1`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 7
+              },
+              "end": {
+                "line": 6,
+                "character": 10
+              }
+            }
+          },
+          "message": "if `$i1` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 22
+        },
+        "end": {
+          "line": 7,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "mismatched ident whose enclosing `try_table` is labeled as `$t1`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 14
+              },
+              "end": {
+                "line": 7,
+                "character": 17
+              }
+            }
+          },
+          "message": "try_table `$t1` defined here"
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@ use lspt::{
 };
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
+mod asymmetric_ident;
 mod block_type;
 mod br_table_branches;
 mod catch_type;

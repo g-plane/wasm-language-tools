@@ -13,6 +13,7 @@ use lspt::{
 use std::cmp::Ordering;
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
 
+mod asymmetric_ident;
 mod block_type;
 mod br_table_branches;
 mod catch_type;
@@ -125,6 +126,9 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
                             if let Some(diagnostic) = block_type::check(&ctx, node) {
                                 diagnostics.push(diagnostic);
                             }
+                            if let Some(diagnostic) = asymmetric_ident::check(node) {
+                                diagnostics.push(diagnostic);
+                            }
                         }
                         SyntaxKind::MODULE_FIELD_START => {
                             if let Some(diagnostic) = start::check(&ctx, node) {
@@ -187,6 +191,9 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
                             }
                             useless_catch::check(&mut diagnostics, &ctx, node);
                             if let Some(diagnostic) = block_type::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                            if let Some(diagnostic) = asymmetric_ident::check(node) {
                                 diagnostics.push(diagnostic);
                             }
                         }

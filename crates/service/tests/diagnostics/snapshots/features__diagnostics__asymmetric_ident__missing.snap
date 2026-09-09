@@ -1,0 +1,145 @@
+---
+source: crates/service/tests/diagnostics/asymmetric_ident.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 14
+        },
+        "end": {
+          "line": 3,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "unexpected ident whose enclosing `block` is not labeled",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 4
+              },
+              "end": {
+                "line": 3,
+                "character": 9
+              }
+            }
+          },
+          "message": "block defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 13
+        },
+        "end": {
+          "line": 4,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "unexpected ident whose enclosing `loop` is not labeled",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 4
+              },
+              "end": {
+                "line": 4,
+                "character": 8
+              }
+            }
+          },
+          "message": "loop defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 11
+        },
+        "end": {
+          "line": 6,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "unexpected ident whose enclosing `if` is not labeled",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 4
+              },
+              "end": {
+                "line": 6,
+                "character": 6
+              }
+            }
+          },
+          "message": "if defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 18
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "asymmetric-ident",
+      "source": "wat",
+      "message": "unexpected ident whose enclosing `try_table` is not labeled",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 4
+              },
+              "end": {
+                "line": 7,
+                "character": 13
+              }
+            }
+          },
+          "message": "try_table defined here"
+        }
+      ]
+    }
+  ]
+}
