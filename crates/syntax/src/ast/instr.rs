@@ -36,14 +36,8 @@ impl<'a> BlockBlock<'a> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
     #[inline]
-    pub fn end_keyword(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax
-            .tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "end")
-    }
-    #[inline]
-    pub fn end_ident_token(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
+    pub fn end_delim(&self) -> Option<EndDelim<'a>> {
+        child(&self.syntax)
     }
 }
 impl<'a> AstNode<'a> for BlockBlock<'a> {
@@ -109,14 +103,8 @@ impl<'a> BlockIf<'a> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
     #[inline]
-    pub fn end_keyword(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax
-            .tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "end")
-    }
-    #[inline]
-    pub fn end_ident_token(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
+    pub fn end_delim(&self) -> Option<EndDelim<'a>> {
+        child(&self.syntax)
     }
 }
 impl<'a> AstNode<'a> for BlockIf<'a> {
@@ -318,14 +306,8 @@ impl<'a> BlockLoop<'a> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
     #[inline]
-    pub fn end_keyword(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax
-            .tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "end")
-    }
-    #[inline]
-    pub fn end_ident_token(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
+    pub fn end_delim(&self) -> Option<EndDelim<'a>> {
+        child(&self.syntax)
     }
 }
 impl<'a> AstNode<'a> for BlockLoop<'a> {
@@ -387,14 +369,8 @@ impl<'a> BlockTryTable<'a> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
     #[inline]
-    pub fn end_keyword(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax
-            .tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "end")
-    }
-    #[inline]
-    pub fn end_ident_token(&self) -> Option<SyntaxToken<'a>> {
-        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
+    pub fn end_delim(&self) -> Option<EndDelim<'a>> {
+        child(&self.syntax)
     }
 }
 impl<'a> AstNode<'a> for BlockTryTable<'a> {
@@ -543,6 +519,45 @@ impl<'a> AstNode<'a> for CatchAll<'a> {
     {
         if Self::can_cast(syntax.kind()) {
             Some(CatchAll { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode<'a> {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct EndDelim<'a> {
+    syntax: SyntaxNode<'a>,
+}
+impl<'a> EndDelim<'a> {
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+}
+impl<'a> AstNode<'a> for EndDelim<'a> {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::END_DELIM
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(EndDelim { syntax })
         } else {
             None
         }

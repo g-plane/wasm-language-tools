@@ -176,7 +176,8 @@ ROOT@0..373
         PLAIN_INSTR@347..358
           INSTR_NAME@347..358 "unreachable"
         WHITESPACE@358..363 "\n    "
-        KEYWORD@363..366 "end"
+        END_DELIM@363..366
+          KEYWORD@363..366 "end"
       WHITESPACE@366..369 "\n  "
       R_PAREN@369..370 ")"
     WHITESPACE@370..371 "\n"

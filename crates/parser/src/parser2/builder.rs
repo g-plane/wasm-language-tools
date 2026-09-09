@@ -30,7 +30,7 @@ impl<'s> Parser<'s, '_> {
     }
 }
 
-pub(super) struct NodeMark(usize);
+pub(super) struct NodeMark(pub usize);
 
 #[derive(Clone, Copy)]
 pub(super) struct Checkpoint<'s> {

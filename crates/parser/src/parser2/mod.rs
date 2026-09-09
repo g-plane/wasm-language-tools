@@ -72,6 +72,7 @@ pub fn parse_as(kind: SyntaxKind, source: &str) -> Option<(GreenNode, Vec<Syntax
             parser.parse_instr()
         }
         SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE => None,
+        SyntaxKind::END_DELIM => parser.parse_end_delim(),
         SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => parser.parse_catch(),
         SyntaxKind::MEM_ARG => parser.parse_mem_arg(),
         SyntaxKind::ON_CLAUSE => parser.parse_on_clause(),

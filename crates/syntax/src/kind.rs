@@ -53,6 +53,7 @@ pub enum SyntaxKind {
     BLOCK_IF_THEN,
     BLOCK_IF_ELSE,
     BLOCK_TRY_TABLE,
+    END_DELIM,
     CATCH,
     CATCH_ALL,
     MEM_ARG,

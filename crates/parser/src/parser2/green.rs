@@ -54,6 +54,9 @@ pub static KW_TRY_TABLE: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD, "try_table").into());
 pub static KW_END: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD, "end").into());
 
+pub static END_DELIM_WO_IDENT: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::END_DELIM, [KW_END.clone()]));
+
 pub static TYPE_KW_I32: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::TYPE_KEYWORD, "i32").into());
 pub static TYPE_KW_I64: LazyLock<GreenElement> =

@@ -54,13 +54,12 @@ impl<'a> Ctx<'a> {
     fn format_trivias_after_node<'b>(&self, node: AmberNode<'b>, parent: AmberNode<'b>, docs: &mut BumpVec<Doc<'b>>) {
         debug_assert!(docs.is_empty());
         docs.reserve(1);
-        let mut tokens = parent
+        let mut node_or_tokens = parent
             .children_with_tokens()
             .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
-            .map_while(NodeOrToken::into_token)
             .peekable();
         let mut whitespace_only = true;
-        while let Some(token) = tokens.next() {
+        while let Some(NodeOrToken::Token(token)) = node_or_tokens.next() {
             match token.kind() {
                 SyntaxKind::LINE_COMMENT => {
                     whitespace_only = false;
@@ -77,13 +76,10 @@ impl<'a> Ctx<'a> {
                     docs.push(format_block_comment(token.text(), self));
                 }
                 SyntaxKind::WHITESPACE
-                    if match tokens.peek() {
-                        Some(token) => match token.kind() {
-                            SyntaxKind::R_PAREN => false,
-                            SyntaxKind::KEYWORD => token.text() != "end",
-                            _ => true,
-                        },
-                        None => token.text().bytes().filter(|b| *b == b'\n').count() > 1 || !whitespace_only, // for whitespace after comments but before another node
+                    if match node_or_tokens.peek() {
+                        Some(NodeOrToken::Token(token)) => token.kind() != SyntaxKind::R_PAREN,
+                        Some(NodeOrToken::Node(node)) if node.kind() == SyntaxKind::END_DELIM => false,
+                        _ => token.text().bytes().filter(|b| *b == b'\n').count() > 1 || !whitespace_only, // for whitespace after comments but before another node
                     } =>
                 {
                     match token.text().bytes().filter(|b| *b == b'\n').count() {
@@ -113,13 +109,12 @@ impl<'a> Ctx<'a> {
     ) {
         debug_assert!(docs.is_empty());
         docs.reserve(1);
-        let mut tokens = parent
+        let mut node_or_tokens = parent
             .children_with_tokens()
             .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
-            .map_while(NodeOrToken::into_token)
             .peekable();
         let mut whitespace_only = true;
-        while let Some(current) = tokens.next() {
+        while let Some(NodeOrToken::Token(current)) = node_or_tokens.next() {
             match current.kind() {
                 SyntaxKind::LINE_COMMENT => {
                     whitespace_only = false;
@@ -130,13 +125,10 @@ impl<'a> Ctx<'a> {
                     docs.push(format_block_comment(current.text(), self));
                 }
                 SyntaxKind::WHITESPACE
-                    if match tokens.peek() {
-                        Some(token) => match token.kind() {
-                            SyntaxKind::R_PAREN => false,
-                            SyntaxKind::KEYWORD => token.text() != "end",
-                            _ => true,
-                        },
-                        None => !whitespace_only, // for whitespace after comments but before another node
+                    if match node_or_tokens.peek() {
+                        Some(NodeOrToken::Token(token)) => token.kind() != SyntaxKind::R_PAREN,
+                        Some(NodeOrToken::Node(node)) if node.kind() == SyntaxKind::END_DELIM => false,
+                        _ => !whitespace_only, // for whitespace after comments but before another node
                     } =>
                 {
                     if !(token.kind() == SyntaxKind::L_PAREN && whitespace_only) {
@@ -189,6 +181,7 @@ pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> 
         SyntaxKind::BLOCK_IF_THEN => format_block_if_then(node, ctx),
         SyntaxKind::BLOCK_IF_ELSE => format_block_if_else(node, ctx),
         SyntaxKind::BLOCK_TRY_TABLE => format_block_try_table(node, ctx),
+        SyntaxKind::END_DELIM => format_end_delim(node, ctx),
         SyntaxKind::CATCH => format_catch(node, ctx),
         SyntaxKind::CATCH_ALL => format_catch_all(node, ctx),
         SyntaxKind::MEM_ARG => format_mem_arg(node, ctx),

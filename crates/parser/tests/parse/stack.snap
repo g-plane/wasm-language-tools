@@ -165,9 +165,10 @@ ROOT@0..1103
                 IMMEDIATE@496..498
                   IDENT@496..498 "$i"
             WHITESPACE@498..507 "\n        "
-            KEYWORD@507..510 "end"
-            WHITESPACE@510..511 " "
-            IDENT@511..516 "$body"
+            END_DELIM@507..516
+              KEYWORD@507..510 "end"
+              WHITESPACE@510..511 " "
+              IDENT@511..516 "$body"
           WHITESPACE@516..525 "\n        "
           PLAIN_INSTR@525..533
             INSTR_NAME@525..527 "br"
@@ -175,13 +176,15 @@ ROOT@0..1103
             IMMEDIATE@528..533
               IDENT@528..533 "$loop"
           WHITESPACE@533..540 "\n      "
-          KEYWORD@540..543 "end"
-          WHITESPACE@543..544 " "
-          IDENT@544..549 "$loop"
+          END_DELIM@540..549
+            KEYWORD@540..543 "end"
+            WHITESPACE@543..544 " "
+            IDENT@544..549 "$loop"
         WHITESPACE@549..554 "\n    "
-        KEYWORD@554..557 "end"
-        WHITESPACE@557..558 " "
-        IDENT@558..563 "$done"
+        END_DELIM@554..563
+          KEYWORD@554..557 "end"
+          WHITESPACE@557..558 " "
+          IDENT@558..563 "$done"
       WHITESPACE@563..568 "\n    "
       PLAIN_INSTR@568..582
         INSTR_NAME@568..577 "local.get"
@@ -372,7 +375,8 @@ ROOT@0..1103
                 IMMEDIATE@1028..1030
                   IDENT@1028..1030 "$i"
             WHITESPACE@1030..1039 "\n        "
-            KEYWORD@1039..1042 "end"
+            END_DELIM@1039..1042
+              KEYWORD@1039..1042 "end"
           WHITESPACE@1042..1051 "\n        "
           PLAIN_INSTR@1051..1059
             INSTR_NAME@1051..1053 "br"
@@ -380,9 +384,11 @@ ROOT@0..1103
             IMMEDIATE@1054..1059
               IDENT@1054..1059 "$loop"
           WHITESPACE@1059..1066 "\n      "
-          KEYWORD@1066..1069 "end"
+          END_DELIM@1066..1069
+            KEYWORD@1066..1069 "end"
         WHITESPACE@1069..1074 "\n    "
-        KEYWORD@1074..1077 "end"
+        END_DELIM@1074..1077
+          KEYWORD@1074..1077 "end"
       WHITESPACE@1077..1082 "\n    "
       PLAIN_INSTR@1082..1096
         INSTR_NAME@1082..1091 "local.get"

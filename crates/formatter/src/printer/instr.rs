@@ -46,20 +46,9 @@ pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &'a Ctx<'a
     let mut docs = BumpVec::from_iter_in([Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width)], &ctx.bump);
     if block_block.tokens_by_kind(R_PAREN).next().is_some() {
         docs.push(ctx.format_right_paren_after_instr(block_block));
-    } else {
-        if let Some(keyword) = block_block.tokens_by_kind(KEYWORD).find(|token| token.text() == "end") {
-            docs.push(Doc::hard_line());
-            docs.push(Doc::text("end"));
-            ctx.format_trivias_after_token(keyword, block_block, &mut trivias);
-        }
-        if let Some(ident) = block_block.tokens_by_kind(IDENT).nth(1) {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.text()));
-        }
+    } else if let Some(end_delim) = block_block.children_by_kind(END_DELIM).next() {
+        docs.push(Doc::hard_line());
+        docs.push(format_end_delim(end_delim, ctx));
     }
     Doc::slice(docs.into_bump_slice())
 }
@@ -122,27 +111,17 @@ pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &'a Ctx<'a>) -> 
         ctx.format_trivias_after_node(else_block, block_if, &mut trivias);
     }
     docs.push(Doc::slice(trivias.into_bump_slice()).nest(ctx.indent_width));
-    trivias = BumpVec::new_in(&ctx.bump);
     if block_if.tokens_by_kind(R_PAREN).next().is_some() {
         Doc::slice(ctx.bump.alloc_slice_fill_iter([
             Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
             ctx.format_right_paren(block_if),
         ]))
         .group()
+    } else if let Some(end_delim) = block_if.children_by_kind(END_DELIM).next() {
+        docs.push(Doc::hard_line());
+        docs.push(format_end_delim(end_delim, ctx));
+        Doc::slice(docs.into_bump_slice())
     } else {
-        if let Some(keyword) = block_if.tokens_by_kind(KEYWORD).find(|token| token.text() == "end") {
-            docs.push(Doc::hard_line());
-            docs.push(Doc::text("end"));
-            ctx.format_trivias_after_token(keyword, block_if, &mut trivias);
-        }
-        if let Some(ident) = block_if.tokens_by_kind(IDENT).nth(1) {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.text()));
-        }
         Doc::slice(docs.into_bump_slice())
     }
 }
@@ -274,20 +253,9 @@ pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &'a Ctx<'a>)
     let mut docs = BumpVec::from_iter_in([Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width)], &ctx.bump);
     if block_loop.tokens_by_kind(R_PAREN).next().is_some() {
         docs.push(ctx.format_right_paren_after_instr(block_loop));
-    } else {
-        if let Some(keyword) = block_loop.tokens_by_kind(KEYWORD).find(|token| token.text() == "end") {
-            docs.push(Doc::hard_line());
-            docs.push(Doc::text("end"));
-            ctx.format_trivias_after_token(keyword, block_loop, &mut trivias);
-        }
-        if let Some(ident) = block_loop.tokens_by_kind(IDENT).nth(1) {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.text()));
-        }
+    } else if let Some(end_delim) = block_loop.children_by_kind(END_DELIM).next() {
+        docs.push(Doc::hard_line());
+        docs.push(format_end_delim(end_delim, ctx));
     }
     Doc::slice(docs.into_bump_slice())
 }
@@ -348,23 +316,9 @@ pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &'
     let mut docs = BumpVec::from_iter_in([Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width)], &ctx.bump);
     if block_try_table.tokens_by_kind(R_PAREN).next().is_some() {
         docs.push(ctx.format_right_paren_after_instr(block_try_table));
-    } else {
-        if let Some(keyword) = block_try_table
-            .tokens_by_kind(KEYWORD)
-            .find(|token| token.text() == "end")
-        {
-            docs.push(Doc::hard_line());
-            docs.push(Doc::text("end"));
-            ctx.format_trivias_after_token(keyword, block_try_table, &mut trivias);
-        }
-        if let Some(ident) = block_try_table.tokens_by_kind(IDENT).nth(1) {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.text()));
-        }
+    } else if let Some(end_delim) = block_try_table.children_by_kind(END_DELIM).next() {
+        docs.push(Doc::hard_line());
+        docs.push(format_end_delim(end_delim, ctx));
     }
     Doc::slice(docs.into_bump_slice())
 }
@@ -433,6 +387,24 @@ pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &'a Ctx<'a>) -
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
         ctx.format_right_paren_on_same_line(catch_all),
     ]))
+}
+
+pub(crate) fn format_end_delim<'a>(end_delim: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(1, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
+    docs.push(Doc::text("end"));
+    if let Some(keyword) = end_delim.tokens_by_kind(KEYWORD).next() {
+        ctx.format_trivias_after_token(keyword, end_delim, &mut trivias);
+    }
+    if let Some(ident) = end_delim.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text()));
+    }
+    Doc::slice(docs.into_bump_slice())
 }
 
 pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {

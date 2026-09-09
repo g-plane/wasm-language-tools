@@ -79,10 +79,9 @@ impl<'s> Parser<'s, '_> {
             self.add_child(node);
         }
 
-        if !self.recover(Self::parse_end_keyword) {
+        if !self.recover(Self::parse_end_delim) {
             self.report_missing(Message::Str("end"));
         }
-        self.eat(IDENT);
         Some(self.finish_node(BLOCK_IF, mark))
     }
 
@@ -108,10 +107,9 @@ impl<'s> Parser<'s, '_> {
             self.add_child(instr);
         }
 
-        if !self.recover(Self::parse_end_keyword) {
+        if !self.recover(Self::parse_end_delim) {
             self.report_missing(Message::Str("end"));
         }
-        self.eat(IDENT);
         Some(self.finish_node(kind, mark))
     }
 
@@ -143,10 +141,9 @@ impl<'s> Parser<'s, '_> {
             self.add_child(instr);
         }
 
-        if !self.recover(Self::parse_end_keyword) {
+        if !self.recover(Self::parse_end_delim) {
             self.report_missing(Message::Str("end"));
         }
-        self.eat(IDENT);
         Some(self.finish_node(BLOCK_TRY_TABLE, mark))
     }
 
@@ -182,8 +179,17 @@ impl<'s> Parser<'s, '_> {
         }
     }
 
-    fn parse_end_keyword(&mut self) -> Option<GreenElement> {
-        self.lexer.keyword("end").map(|_| green::KW_END.clone())
+    pub(super) fn parse_end_delim(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
+        self.lexer.keyword("end")?;
+        self.add_child(green::KW_END.clone());
+
+        if self.eat(IDENT) {
+            Some(self.finish_node(SyntaxKind::END_DELIM, mark))
+        } else {
+            self.elements.truncate(mark.0);
+            Some(green::END_DELIM_WO_IDENT.clone())
+        }
     }
 
     pub(super) fn parse_immediate(&mut self) -> Option<GreenNode> {

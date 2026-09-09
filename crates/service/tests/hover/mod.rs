@@ -691,6 +691,21 @@ fn block_keyword() {
 }
 
 #[test]
+fn block_end_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    block
+    end $b))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 6));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn loop_keyword() {
     let uri = "untitled:test".to_string();
     let source = "
