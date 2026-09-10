@@ -116,7 +116,7 @@ fn try_table() {
   (func
     try_table $b
       br 0
-    end))
+    end $b))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

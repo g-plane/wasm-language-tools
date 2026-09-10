@@ -706,6 +706,23 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                 symbols.insert(symbol);
                             }
                         }
+                        SyntaxKind::END_DELIM => {
+                            if let Some(close) = node.tokens_by_kind(SyntaxKind::IDENT).next()
+                                && let Some((block, _)) = node_stack.last()
+                                && let Some(symbol) =
+                                    create_ref_symbol(db, node, SymbolKey::from(*block), SymbolKind::BlockRef)
+                            {
+                                let index = symbols.values.len() as u32;
+                                symbols.insert(symbol);
+                                if block
+                                    .tokens_by_kind(SyntaxKind::IDENT)
+                                    .next()
+                                    .is_some_and(|open| open.text() == close.text())
+                                {
+                                    pre_resolved.insert(index, SymbolKey::from(*block));
+                                }
+                            }
+                        }
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => {
                             if let Some(symbol) = node
                                 .children_by_kind(SyntaxKind::INDEX)

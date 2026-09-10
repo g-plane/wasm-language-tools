@@ -28,5 +28,18 @@ expression: def
         "character": 10
       }
     }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 8
+      },
+      "end": {
+        "line": 5,
+        "character": 10
+      }
+    }
   }
 ]

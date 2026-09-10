@@ -140,6 +140,70 @@ expression: response
           "message": "try_table defined here"
         }
       ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 10
+        },
+        "end": {
+          "line": 3,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find label `$b` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 9
+        },
+        "end": {
+          "line": 4,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find label `$l` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 7
+        },
+        "end": {
+          "line": 6,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find label `$i` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 14
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find label `$t` in this scope"
     }
   ]
 }

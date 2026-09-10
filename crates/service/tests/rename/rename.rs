@@ -541,6 +541,22 @@ fn block_ref() {
 }
 
 #[test]
+fn block_end() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    block $block
+      br $block
+    end $block))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.rename(create_params(uri, 5, 12, "$b"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn field_def() {
     let uri = "untitled:test".to_string();
     let source = "
