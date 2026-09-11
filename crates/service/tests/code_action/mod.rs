@@ -9,6 +9,7 @@ mod expand_compact_import;
 mod expand_ref_type;
 mod export_as;
 mod extract_export;
+mod fix_asymmetric_ident;
 mod fix_invalid_mem_arg;
 mod fix_packing;
 mod if_br_to_br_if;

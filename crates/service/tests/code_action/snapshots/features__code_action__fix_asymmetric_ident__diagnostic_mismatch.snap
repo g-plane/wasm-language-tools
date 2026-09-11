@@ -1,0 +1,66 @@
+---
+source: crates/service/tests/code_action/fix_asymmetric_ident.rs
+expression: response
+---
+[
+  {
+    "title": "Fix mismatched identifier `$l2` to `$l1`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 17
+          },
+          "end": {
+            "line": 3,
+            "character": 20
+          }
+        },
+        "severity": 1,
+        "code": "asymmetric-ident",
+        "source": "wat",
+        "message": "mismatched ident whose enclosing `loop` is labeled as `$l1`",
+        "relatedInformation": [
+          {
+            "location": {
+              "uri": "untitled:test",
+              "range": {
+                "start": {
+                  "line": 3,
+                  "character": 9
+                },
+                "end": {
+                  "line": 3,
+                  "character": 12
+                }
+              }
+            },
+            "message": "loop `$l1` defined here"
+          }
+        ]
+      }
+    ],
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 17
+              },
+              "end": {
+                "line": 3,
+                "character": 20
+              }
+            },
+            "newText": "$l1"
+          }
+        ]
+      }
+    }
+  }
+]

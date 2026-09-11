@@ -1,0 +1,30 @@
+---
+source: crates/service/tests/code_action/fix_asymmetric_ident.rs
+expression: response
+---
+[
+  {
+    "title": "Fix mismatched identifier `$l2` to `$l1`",
+    "kind": "quickfix",
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 17
+              },
+              "end": {
+                "line": 3,
+                "character": 20
+              }
+            },
+            "newText": "$l1"
+          }
+        ]
+      }
+    }
+  }
+]

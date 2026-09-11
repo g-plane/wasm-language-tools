@@ -1,0 +1,66 @@
+---
+source: crates/service/tests/code_action/fix_asymmetric_ident.rs
+expression: response
+---
+[
+  {
+    "title": "Remove identifier `$t`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 18
+          },
+          "end": {
+            "line": 3,
+            "character": 20
+          }
+        },
+        "severity": 1,
+        "code": "asymmetric-ident",
+        "source": "wat",
+        "message": "unexpected ident whose enclosing `try_table` is not labeled",
+        "relatedInformation": [
+          {
+            "location": {
+              "uri": "untitled:test",
+              "range": {
+                "start": {
+                  "line": 3,
+                  "character": 4
+                },
+                "end": {
+                  "line": 3,
+                  "character": 13
+                }
+              }
+            },
+            "message": "try_table defined here"
+          }
+        ]
+      }
+    ],
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 17
+              },
+              "end": {
+                "line": 3,
+                "character": 20
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    }
+  }
+]

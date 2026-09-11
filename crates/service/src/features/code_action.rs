@@ -102,6 +102,11 @@ impl LanguageService {
                         if rewrite && let Some(action) = if_br_to_br_if::act(uri, line_index, &it) {
                             actions.push(action);
                         }
+                        if quickfix
+                            && let Some(action) = fix_asymmetric_ident::act(uri, line_index, &it, &params.context)
+                        {
+                            actions.push(action);
+                        }
                     }
                     SyntaxKind::BLOCK_IF_THEN => {
                         if quickfix && let Some(action) = add_result_types::act(uri, line_index, &it, &params.context) {
@@ -109,8 +114,13 @@ impl LanguageService {
                         }
                     }
                     SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
-                        if quickfix && let Some(action) = add_result_types::act(uri, line_index, &it, &params.context) {
-                            actions.push(action);
+                        if quickfix {
+                            if let Some(action) = add_result_types::act(uri, line_index, &it, &params.context) {
+                                actions.push(action);
+                            }
+                            if let Some(action) = fix_asymmetric_ident::act(uri, line_index, &it, &params.context) {
+                                actions.push(action);
+                            }
                         }
                     }
                     SyntaxKind::GLOBAL_TYPE => {

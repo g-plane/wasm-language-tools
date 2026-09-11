@@ -1,0 +1,30 @@
+---
+source: crates/service/tests/code_action/fix_asymmetric_ident.rs
+expression: response
+---
+[
+  {
+    "title": "Remove identifier `$l`",
+    "kind": "quickfix",
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 12
+              },
+              "end": {
+                "line": 3,
+                "character": 15
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    }
+  }
+]
