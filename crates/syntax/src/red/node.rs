@@ -425,12 +425,11 @@ impl<'a> NodeData<'a> {
 
     #[inline]
     pub fn prev_children(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxNode<'a>> {
-        let slice = self.green.slice();
-        slice
-            .iter()
-            .enumerate()
-            .rev()
-            .skip(slice.len() - index as usize)
+        self.green
+            .slice()
+            .get(..index as usize)
+            .into_iter()
+            .flat_map(|children| children.iter().enumerate().rev())
             .filter_map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => Some(SyntaxNode::new(
                     i as u32,
@@ -457,12 +456,11 @@ impl<'a> NodeData<'a> {
 
     #[inline]
     pub fn prev_children_with_tokens(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxElement<'a>> {
-        let slice = self.green.slice();
-        slice
-            .iter()
-            .enumerate()
-            .rev()
-            .skip(slice.len() - index as usize)
+        self.green
+            .slice()
+            .get(..index as usize)
+            .into_iter()
+            .flat_map(|children| children.iter().enumerate().rev())
             .map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => {
                     SyntaxNode::new(i as u32, node, self.range.start() + offset, Rc::clone(self)).into()
@@ -475,12 +473,11 @@ impl<'a> NodeData<'a> {
 
     #[inline]
     pub fn prev_consecutive_tokens(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxToken<'a>> {
-        let slice = self.green.slice();
-        slice
-            .iter()
-            .enumerate()
-            .rev()
-            .skip(slice.len() - index as usize)
+        self.green
+            .slice()
+            .get(..index as usize)
+            .into_iter()
+            .flat_map(|children| children.iter().enumerate().rev())
             .map_while(|(i, child)| match child {
                 GreenChild::Node { .. } => None,
                 GreenChild::Token { offset, token } => Some(SyntaxToken::new(
