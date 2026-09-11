@@ -64,6 +64,25 @@ fn missing() {
 }
 
 #[test]
+fn matched() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    block $b end $b
+    loop $l end $l
+    i32.const 0
+    if $i end $i
+    try_table $t end $t))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn mismatch() {
     let uri = "untitled:test".to_string();
     let source = "
