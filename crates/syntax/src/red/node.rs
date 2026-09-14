@@ -264,39 +264,45 @@ impl<'a> SyntaxNode<'a> {
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
-    // Copied from rowan with modification.
-    pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<'a> {
-        let range = self.data.range;
-        let relative_offset = offset - range.start();
-        let mut children = self
-            .data
-            .green
-            .slice()
-            .iter()
-            .enumerate()
-            .filter(|(_, child)| {
-                let (start, end) = match child {
-                    GreenChild::Node { offset, node } => (*offset, offset + node.text_len()),
-                    GreenChild::Token { offset, token } => (*offset, offset + token.text_len()),
-                };
-                start <= relative_offset && relative_offset <= end
-            })
-            .map(|(i, child)| match child {
-                GreenChild::Node { offset, node } => NodeOrToken::Node(self.new_child(i as u32, node, *offset)),
-                GreenChild::Token { offset, token } => NodeOrToken::Token(self.new_token(i as u32, token, *offset)),
-            });
-
-        let Some(left) = children.next() else {
+    pub fn token_at_offset(&self, root_offset: TextSize) -> TokenAtOffset<'a> {
+        if root_offset < self.data.range.start() || self.data.range.end() < root_offset {
             return TokenAtOffset::None;
-        };
-        let right = children.next();
-        if let Some(right) = right {
-            match (left.token_at_offset(offset), right.token_at_offset(offset)) {
-                (TokenAtOffset::Single(left), TokenAtOffset::Single(right)) => TokenAtOffset::Between(left, right),
-                _ => TokenAtOffset::None,
+        }
+
+        let slice = self.data.green.slice();
+        let relative_range = TextRange::empty(root_offset - self.data.range.start());
+        let index = self.data.green.binary_search_by_range(relative_range);
+        let left = match slice.get(index) {
+            Some(GreenChild::Node { offset, node })
+                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) =>
+            {
+                self.new_child(index as u32, node, *offset).token_at_offset(root_offset)
             }
+            Some(GreenChild::Token { offset, token })
+                if TextRange::new(*offset, offset + token.text_len()).contains_range(relative_range) =>
+            {
+                TokenAtOffset::Single(self.new_token(index as u32, token, *offset))
+            }
+            _ => return TokenAtOffset::None,
+        };
+        let right = match slice.get(index + 1) {
+            Some(GreenChild::Node { offset, node })
+                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) =>
+            {
+                self.new_child(index as u32 + 1, node, *offset)
+                    .token_at_offset(root_offset)
+            }
+            Some(GreenChild::Token { offset, token })
+                if TextRange::new(*offset, offset + token.text_len()).contains_range(relative_range) =>
+            {
+                TokenAtOffset::Single(self.new_token(index as u32 + 1, token, *offset))
+            }
+            _ => return left,
+        };
+        if let (TokenAtOffset::Single(left), TokenAtOffset::Single(right)) = (left, right) {
+            TokenAtOffset::Between(left, right)
         } else {
-            left.token_at_offset(offset)
+            TokenAtOffset::None
         }
     }
 

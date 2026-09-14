@@ -1,5 +1,5 @@
-use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken, TokenAtOffset};
-use text_size::{TextRange, TextSize};
+use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
+use text_size::TextRange;
 
 pub(crate) type SyntaxElement<'a> = NodeOrToken<SyntaxNode<'a>, SyntaxToken<'a>>;
 
@@ -17,14 +17,6 @@ impl<'a> SyntaxElement<'a> {
         match self {
             NodeOrToken::Node(node) => node.text_range(),
             NodeOrToken::Token(token) => token.text_range(),
-        }
-    }
-
-    #[inline]
-    pub(crate) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<'a> {
-        match self {
-            NodeOrToken::Node(node) => node.token_at_offset(offset),
-            NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
         }
     }
 }

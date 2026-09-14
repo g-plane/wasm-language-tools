@@ -85,8 +85,23 @@ impl GreenNode {
     #[inline]
     /// Find a child node that intersects with the given range.
     pub(crate) fn child_at_range(&self, relative_range: TextRange) -> Option<(&GreenNode, TextSize, usize)> {
-        let slice = self.data.slice();
-        let i = slice
+        let index = self.binary_search_by_range(relative_range);
+        self.data.slice().get(index).and_then(|child| match child {
+            GreenChild::Node { offset, node } => {
+                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) {
+                    Some((node, *offset, index))
+                } else {
+                    None
+                }
+            }
+            GreenChild::Token { .. } => None,
+        })
+    }
+
+    #[inline]
+    pub(crate) fn binary_search_by_range(&self, relative_range: TextRange) -> usize {
+        self.data
+            .slice()
             .binary_search_by(|child| match child {
                 GreenChild::Node { offset, node } => {
                     TextRange::new(*offset, offset + node.text_len()).ordering(relative_range)
@@ -95,17 +110,12 @@ impl GreenNode {
                     TextRange::new(*offset, offset + token.text_len()).ordering(relative_range)
                 }
             })
-            .unwrap_or_else(|i| i.saturating_sub(1)); // not sure why but rowan does it
-        slice.get(i).and_then(|child| match child {
-            GreenChild::Node { offset, node } => {
-                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) {
-                    Some((node, *offset, i))
-                } else {
-                    None
-                }
-            }
-            GreenChild::Token { .. } => None,
-        })
+            .unwrap_or_else(|i| {
+                // If not found, `binary_search_by` will return the index where new item should be inserted.
+                // Though we won't insert anything, we need to substract 1 to get the previous item
+                // which is the last item that is less than given `relative_range`.
+                i.saturating_sub(1)
+            })
     }
 
     #[inline]
