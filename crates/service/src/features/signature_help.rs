@@ -24,7 +24,7 @@ impl LanguageService {
             let root = SyntaxNode::new_root(document.root(db));
             let symbol_table = SymbolTable::of(db, document);
 
-            let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
+            let token = root.left_token_at_offset(line_index.convert(params.position)?)?;
             let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
                 (token.parent(), token.prev_siblings().find_map(Instr::cast), true)
             } else {

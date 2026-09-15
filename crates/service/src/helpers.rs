@@ -133,7 +133,7 @@ pub(crate) mod syntax {
         ops::{ControlFlow, Deref},
     };
     use wat_syntax::{
-        AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken, TextRange, TextSize, TokenAtOffset,
+        AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, TextRange,
         ast::{AstNode, ExternIdx},
     };
 
@@ -162,14 +162,6 @@ pub(crate) mod syntax {
             .children_by_kind(ExternIdx::can_cast)
             .next()
             .and_then(|extern_idx| extern_idx.children_by_kind(SyntaxKind::INDEX).next())
-    }
-
-    pub fn find_token<'a>(root: &SyntaxNode<'a>, offset: TextSize) -> Option<SyntaxToken<'a>> {
-        match root.token_at_offset(offset) {
-            TokenAtOffset::None => None,
-            TokenAtOffset::Single(token) => Some(token),
-            TokenAtOffset::Between(left, _) => Some(left),
-        }
     }
 
     pub fn find_outer_block_for_types<'a>(node: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {

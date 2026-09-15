@@ -25,7 +25,7 @@ impl LanguageService {
         self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = SyntaxNode::new_root(document.root(db));
-            let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
+            let token = root.left_token_at_offset(line_index.convert(params.position)?)?;
 
             let cmp_ctx = get_cmp_ctx(&token)?;
             let items = get_cmp_list(db, cmp_ctx, &token, document, line_index);

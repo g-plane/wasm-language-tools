@@ -307,6 +307,31 @@ impl<'a> SyntaxNode<'a> {
     }
 
     #[inline]
+    /// Find a token in the subtree corresponding to this node, which covers the offset at the left side.
+    pub fn left_token_at_offset(&self, root_offset: TextSize) -> Option<SyntaxToken<'a>> {
+        if root_offset < self.data.range.start() || self.data.range.end() < root_offset {
+            return None;
+        }
+
+        let relative_range = TextRange::empty(root_offset - self.data.range.start());
+        let index = self.data.green.binary_search_by_range(relative_range);
+        match self.data.green.slice().get(index) {
+            Some(GreenChild::Node { offset, node })
+                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) =>
+            {
+                self.new_child(index as u32, node, *offset)
+                    .left_token_at_offset(root_offset)
+            }
+            Some(GreenChild::Token { offset, token })
+                if TextRange::new(*offset, offset + token.text_len()).contains_range(relative_range) =>
+            {
+                Some(self.new_token(index as u32, token, *offset))
+            }
+            _ => None,
+        }
+    }
+
+    #[inline]
     /// Find a child node that intersects with the given range.
     pub fn child_at_range(&self, range: TextRange) -> Option<SyntaxNode<'a>> {
         if !self.data.range.contains_range(range) {
