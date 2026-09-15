@@ -44,3 +44,6 @@ harness = false
 [[bench]]
 name = "diagnostics"
 harness = false
+[[bench]]
+name = "folding_range"
+harness = false
