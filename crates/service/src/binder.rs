@@ -1117,11 +1117,10 @@ impl<'db> SymbolTable<'db> {
         }
     }
 
-    pub fn get_declared(&self, module: &SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
-        let module_key = SymbolKey::from(module);
+    pub fn get_declared_in(&self, range: TextRange, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
         self.modules
             .iter()
-            .find(|module| module.key == module_key)
+            .find(|module| module.key.0.text_range().contains_range(range))
             .into_iter()
             .flat_map(move |module| match kind {
                 SymbolKind::Func => &*module.funcs,

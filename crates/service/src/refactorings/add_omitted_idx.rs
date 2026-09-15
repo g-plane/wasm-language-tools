@@ -151,9 +151,9 @@ pub fn act(
 }
 
 fn retrieve_idx<'a>(symbol_table: &'a SymbolTable, node: &SyntaxNode, kind: SymbolKind) -> Option<Idx<'a>> {
-    node.ancestors()
-        .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE)
-        .and_then(|module| symbol_table.get_declared(&module, kind).next())
+    symbol_table
+        .get_declared_in(node.text_range(), kind)
+        .next()
         .map(|symbol| symbol.idx)
 }
 

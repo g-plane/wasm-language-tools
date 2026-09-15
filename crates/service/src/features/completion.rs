@@ -238,7 +238,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             }
         }
         SyntaxKind::IMMEDIATE => {
-            let instr = parent.ancestors().find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
+            let instr = parent.parent()?;
             let instr_name = get_instr_name(&instr)?;
             add_cmp_ctx_for_immediates(instr_name, &parent, false, &mut ctx);
         }
@@ -773,137 +773,142 @@ fn get_cmp_list(
                 );
             }
             CmpCtx::Func => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::Func).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Function),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        detail: Some(types_analyzer::render_func_header(
-                            db,
-                            symbol.idx.name,
-                            NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol)),
-                        )),
-                        label_details: Some(CompletionItemLabelDetails {
-                            description: Some(
-                                NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol))
-                                    .render_compact(db)
-                                    .to_string(),
-                            ),
-                            ..Default::default()
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::Func)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Function),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                detail: Some(types_analyzer::render_func_header(
+                                    db,
+                                    symbol.idx.name,
+                                    NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol)),
+                                )),
+                                label_details: Some(CompletionItemLabelDetails {
+                                    description: Some(
+                                        NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol))
+                                            .render_compact(db)
+                                            .to_string(),
+                                    ),
+                                    ..Default::default()
+                                }),
+                                documentation: helpers::get_doc_comment(symbol, symbol_table).map(|value| {
+                                    StringOrMarkupContent::MarkupContent(MarkupContent {
+                                        kind: MarkupKind::Markdown,
+                                        value,
+                                    })
+                                }),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
                         }),
-                        documentation: helpers::get_doc_comment(symbol, symbol_table).map(|value| {
-                            StringOrMarkupContent::MarkupContent(MarkupContent {
-                                kind: MarkupKind::Markdown,
-                                value,
-                            })
-                        }),
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                );
             }
             CmpCtx::TypeDef(preferred_type) => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let def_types = types_analyzer::get_def_types(db, document);
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::Type).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    let comp_type = def_types.get(&symbol.key).map(|def_type| &def_type.comp);
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Interface),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        label_details: comp_type.map(|comp_type| CompletionItemLabelDetails {
-                            detail: match comp_type {
-                                CompositeType::Func(..) => Some("(func)".into()),
-                                CompositeType::Struct(..) => Some("(struct)".into()),
-                                CompositeType::Array(..) => Some("(array)".into()),
-                                CompositeType::Cont(..) => Some("(cont)".into()),
-                            },
-                            ..Default::default()
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::Type)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            let comp_type = def_types.get(&symbol.key).map(|def_type| &def_type.comp);
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Interface),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                label_details: comp_type.map(|comp_type| CompletionItemLabelDetails {
+                                    detail: match comp_type {
+                                        CompositeType::Func(..) => Some("(func)".into()),
+                                        CompositeType::Struct(..) => Some("(struct)".into()),
+                                        CompositeType::Array(..) => Some("(array)".into()),
+                                        CompositeType::Cont(..) => Some("(cont)".into()),
+                                    },
+                                    ..Default::default()
+                                }),
+                                sort_text: preferred_type.as_ref().map(|preferred_type| {
+                                    comp_type
+                                        .map(|comp_type| {
+                                            if let (CompositeType::Func(..), PreferredType::Func)
+                                            | (CompositeType::Array(..), PreferredType::Array)
+                                            | (CompositeType::Struct(..), PreferredType::Struct)
+                                            | (CompositeType::Cont(..), PreferredType::Cont) =
+                                                (comp_type, preferred_type)
+                                            {
+                                                "0".into()
+                                            } else {
+                                                "1".into()
+                                            }
+                                        })
+                                        .unwrap_or_else(|| "1".into())
+                                }),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
                         }),
-                        sort_text: preferred_type.as_ref().map(|preferred_type| {
-                            comp_type
-                                .map(|comp_type| {
-                                    if let (CompositeType::Func(..), PreferredType::Func)
-                                    | (CompositeType::Array(..), PreferredType::Array)
-                                    | (CompositeType::Struct(..), PreferredType::Struct)
-                                    | (CompositeType::Cont(..), PreferredType::Cont) = (comp_type, preferred_type)
-                                    {
-                                        "0".into()
-                                    } else {
-                                        "1".into()
-                                    }
-                                })
-                                .unwrap_or_else(|| "1".into())
-                        }),
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                );
             }
             CmpCtx::Global => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
                 let preferred_type = guess_preferred_type(db, document, token);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::GlobalDef).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    let ty = types_analyzer::extract_global_type(db, symbol_table.get_type_node_of(symbol).green());
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Variable),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
-                            description: Some(ty.render(db).to_string()),
-                            ..Default::default()
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::GlobalDef)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            let ty =
+                                types_analyzer::extract_global_type(db, symbol_table.get_type_node_of(symbol).green());
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
+                                    description: Some(ty.render(db).to_string()),
+                                    ..Default::default()
+                                }),
+                                sort_text: preferred_type
+                                    .as_ref()
+                                    .zip(ty.as_ref())
+                                    .map(|(expected, it)| if expected == it { "0".into() } else { "1".into() }),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
                         }),
-                        sort_text: preferred_type
-                            .as_ref()
-                            .zip(ty.as_ref())
-                            .map(|(expected, it)| if expected == it { "0".into() } else { "1".into() }),
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                );
             }
             CmpCtx::MemArg => {
                 items.extend(["offset=", "align="].iter().map(|label| CompletionItem {
@@ -913,56 +918,58 @@ fn get_cmp_list(
                 }));
             }
             CmpCtx::Memory => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::MemoryDef).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Variable),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::MemoryDef)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
+                        }),
+                );
             }
             CmpCtx::Table => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::TableDef).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Variable),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::TableDef)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
+                        }),
+                );
             }
             CmpCtx::Block => {
                 items.extend(
@@ -1084,107 +1091,110 @@ fn get_cmp_list(
                 );
             }
             CmpCtx::Tag => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::TagDef).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    let sig = NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol));
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Variable),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        label_details: Some(CompletionItemLabelDetails {
-                            description: Some(format!(
-                                "[{}]",
-                                sig.params.iter().map(|(ty, _)| ty.render(db)).join(", ")
-                            )),
-                            ..Default::default()
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::TagDef)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            let sig = NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol));
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                label_details: Some(CompletionItemLabelDetails {
+                                    description: Some(format!(
+                                        "[{}]",
+                                        sig.params.iter().map(|(ty, _)| ty.render(db)).join(", ")
+                                    )),
+                                    ..Default::default()
+                                }),
+                                detail: Some(types_analyzer::render_header(db, "tag", symbol.idx.name, sig)),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
                         }),
-                        detail: Some(types_analyzer::render_header(db, "tag", symbol.idx.name, sig)),
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                );
             }
             CmpCtx::Data => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::DataDef).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Variable),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        label_details: Some(CompletionItemLabelDetails {
-                            detail: Some(if let Some(name) = symbol.idx.name {
-                                format!("(data {})", name.ident(db))
-                            } else {
-                                "(data)".into()
-                            }),
-                            ..Default::default()
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::DataDef)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                label_details: Some(CompletionItemLabelDetails {
+                                    detail: Some(if let Some(name) = symbol.idx.name {
+                                        format!("(data {})", name.ident(db))
+                                    } else {
+                                        "(data)".into()
+                                    }),
+                                    ..Default::default()
+                                }),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
                         }),
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                );
             }
             CmpCtx::Elem => {
-                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
-                    return items;
-                };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(&module, SymbolKind::ElemDef).map(|symbol| {
-                    let label = symbol.idx.render(db).to_string();
-                    CompletionItem {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::Variable),
-                        text_edit: if token.kind().is_trivia() {
-                            None
-                        } else {
-                            line_index
-                                .convert(token.text_range())
-                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
-                        },
-                        label_details: Some(CompletionItemLabelDetails {
-                            detail: Some(if let Some(name) = symbol.idx.name {
-                                format!("(elem {})", name.ident(db))
-                            } else {
-                                "(elem)".into()
-                            }),
-                            ..Default::default()
+                items.extend(
+                    symbol_table
+                        .get_declared_in(token.text_range(), SymbolKind::ElemDef)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
+                                },
+                                label_details: Some(CompletionItemLabelDetails {
+                                    detail: Some(if let Some(name) = symbol.idx.name {
+                                        format!("(elem {})", name.ident(db))
+                                    } else {
+                                        "(elem)".into()
+                                    }),
+                                    ..Default::default()
+                                }),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                ..Default::default()
+                            }
                         }),
-                        tags: if deprecation.contains_key(&symbol.key) {
-                            Some(vec![CompletionItemTag::Deprecated])
-                        } else {
-                            None
-                        },
-                        ..Default::default()
-                    }
-                }));
+                );
             }
             CmpCtx::MemPageSize => items.extend([1, 65536].map(|page_size| CompletionItem {
                 label: page_size.to_string(),
