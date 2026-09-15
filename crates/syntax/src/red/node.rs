@@ -1,4 +1,4 @@
-use super::{element::SyntaxElement, traversal::Descendants};
+use super::element::SyntaxElement;
 use crate::{
     AmberNode, GreenNode, GreenToken, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNodeChildren, SyntaxToken,
     TokenAtOffset, green::GreenChild,
@@ -255,12 +255,6 @@ impl<'a> SyntaxNode<'a> {
             .as_ref()
             .into_iter()
             .flat_map(|parent| parent.prev_consecutive_tokens(self.data.index))
-    }
-
-    #[inline]
-    /// Iterator over all nodes in the subtree, including this node itself.
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode<'a>> {
-        Descendants::new(self.clone())
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.

@@ -3,7 +3,6 @@ mod iter;
 mod node;
 mod ptr;
 mod token;
-mod traversal;
 
 pub use self::{iter::SyntaxNodeChildren, node::SyntaxNode, ptr::SyntaxNodePtr, token::SyntaxToken};
 
