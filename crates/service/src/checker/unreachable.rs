@@ -7,7 +7,7 @@ use bumpalo::collections::Vec as BumpVec;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
 use wat_syntax::{
     AmberNode, SyntaxKind, TextRange,
-    ast::{AstNode, Instr, support},
+    ast::{AstNode, Instr},
 };
 
 const DIAGNOSTIC_CODE: &str = "unreachable";
@@ -29,14 +29,12 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
         match &raw_node.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.instrs().for_each(|instr| {
-                    let Some(instr) = instr.to_ptr().to_node(ctx.module) else {
-                        return;
-                    };
                     let current = instr.text_range();
                     if let Some(last) = ranges.last_mut() {
                         if instr
-                            .prev_siblings()
-                            .next()
+                            .to_ptr()
+                            .to_node(ctx.module)
+                            .and_then(|instr| instr.prev_siblings().next())
                             .is_some_and(|prev| last.contains_range(prev.text_range()))
                         {
                             // current and previous are adjacent, so merge ranges
@@ -44,7 +42,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
                         } else if current.contains_range(*last) {
                             // this can be occurred for folded instructions
                             if instr
-                                .amber()
                                 .children_by_kind(Instr::can_cast)
                                 .next()
                                 .is_none_or(|first| last.contains_range(first.text_range()))
@@ -52,8 +49,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
                                 // current instruction is the parent of last range,
                                 // and all children are from the same basic block with current instruction
                                 *last = current;
-                            } else if let Some(instr_name) = instr.amber().tokens_by_kind(SyntaxKind::INSTR_NAME).next()
-                            {
+                            } else if let Some(instr_name) = instr.tokens_by_kind(SyntaxKind::INSTR_NAME).next() {
                                 // if there're child instructions from different basic blocks,
                                 // only mark the instruction name as unreachable
                                 ranges.push(instr_name.text_range());
@@ -61,8 +57,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
                         } else if !last.contains_range(current) {
                             ranges.push(current);
                         }
-                    } else if instr.has_child_or_token_by_kind(Instr::can_cast)
-                        && let Some(instr_name) = support::token(&instr, SyntaxKind::INSTR_NAME)
+                    } else if instr.children_by_kind(Instr::can_cast).next().is_some()
+                        && let Some(instr_name) = instr.tokens_by_kind(SyntaxKind::INSTR_NAME).next()
                     {
                         // this can be occurred when all child instructions are from different basic blocks
                         ranges.push(instr_name.text_range());
