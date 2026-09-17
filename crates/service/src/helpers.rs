@@ -133,7 +133,7 @@ pub(crate) mod syntax {
         ops::{ControlFlow, Deref},
     };
     use wat_syntax::{
-        AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, TextRange,
+        AmberNode, GreenNode, NodeOrToken, SyntaxKind, TextRange,
         ast::{AstNode, ExternIdx},
     };
 
@@ -164,18 +164,22 @@ pub(crate) mod syntax {
             .and_then(|extern_idx| extern_idx.children_by_kind(SyntaxKind::INDEX).next())
     }
 
-    pub fn find_outer_block_for_types<'a>(node: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
-        node.ancestors().find(|ancestor| {
-            matches!(
-                ancestor.kind(),
-                SyntaxKind::MODULE_FIELD_FUNC
-                    | SyntaxKind::BLOCK_BLOCK
-                    | SyntaxKind::BLOCK_LOOP
-                    | SyntaxKind::BLOCK_IF_THEN
-                    | SyntaxKind::BLOCK_IF_ELSE
-                    | SyntaxKind::BLOCK_TRY_TABLE
-            )
-        })
+    /// This returns a 2-component tuple.
+    /// The first component is the node that contains given descendant node;
+    /// the second component is the node that contains accessible block types.
+    pub fn find_outer_block_for_types<'a>(
+        module: AmberNode<'a>,
+        descendant: AmberNode<'a>,
+    ) -> (AmberNode<'a>, Option<AmberNode<'a>>) {
+        descendant
+            .path_from(module)
+            .fold((module, None), |acc, node| match node.kind() {
+                SyntaxKind::MODULE_FIELD_FUNC => (node, None),
+                SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => (node, Some(node)),
+                SyntaxKind::BLOCK_IF => (node, acc.1),
+                SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE => (node, Some(acc.0)),
+                _ => acc,
+            })
     }
 
     pub fn infer_def_poi(node: AmberNode) -> TextRange {

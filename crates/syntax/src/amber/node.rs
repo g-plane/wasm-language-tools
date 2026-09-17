@@ -148,6 +148,14 @@ impl<'a> AmberNode<'a> {
             GreenChild::Token { offset, token } => AmberToken::new(token, self.range.start() + offset).into(),
         })
     }
+
+    #[inline]
+    /// Iterate all levels of node from given ancestor to current node.
+    ///
+    /// The first one is the given ancestor node and the last one is current node.
+    pub fn path_from(&self, ancestor: AmberNode<'a>) -> impl Iterator<Item = AmberNode<'a>> {
+        std::iter::successors(Some(ancestor), |node| node.child_at_range(self.range))
+    }
 }
 
 impl<'a> From<&SyntaxNode<'a>> for AmberNode<'a> {

@@ -7,7 +7,7 @@ use crate::helpers;
 use bumpalo::collections::Vec as BumpVec;
 use std::ops::ControlFlow;
 use wat_syntax::{
-    AmberNode, SyntaxKind, SyntaxNode,
+    AmberNode, SyntaxKind,
     ast::{AstNode, Instr},
 };
 
@@ -15,7 +15,7 @@ type TypeStack<'db, 'bump> = BumpVec<'bump, OperandType<'db>>;
 
 pub(crate) fn perform_types_till<'db, 'bump>(
     target: AmberNode<'db>,
-    outer_block: &'db SyntaxNode,
+    (outer_block, init_types_block): (AmberNode<'db>, Option<AmberNode<'db>>),
     ctx: &InstrSigResolverCtx<'db, 'bump>,
 ) -> Option<(TypeStack<'db, 'bump>, ResolvedSig<'db, 'bump>)> {
     fn unfold<'db, 'bump>(
@@ -64,25 +64,18 @@ pub(crate) fn perform_types_till<'db, 'bump>(
         }
     }
 
-    let mut stack = match outer_block.kind() {
-        SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE => BumpVec::from_iter_in(
-            Sig::from_func(ctx.db, ctx.document, outer_block.parent()?.amber())
-                .params
-                .into_iter()
-                .map(OperandType::Val),
-            ctx.bump,
-        ),
-        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => BumpVec::from_iter_in(
-            Sig::from_func(ctx.db, ctx.document, outer_block.amber())
-                .params
-                .into_iter()
-                .map(OperandType::Val),
-            ctx.bump,
-        ),
-        _ => BumpVec::new_in(ctx.bump),
-    };
+    let mut stack = init_types_block
+        .map(|block| {
+            BumpVec::from_iter_in(
+                Sig::from_func(ctx.db, ctx.document, block)
+                    .params
+                    .into_iter()
+                    .map(OperandType::Val),
+                ctx.bump,
+            )
+        })
+        .unwrap_or_else(|| BumpVec::new_in(ctx.bump));
     outer_block
-        .amber()
         .children_by_kind(Instr::can_cast)
         .try_for_each(|child| unfold(child, ctx, &mut stack, target))
         .break_value()

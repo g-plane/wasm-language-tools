@@ -157,10 +157,9 @@ impl LanguageService {
                         .children_by_kind(SyntaxKind::MODULE)
                         .enumerate()
                         .find(|(_, module)| module.text_range().contains_range(token.text_range()))
-                        && let Some(outer_block) = helpers::syntax::find_outer_block_for_types(&parent)
                         && let Some((stack, sig)) = types_analyzer::perform_types_till(
                             parent.amber(),
-                            &outer_block,
+                            helpers::syntax::find_outer_block_for_types(module.amber(), parent.amber()),
                             &InstrSigResolverCtx {
                                 db: self,
                                 document,

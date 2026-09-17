@@ -399,24 +399,19 @@ pub fn check(
                 }
             }
             "br_on_null" => {
-                if let Some(outer_block) = node
-                    .to_ptr()
-                    .to_node(ctx.module)
-                    .and_then(|node| helpers::syntax::find_outer_block_for_types(&node))
-                    && let Some((stack, _)) = perform_types_till(
-                        node,
-                        &outer_block,
-                        &InstrSigResolverCtx {
-                            db: ctx.db,
-                            document: ctx.document,
-                            symbol_table: ctx.symbol_table,
-                            def_types: ctx.def_types,
-                            module: ctx.module,
-                            module_id: ctx.module_id,
-                            bump: ctx.bump,
-                        },
-                    )
-                {
+                if let Some((stack, _)) = perform_types_till(
+                    node,
+                    helpers::syntax::find_outer_block_for_types(ctx.module.into(), node),
+                    &InstrSigResolverCtx {
+                        db: ctx.db,
+                        document: ctx.document,
+                        symbol_table: ctx.symbol_table,
+                        def_types: ctx.def_types,
+                        module: ctx.module,
+                        module_id: ctx.module_id,
+                        bump: ctx.bump,
+                    },
+                ) {
                     const BASE_MSG: &str = "first type from stack top must be ref type";
                     match stack.last() {
                         Some(OperandType::Val(ValType::Ref(..))) => {}
@@ -806,13 +801,9 @@ pub fn check(
             }
             "select" => {
                 if immediates.next().is_none()
-                    && let Some(outer_block) = node
-                        .to_ptr()
-                        .to_node(ctx.module)
-                        .and_then(|node| helpers::syntax::find_outer_block_for_types(&node))
                     && let Some((stack, _)) = perform_types_till(
                         node,
-                        &outer_block,
+                        helpers::syntax::find_outer_block_for_types(ctx.module.into(), node),
                         &InstrSigResolverCtx {
                             db: ctx.db,
                             document: ctx.document,
