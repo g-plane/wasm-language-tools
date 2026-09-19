@@ -1406,9 +1406,8 @@ fn get_cmp_list(
 fn has_leading_l_paren(token: &SyntaxToken) -> bool {
     is_l_paren(token)
         || token
-            .prev_siblings_with_tokens()
-            .skip_while(|node_or_token| node_or_token.kind().is_trivia())
-            .find_map(NodeOrToken::into_token)
+            .prev_consecutive_tokens()
+            .find(|token| !token.kind().is_trivia())
             .is_some_and(|token| is_l_paren(&token))
 }
 fn is_l_paren(token: &SyntaxToken) -> bool {
