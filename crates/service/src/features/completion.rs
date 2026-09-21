@@ -7,12 +7,15 @@ use crate::{
     idx::Idx,
     types_analyzer::{self, CompositeType, Fields, NamedSig, OperandType, ValType},
 };
+use indexmap::IndexMap;
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag, CompletionItemTextEdit,
     CompletionParams, MarkupContent, MarkupKind, StringOrMarkupContent, TextEdit,
 };
+use rustc_hash::FxBuildHasher;
+use std::sync::LazyLock;
 use wat_syntax::{
     NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{AstNode, Instr, PlainInstr, TableType, support},
@@ -657,12 +660,12 @@ fn get_cmp_list(
     ctx.into_iter().fold(Vec::with_capacity(2), |mut items, ctx| {
         match ctx {
             CmpCtx::Instr(const_only) => {
-                let instrs = if const_only {
-                    data_set::CONST_INSTRS.iter()
-                } else {
-                    data_set::INSTR_NAMES.iter()
-                };
                 if let Some((left, _)) = token.text().rsplit_once('.') {
+                    let instrs = if const_only {
+                        data_set::CONST_INSTRS.iter()
+                    } else {
+                        data_set::INSTR_NAMES.iter()
+                    };
                     items.extend(
                         instrs
                             .filter_map(|name| name.strip_prefix(left).and_then(|s| s.strip_prefix('.')))
@@ -672,10 +675,25 @@ fn get_cmp_list(
                                 ..Default::default()
                             }),
                     );
-                } else {
-                    items.extend(instrs.map(|name| CompletionItem {
+                } else if const_only {
+                    items.extend(data_set::CONST_INSTRS.iter().map(|name| CompletionItem {
                         label: name.to_string(),
                         kind: Some(CompletionItemKind::Operator),
+                        ..Default::default()
+                    }));
+                } else {
+                    items.extend(INSTR_PREFIXES.iter().map(|(name, prefix_only)| CompletionItem {
+                        label: name.to_string(),
+                        kind: Some(CompletionItemKind::Operator),
+                        label_details: if *prefix_only {
+                            Some(CompletionItemLabelDetails {
+                                detail: Some(".".into()),
+                                description: None,
+                            })
+                        } else {
+                            None
+                        },
+                        sort_text: if *name == "i32" { Some("0".into()) } else { None },
                         ..Default::default()
                     }));
                 }
@@ -1462,3 +1480,14 @@ fn is_under_const(node: &SyntaxNode) -> bool {
         )
     })
 }
+
+static INSTR_PREFIXES: LazyLock<Box<indexmap::map::Slice<&str, bool>>> = LazyLock::new(|| {
+    data_set::INSTR_NAMES
+        .iter()
+        .map(|name| match name.split_once('.') {
+            Some((prefix, _)) => (prefix, true),
+            None => (*name, false),
+        })
+        .collect::<IndexMap<_, _, FxBuildHasher>>()
+        .into_boxed_slice()
+});
