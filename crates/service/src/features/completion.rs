@@ -15,7 +15,7 @@ use lspt::{
     CompletionParams, MarkupContent, MarkupKind, StringOrMarkupContent, TextEdit,
 };
 use rustc_hash::FxBuildHasher;
-use std::sync::LazyLock;
+use std::{borrow::Cow, sync::LazyLock};
 use wat_syntax::{
     NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{AstNode, Instr, PlainInstr, TableType, support},
@@ -694,6 +694,7 @@ fn get_cmp_list(
                             None
                         },
                         sort_text: if *name == "i32" { Some("0".into()) } else { None },
+                        commit_characters: if *prefix_only { Some(Cow::from(&['.'])) } else { None },
                         ..Default::default()
                     }));
                 }

@@ -96,21 +96,30 @@ expression: response
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "global",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "table",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i32",
@@ -118,42 +127,60 @@ expression: response
       "detail": "."
     },
     "kind": 24,
-    "sortText": "0"
+    "sortText": "0",
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i64",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "f32",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "f64",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "memory",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "ref",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "br_on_null",
@@ -168,7 +195,10 @@ expression: response
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "suspend",
@@ -195,14 +225,20 @@ expression: response
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "array",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "br_on_cast",
@@ -217,91 +253,130 @@ expression: response
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "extern",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i31",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "data",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "elem",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "v128",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i8x16",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i16x8",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i32x4",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i64x2",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "f32x4",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "f64x2",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "atomic",
     "labelDetails": {
       "detail": "."
     },
-    "kind": 24
+    "kind": 24,
+    "commitCharacters": [
+      "."
+    ]
   },
   {
     "label": "i8x16",
