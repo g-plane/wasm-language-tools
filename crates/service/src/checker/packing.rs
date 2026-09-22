@@ -13,7 +13,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
             if let Some((_, symbol)) = find_struct_field(ctx, node).filter(|(ty, _)| ty.is_packed()) {
                 Some(Diagnostic {
                     range: symbol.key.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("field `{}` is packed", symbol.idx.render(ctx.db)),
                     related_information: Some(vec![RelatedInformation {
                         range: instr_name.text_range(),
@@ -29,7 +29,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
             if let Some((_, symbol)) = find_struct_field(ctx, node).filter(|(ty, _)| !ty.is_packed()) {
                 Some(Diagnostic {
                     range: symbol.key.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("field `{}` is unpacked", symbol.idx.render(ctx.db)),
                     related_information: Some(vec![RelatedInformation {
                         range: instr_name.text_range(),
@@ -45,7 +45,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
             if let Some((_, symbol)) = find_array(ctx, node).filter(|(ty, _)| ty.is_packed()) {
                 Some(Diagnostic {
                     range: symbol.key.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("array `{}` is packed", symbol.idx.render(ctx.db)),
                     related_information: Some(vec![RelatedInformation {
                         range: instr_name.text_range(),
@@ -61,7 +61,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
             if let Some((_, symbol)) = find_array(ctx, node).filter(|(ty, _)| !ty.is_packed()) {
                 Some(Diagnostic {
                     range: symbol.key.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("array `{}` is unpacked", symbol.idx.render(ctx.db)),
                     related_information: Some(vec![RelatedInformation {
                         range: instr_name.text_range(),

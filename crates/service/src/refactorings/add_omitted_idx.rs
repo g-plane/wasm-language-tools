@@ -175,7 +175,7 @@ fn build_action(
         }],
     );
     Some(CodeAction {
-        title,
+        title: title.into(),
         kind: Some(CodeActionKind::QuickFix),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

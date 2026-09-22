@@ -58,7 +58,7 @@ fn build_diagnostic(reported: AmberNode, related: AmberNode, severity: Diagnosti
     Diagnostic {
         range: reported.text_range(),
         severity,
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: "this catch clause will never be matched".into(),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         related_information: Some(vec![RelatedInformation {

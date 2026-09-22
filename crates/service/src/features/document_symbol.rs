@@ -7,6 +7,7 @@ use crate::{
     types_analyzer::{self, CompositeType},
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};
+use std::borrow::Cow;
 
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.
@@ -70,7 +71,7 @@ impl LanguageService {
                             lsp_symbol.children.get_or_insert_default().push(DocumentSymbol {
                                 name: render_symbol_name(symbol, db),
                                 detail: types_analyzer::extract_type(db, &symbol.green)
-                                    .map(|ty| ty.render(db).to_string()),
+                                    .map(|ty| ty.render(db).to_string().into()),
                                 kind: LspSymbolKind::Variable,
                                 tags,
                                 range,
@@ -117,9 +118,9 @@ impl LanguageService {
                                         .and_then(|mutability| mutability.mut_keyword)
                                         .is_some()
                                     {
-                                        format!("(mut {})", ty.render(db))
+                                        format!("(mut {})", ty.render(db)).into()
                                     } else {
-                                        ty.render(db).to_string()
+                                        ty.render(db).to_string().into()
                                     }
                                 }),
                                 kind: LspSymbolKind::Variable,
@@ -156,7 +157,7 @@ impl LanguageService {
                             lsp_symbol.children.get_or_insert_default().push(DocumentSymbol {
                                 name: render_symbol_name(symbol, db),
                                 detail: types_analyzer::resolve_field_type(db, document, symbol.key, symbol.region)
-                                    .map(|ty| ty.render(db).to_string()),
+                                    .map(|ty| ty.render(db).to_string().into()),
                                 kind: LspSymbolKind::Field,
                                 tags,
                                 range,
@@ -191,12 +192,12 @@ impl LanguageService {
     }
 }
 
-fn render_symbol_name(symbol: &Symbol, db: &dyn salsa::Database) -> String {
+fn render_symbol_name(symbol: &Symbol, db: &dyn salsa::Database) -> Cow<'static, str> {
     if let Some(name) = symbol.idx.name {
-        name.ident(db).to_string()
+        name.ident(db).to_string().into()
     } else if let Some(num) = symbol.idx.num {
-        format!("{} {num}", symbol.kind)
+        format!("{} {num}", symbol.kind).into()
     } else {
-        String::new()
+        "".into()
     }
 }

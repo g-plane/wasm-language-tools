@@ -26,7 +26,7 @@ impl LanguageService {
 
         symbol_table.symbols.iter().find_map(|symbol| match symbol.kind {
             SymbolKind::Type if symbol.key.text_range() == parent_range => Some(vec![TypeHierarchyItem {
-                name: symbol.idx.render(self).to_string(),
+                name: symbol.idx.render(self).to_string().into(),
                 kind: LspSymbolKind::Class,
                 tags: if deprecation.contains_key(&symbol.key) {
                     Some(vec![SymbolTag::Deprecated])
@@ -47,7 +47,7 @@ impl LanguageService {
             SymbolKind::TypeUse if symbol.key.text_range() == parent_range => {
                 symbol_table.find_def(symbol.key).and_then(|symbol| {
                     Some(vec![TypeHierarchyItem {
-                        name: symbol.idx.render(self).to_string(),
+                        name: symbol.idx.render(self).to_string().into(),
                         kind: LspSymbolKind::Class,
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![SymbolTag::Deprecated])
@@ -91,7 +91,7 @@ impl LanguageService {
             .and_then(|inherits| symbol_table.symbols.get(inherits.symbol))
             .and_then(|symbol| {
                 Some(vec![TypeHierarchyItem {
-                    name: symbol.idx.render(self).to_string(),
+                    name: symbol.idx.render(self).to_string().into(),
                     kind: LspSymbolKind::Class,
                     tags: if deprecation.contains_key(&symbol.key) {
                         Some(vec![SymbolTag::Deprecated])
@@ -138,7 +138,7 @@ impl LanguageService {
             .filter_map(|(key, _)| symbol_table.symbols.get(key))
             .filter_map(|symbol| {
                 Some(TypeHierarchyItem {
-                    name: symbol.idx.render(self).to_string(),
+                    name: symbol.idx.render(self).to_string().into(),
                     kind: LspSymbolKind::Class,
                     tags: if deprecation.contains_key(&symbol.key) {
                         Some(vec![SymbolTag::Deprecated])

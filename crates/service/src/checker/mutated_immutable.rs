@@ -34,7 +34,7 @@ pub fn check(
                         };
                         Diagnostic {
                             range: key.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: format!(
                                 "mutating the immutable {kind} `{}` is not allowed",
                                 ref_symbol.idx.render(db)

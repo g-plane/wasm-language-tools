@@ -34,7 +34,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: AmberNode) -> Option<CodeAct
             }],
         );
         Some(CodeAction {
-            title: format!("Remove empty {kind}"),
+            title: format!("Remove empty {kind}").into(),
             kind: Some(CodeActionKind::Refactor),
             edit: Some(WorkspaceEdit {
                 changes: Some(changes),

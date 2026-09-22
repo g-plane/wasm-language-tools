@@ -32,7 +32,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: AmberNode) -> Option<CodeAct
         }],
     );
     Some(CodeAction {
-        title: format!("Expand `{type_keyword}`"),
+        title: format!("Expand `{type_keyword}`").into(),
         kind: Some(CodeActionKind::RefactorRewrite),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

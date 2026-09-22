@@ -29,7 +29,7 @@ pub fn check(
         if received != expected {
             Some(Diagnostic {
                 range: immediate.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!(
                     "type mismatch in `br_table`: expected {}, found {}",
                     join_types(ctx.db, expected.iter(), "", ctx.bump),

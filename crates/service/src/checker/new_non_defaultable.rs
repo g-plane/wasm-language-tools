@@ -33,7 +33,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
             } else {
                 Some(Diagnostic {
                     range: immediate.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("struct type `{}` is not defaultable", def_symbol.idx.render(ctx.db)),
                     related_information: Some(
                         non_defaultables
@@ -66,7 +66,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
             ..
         })) if !ty.defaultable() => Some(Diagnostic {
             range: immediate.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!("array type `{}` is not defaultable", def_symbol.idx.render(ctx.db)),
             ..Default::default()
         }),

@@ -36,6 +36,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 pub use salsa::CancellationToken;
 use salsa::Database;
 use std::{
+    borrow::Cow,
     panic::{AssertUnwindSafe, UnwindSafe},
     sync::Arc,
 };
@@ -125,17 +126,12 @@ impl LanguageService {
                     ..Default::default()
                 }),
                 completion_provider: Some(CompletionOptions {
-                    trigger_characters: Some(
-                        [
-                            '$', '(', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                            'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7',
-                            '8', '9', '.', '@',
-                        ]
-                        .iter()
-                        .map(char::to_string)
-                        .collect(),
-                    ),
-                    all_commit_characters: Some(vec![")".into()]),
+                    trigger_characters: Some(Cow::from(&[
+                        '$', '(', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+                        'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                        '.', '@',
+                    ])),
+                    all_commit_characters: Some(Cow::from(&[')'])),
                     ..Default::default()
                 }),
                 definition_provider: Some(DefinitionProvider::Bool(true)),
@@ -179,7 +175,7 @@ impl LanguageService {
                     ..Default::default()
                 })),
                 signature_help_provider: Some(SignatureHelpOptions {
-                    trigger_characters: Some(['(', ')'].iter().map(char::to_string).collect()),
+                    trigger_characters: Some(Cow::from(&['(', ')'])),
                     ..Default::default()
                 }),
                 type_hierarchy_provider: Some(TypeHierarchyProvider::Bool(true)),

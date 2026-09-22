@@ -49,7 +49,7 @@ pub fn check(
                     if has_align {
                         diagnostics.push(Diagnostic {
                             range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: "multiple alignments are not allowed".into(),
                             ..Default::default()
                         });
@@ -78,14 +78,14 @@ pub fn check(
                     if !align.is_power_of_two() {
                         diagnostics.push(Diagnostic {
                             range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: "alignment must be power-of-two".into(),
                             ..Default::default()
                         });
                     } else if align > ty_size {
                         diagnostics.push(Diagnostic {
                             range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: format!("alignment must be between 1 and {ty_size} inclusively"),
                             ..Default::default()
                         });
@@ -95,7 +95,7 @@ pub fn check(
                     if has_offset {
                         diagnostics.push(Diagnostic {
                             range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: "multiple offsets are not allowed".into(),
                             ..Default::default()
                         });
@@ -110,7 +110,7 @@ pub fn check(
                     {
                         diagnostics.push(Diagnostic {
                             range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: "offset is out of range".into(),
                             related_information: Some(vec![RelatedInformation {
                                 range: mem_def.key.text_range(),

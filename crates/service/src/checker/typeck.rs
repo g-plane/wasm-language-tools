@@ -248,7 +248,7 @@ fn check_instr<'db, 'bump>(
                 } else if node.tokens_by_kind(SyntaxKind::L_PAREN).next().is_some() {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "missing `then` branch with expected types {}",
                             join_types(ctx.db, results.iter(), "", ctx.bump)
@@ -268,7 +268,7 @@ fn check_instr<'db, 'bump>(
                     if type_stack.check_to_bottom(&results, ReportRange::Instr(node)).is_some() {
                         diagnostics.push(Diagnostic {
                             range: node.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: format!(
                                 "missing `else` branch with expected types {}",
                                 join_types(ctx.db, results.iter(), "", ctx.bump)
@@ -327,7 +327,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
         if mismatch {
             diagnostic = Some(Diagnostic {
                 range: report_range.pick(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!(
                     "expected types {}, found {}",
                     join_types(self.ctx.db, expected.iter(), "", self.ctx.bump),
@@ -385,7 +385,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
         if mismatch {
             Some(Diagnostic {
                 range: report_range.pick(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!(
                     "expected types {}, found {}{}",
                     join_types(self.ctx.db, expected.iter(), "", self.ctx.bump),

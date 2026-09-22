@@ -22,7 +22,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode, context: &CodeA
             let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
             changes.insert(uri.to_owned(), text_edits);
             Some(CodeAction {
-                title: format!("Fix mismatched identifier `{}` to `{}`", close.text(), open.text()),
+                title: format!("Fix mismatched identifier `{}` to `{}`", close.text(), open.text()).into(),
                 kind: Some(CodeActionKind::QuickFix),
                 edit: Some(WorkspaceEdit {
                     changes: Some(changes),
@@ -49,7 +49,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode, context: &CodeA
         let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
         changes.insert(uri.to_owned(), text_edits);
         Some(CodeAction {
-            title: format!("Remove identifier `{}`", close.text()),
+            title: format!("Remove identifier `{}`", close.text()).into(),
             kind: Some(CodeActionKind::QuickFix),
             edit: Some(WorkspaceEdit {
                 changes: Some(changes),

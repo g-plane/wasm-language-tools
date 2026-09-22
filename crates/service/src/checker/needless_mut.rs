@@ -46,7 +46,7 @@ pub fn check(
                 Diagnostic {
                     range: keyword_range,
                     severity,
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("{kind} `{}` is unnecessarily mutable", symbol.idx.render(db)),
                     tags: Some(vec![DiagnosticTag::Unnecessary]),
                     ..Default::default()

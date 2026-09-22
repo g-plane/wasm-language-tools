@@ -37,7 +37,7 @@ pub fn act(
         }],
     );
     Some(CodeAction {
-        title: format!("Export as {name}"),
+        title: format!("Export as {name}").into(),
         kind: Some(CodeActionKind::Refactor),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

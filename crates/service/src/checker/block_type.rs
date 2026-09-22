@@ -17,7 +17,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     {
         Some(Diagnostic {
             range: index.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "block type must be function type".into(),
             ..Default::default()
         })

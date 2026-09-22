@@ -80,7 +80,7 @@ fn check_immediate(immediate: AmberNode, max: u32) -> Option<Diagnostic> {
             } else {
                 Some(Diagnostic {
                     range: immediate.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("lane index must be less than {max}"),
                     ..Default::default()
                 })
@@ -88,7 +88,7 @@ fn check_immediate(immediate: AmberNode, max: u32) -> Option<Diagnostic> {
         }
         Err(error) => Some(Diagnostic {
             range: immediate.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: if error.kind() == &IntErrorKind::PosOverflow {
                 format!("lane index must be less than {max}")
             } else {

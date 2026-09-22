@@ -24,7 +24,7 @@ pub fn check(node: AmberNode) -> Option<Diagnostic> {
     {
         Some(Diagnostic {
             range: TextRange::cover(first.text_range(), last.text_range()),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "expression must be constant".into(),
             ..Default::default()
         })

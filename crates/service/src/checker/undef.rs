@@ -37,7 +37,7 @@ pub fn check(db: &dyn salsa::Database, diagnostics: &mut Vec<Diagnostic>, symbol
             })
             .map(|(symbol, _)| Diagnostic {
                 range: symbol.key.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!("cannot find {} `{}` in this scope", symbol.kind, symbol.idx.render(db)),
                 ..Default::default()
             }),

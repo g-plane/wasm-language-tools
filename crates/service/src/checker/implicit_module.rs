@@ -16,7 +16,7 @@ pub fn check(lint_level: LintLevel, node: AmberNode) -> Option<Diagnostic> {
         Some(Diagnostic {
             range: node.text_range(),
             severity,
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "top-level module fields should be wrapped in a module".into(),
             ..Default::default()
         })

@@ -23,7 +23,7 @@ pub fn check(ctx: &mut DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     let last = node.children().next_back()?;
     Some(Diagnostic {
         range: first.text_range().cover(last.text_range()),
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: "imported item can't contain definition".into(),
         related_information: node.children_by_kind(SyntaxKind::IMPORT).next().map(|import| {
             vec![RelatedInformation {

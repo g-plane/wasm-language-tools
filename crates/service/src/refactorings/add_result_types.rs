@@ -78,7 +78,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode, context: &CodeA
     );
     Some(CodeAction {
         title: if let Some(ident) = support::token(node, SyntaxKind::IDENT) {
-            format!("Add result types to `{}`", ident.text())
+            format!("Add result types to `{}`", ident.text()).into()
         } else {
             "Add result types".into()
         },

@@ -53,7 +53,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     {
         Some(Diagnostic {
             range: label_index.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!(
                 "result type `[{}]` should match result type of block `{}`",
                 results.iter().map(|ty| ty.render(ctx.db)).join(", "),

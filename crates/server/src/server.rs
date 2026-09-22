@@ -466,7 +466,7 @@ impl Server {
                 serde_json::to_value(ConfigurationParams {
                     items: vec![ConfigurationItem {
                         scope_uri: Some(uri.clone()),
-                        section: Some("wasmLanguageTools".to_string()),
+                        section: Some("wasmLanguageTools".into()),
                     }],
                 })?,
                 move |server, result| server.update_configs(vec![uri], result),
@@ -495,7 +495,7 @@ impl Server {
                             .iter()
                             .map(|uri| ConfigurationItem {
                                 scope_uri: Some(uri.clone()),
-                                section: Some("wasmLanguageTools".to_string()),
+                                section: Some("wasmLanguageTools".into()),
                             })
                             .collect(),
                     })?,

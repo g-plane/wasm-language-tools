@@ -80,7 +80,7 @@ fn report(db: &dyn salsa::Database, range: TextRange, severity: DiagnosticSeveri
     Diagnostic {
         range,
         severity,
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: format!("{} `{}` is never used", symbol.kind, symbol.idx.render(db)),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()

@@ -270,7 +270,7 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
     subtyping::check(&mut diagnostics, db, document, symbol_table, def_types);
     deprecated::check(&mut diagnostics, db, document, config.lint.deprecated, symbol_table);
 
-    diagnostics.sort_unstable_by(|a, b| match a.code.cmp(&b.code) {
+    diagnostics.sort_unstable_by(|a, b| match a.code.cmp(b.code) {
         Ordering::Equal => a.range.ordering(b.range),
         other => other,
     });
@@ -280,7 +280,7 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
             Some(lspt::Diagnostic {
                 range: line_index.convert(diagnostic.range)?,
                 severity: Some(diagnostic.severity),
-                code: Some(NumberOrString::String(diagnostic.code)),
+                code: Some(NumberOrString::String(diagnostic.code.into())),
                 code_description: None,
                 source: Some("wat".into()),
                 message: StringOrMarkupContent::String(diagnostic.message),
@@ -310,7 +310,7 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
 struct Diagnostic {
     range: TextRange,
     severity: DiagnosticSeverity,
-    code: String,
+    code: &'static str,
     message: String,
     tags: Option<Vec<DiagnosticTag>>,
     related_information: Option<Vec<RelatedInformation>>,

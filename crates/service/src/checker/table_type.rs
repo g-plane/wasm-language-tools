@@ -49,7 +49,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
         if max < min {
             diagnostics.push(Diagnostic {
                 range: max_token.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: "maximum size must be greater than minimum size".into(),
                 ..Default::default()
             });
@@ -61,7 +61,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
 fn report_overflow(token: AmberToken, upper_bound: u64) -> Diagnostic {
     Diagnostic {
         range: token.text_range(),
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: format!("table limit can't be greater than {upper_bound}"),
         ..Default::default()
     }

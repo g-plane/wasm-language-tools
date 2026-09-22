@@ -46,7 +46,7 @@ pub fn act(
         }],
     );
     Some(CodeAction {
-        title: format!("Inline func type `{index}`"),
+        title: format!("Inline func type `{index}`").into(),
         kind: Some(CodeActionKind::RefactorInline),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

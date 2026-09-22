@@ -23,7 +23,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, imports: &[SymbolKey], node: Amb
                 }
                 SyntaxKind::MODULE_FIELD_IMPORT if *has_non_import => Some(Some(Diagnostic {
                     range: child.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: "import must occur before all non-import definitions".into(),
                     ..Default::default()
                 })),

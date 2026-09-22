@@ -25,18 +25,21 @@ impl LanguageService {
 
         symbol_table.symbols.iter().find_map(|symbol| match symbol.kind {
             SymbolKind::Func if symbol.key.text_range() == parent_range => Some(vec![CallHierarchyItem {
-                name: symbol.idx.render(self).to_string(),
+                name: symbol.idx.render(self).to_string().into(),
                 kind: LspSymbolKind::Function,
                 tags: if deprecation.contains_key(&symbol.key) {
                     Some(vec![SymbolTag::Deprecated])
                 } else {
                     None
                 },
-                detail: Some(types_analyzer::render_func_header(
-                    self,
-                    symbol.idx.name,
-                    NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
-                )),
+                detail: Some(
+                    types_analyzer::render_func_header(
+                        self,
+                        symbol.idx.name,
+                        NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
+                    )
+                    .into(),
+                ),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range())?,
                 selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
@@ -45,18 +48,21 @@ impl LanguageService {
             SymbolKind::Call if symbol.key.text_range() == parent_range => {
                 symbol_table.find_def(symbol.key).and_then(|symbol| {
                     Some(vec![CallHierarchyItem {
-                        name: symbol.idx.render(self).to_string(),
+                        name: symbol.idx.render(self).to_string().into(),
                         kind: LspSymbolKind::Function,
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![SymbolTag::Deprecated])
                         } else {
                             None
                         },
-                        detail: Some(types_analyzer::render_func_header(
-                            self,
-                            symbol.idx.name,
-                            NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
-                        )),
+                        detail: Some(
+                            types_analyzer::render_func_header(
+                                self,
+                                symbol.idx.name,
+                                NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
+                            )
+                            .into(),
+                        ),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range())?,
                         selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
@@ -101,18 +107,21 @@ impl LanguageService {
                     .and_then(|symbol| {
                         Some(CallHierarchyIncomingCall {
                             from: CallHierarchyItem {
-                                name: symbol.idx.render(self).to_string(),
+                                name: symbol.idx.render(self).to_string().into(),
                                 kind: LspSymbolKind::Function,
                                 tags: if deprecation.contains_key(&symbol.key) {
                                     Some(vec![SymbolTag::Deprecated])
                                 } else {
                                     None
                                 },
-                                detail: Some(types_analyzer::render_func_header(
-                                    self,
-                                    symbol.idx.name,
-                                    NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
-                                )),
+                                detail: Some(
+                                    types_analyzer::render_func_header(
+                                        self,
+                                        symbol.idx.name,
+                                        NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
+                                    )
+                                    .into(),
+                                ),
                                 uri: params.item.uri.clone(),
                                 range: line_index.convert(symbol.key.text_range())?,
                                 selection_range: line_index.convert(helpers::syntax::infer_def_poi(symbol.amber()))?,
@@ -144,18 +153,21 @@ impl LanguageService {
             .filter_map(|(def_symbol, ref_symbol)| {
                 Some(CallHierarchyOutgoingCall {
                     to: CallHierarchyItem {
-                        name: def_symbol.idx.render(self).to_string(),
+                        name: def_symbol.idx.render(self).to_string().into(),
                         kind: LspSymbolKind::Function,
                         tags: if deprecation.contains_key(&def_symbol.key) {
                             Some(vec![SymbolTag::Deprecated])
                         } else {
                             None
                         },
-                        detail: Some(types_analyzer::render_func_header(
-                            self,
-                            def_symbol.idx.name,
-                            NamedSig::from_func(self, document, symbol_table.get_type_node_of(def_symbol)),
-                        )),
+                        detail: Some(
+                            types_analyzer::render_func_header(
+                                self,
+                                def_symbol.idx.name,
+                                NamedSig::from_func(self, document, symbol_table.get_type_node_of(def_symbol)),
+                            )
+                            .into(),
+                        ),
                         uri: params.item.uri.clone(),
                         range: line_index.convert(def_symbol.key.text_range())?,
                         selection_range: line_index.convert(helpers::syntax::infer_def_poi(def_symbol.amber()))?,

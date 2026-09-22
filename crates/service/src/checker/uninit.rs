@@ -48,7 +48,7 @@ pub fn check(
                     .filter_map(|key| symbol_table.symbols.get(key))
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!("local `{}` is read before being initialized", symbol.idx.render(db)),
                         ..Default::default()
                     }),

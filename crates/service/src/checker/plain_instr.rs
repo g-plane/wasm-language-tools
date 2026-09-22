@@ -57,7 +57,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                     }) else {
                         diagnostics.push(Diagnostic {
                             range: node.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: "expected result type".into(),
                             ..Default::default()
                         });
@@ -73,7 +73,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                     }
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: "there must be exactly one result type".into(),
                         ..Default::default()
                     });
@@ -98,7 +98,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                     })
                     .map(|immediate| Diagnostic {
                         range: immediate.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: "expected identifier or unsigned integer".into(),
                         ..Default::default()
                     }),
@@ -248,7 +248,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                 if actual_count != expected_count {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "expected {expected_count} {} in `v128.const`",
                             if allow_float {
@@ -313,7 +313,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
             if immediates_count != 16 {
                 diagnostics.push(Diagnostic {
                     range: node.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("expected 16 lane indices in `i8x16.shuffle`, found {immediates_count}"),
                     ..Default::default()
                 });
@@ -522,7 +522,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                     })
                     .map(|immediate| Diagnostic {
                         range: immediate.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: "expected `on` handler clause".into(),
                         ..Default::default()
                     }),
@@ -557,7 +557,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                     })
                     .map(|immediate| Diagnostic {
                         range: immediate.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: "expected `on` handler clause".into(),
                         ..Default::default()
                     }),
@@ -569,14 +569,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
     if INSTR_OP_CODES.contains_key(name) {
         diagnostics.extend(immediates.map(|immediate| Diagnostic {
             range: immediate.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "unexpected immediate".into(),
             ..Default::default()
         }));
     } else {
         diagnostics.push(Diagnostic {
             range: instr_name.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!("unknown instruction `{name}`"),
             ..Default::default()
         });
@@ -604,7 +604,7 @@ fn check_immediate<'a>(
         } else if required {
             diagnostics.push(Diagnostic {
                 range,
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!("expected {description}"),
                 ..Default::default()
             });
@@ -613,7 +613,7 @@ fn check_immediate<'a>(
     } else if required {
         diagnostics.push(Diagnostic {
             range: instr_name.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!("missing {description}"),
             ..Default::default()
         });

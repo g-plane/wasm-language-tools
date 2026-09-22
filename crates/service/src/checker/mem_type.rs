@@ -21,7 +21,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
         } else {
             diagnostics.push(Diagnostic {
                 range: token.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: "memory page size must be 1 or 65536".into(),
                 ..Default::default()
             });
@@ -80,7 +80,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
         if max < min {
             diagnostics.push(Diagnostic {
                 range: max_token.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: "maximum size must be greater than minimum size".into(),
                 ..Default::default()
             });
@@ -91,7 +91,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
     {
         diagnostics.push(Diagnostic {
             range: token.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "shared memory must have a maximum size".into(),
             ..Default::default()
         });
@@ -102,7 +102,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
 fn report_overflow(token: AmberToken, upper_bound: u64) -> Diagnostic {
     Diagnostic {
         range: token.text_range(),
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: format!("memory size can't be greater than {upper_bound}"),
         ..Default::default()
     }

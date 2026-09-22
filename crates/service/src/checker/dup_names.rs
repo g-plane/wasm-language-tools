@@ -50,7 +50,7 @@ pub fn check(
                 let name = name.ident(db);
                 symbols.iter().map(move |symbol| Diagnostic {
                     range: helpers::syntax::infer_def_poi(symbol.amber()),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("duplicated {kind} name `{name}` in this scope"),
                     related_information: Some(
                         symbols
@@ -84,7 +84,7 @@ pub fn check(
                     let name = &name[1..name.len() - 1];
                     ranges.iter().map(move |range| Diagnostic {
                         range: *range,
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!("duplicated export `{name}` in this module"),
                         related_information: Some(
                             ranges

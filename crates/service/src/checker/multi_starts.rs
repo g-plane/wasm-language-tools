@@ -10,7 +10,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, module: AmberNode) {
             .skip(1)
             .map(|start| Diagnostic {
                 range: start.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: "only one start section is allowed".into(),
                 ..Default::default()
             }),

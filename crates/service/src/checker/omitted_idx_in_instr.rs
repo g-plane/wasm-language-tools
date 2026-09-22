@@ -31,7 +31,7 @@ pub fn check(lint_level: LintLevel, node: AmberNode) -> Option<Diagnostic> {
             {
                 Some(Diagnostic {
                     range: instr_name_token.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("explicit memory idx for `{instr_name}` is required"),
                     severity,
                     ..Default::default()
@@ -44,7 +44,7 @@ pub fn check(lint_level: LintLevel, node: AmberNode) -> Option<Diagnostic> {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).count() < 2 {
                 Some(Diagnostic {
                     range: instr_name_token.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("explicit memory idx for `{instr_name}` is required"),
                     severity,
                     ..Default::default()
@@ -57,7 +57,7 @@ pub fn check(lint_level: LintLevel, node: AmberNode) -> Option<Diagnostic> {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).next().is_none() {
                 Some(Diagnostic {
                     range: instr_name_token.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("explicit table idx for `{instr_name}` is required"),
                     severity,
                     ..Default::default()
@@ -70,7 +70,7 @@ pub fn check(lint_level: LintLevel, node: AmberNode) -> Option<Diagnostic> {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).count() < 2 {
                 Some(Diagnostic {
                     range: instr_name_token.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("explicit table idx for `{instr_name}` is required"),
                     severity,
                     ..Default::default()

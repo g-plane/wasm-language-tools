@@ -38,7 +38,7 @@ pub fn act(db: &dyn salsa::Database, uri: &str, line_index: &LineIndex, node: Am
         }],
     );
     Some(CodeAction {
-        title: format!("Simplify to `{ref_type}`"),
+        title: format!("Simplify to `{ref_type}`").into(),
         kind: Some(CodeActionKind::RefactorRewrite),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

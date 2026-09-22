@@ -56,7 +56,7 @@ pub fn check(
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
                         severity,
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!("local `{}` is set but never read", symbol.idx.render(db)),
                         ..Default::default()
                     }),

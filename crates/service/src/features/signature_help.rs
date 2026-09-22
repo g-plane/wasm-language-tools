@@ -96,7 +96,7 @@ impl LanguageService {
             label.push(')');
             Some(SignatureHelp {
                 signatures: vec![SignatureInformation {
-                    label,
+                    label: label.into(),
                     documentation: func
                         .and_then(|func| helpers::get_doc_comment(func, symbol_table))
                         .map(|value| {

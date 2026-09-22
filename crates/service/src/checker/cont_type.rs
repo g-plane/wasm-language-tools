@@ -13,7 +13,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     } else {
         Some(Diagnostic {
             range: index.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!("type `{}` must be a function type", ref_symbol.idx.render(ctx.db)),
             related_information: Some(vec![RelatedInformation {
                 range: def_symbol.key.text_range(),

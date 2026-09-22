@@ -59,7 +59,7 @@ pub fn check(
                     .text_range();
                 Some(Diagnostic {
                     range,
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message,
                     ..Default::default()
                 })

@@ -18,7 +18,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: Amb
             .map(|module| Diagnostic {
                 range: module.text_range(),
                 severity,
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: "only one module is allowed".into(),
                 ..Default::default()
             }),

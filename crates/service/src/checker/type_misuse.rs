@@ -68,7 +68,7 @@ pub fn check(
                 {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "source array type `{}` doesn't match destination array type `{}`",
                             src_symbol.idx.render(ctx.db),
@@ -120,7 +120,7 @@ pub fn check(
             if !ValType::Ref(elem_type.clone()).matches(&array_type, ctx.db, ctx.document, ctx.module_id) {
                 diagnostics.push(Diagnostic {
                     range: node.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!(
                         "ref type `{}` of element segment `{}` doesn't match ref type `{}` of array type `{}`",
                         elem_type.render(ctx.db),
@@ -170,7 +170,7 @@ pub fn check(
             ) {
                 diagnostics.push(Diagnostic {
                     range: array.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!(
                         "array type `{}` must be number type or vector type but found `{}`",
                         array_symbol.idx.render(ctx.db),
@@ -255,7 +255,7 @@ pub fn check(
                     if !partial.matches(snd_sig, ctx.db, ctx.document, ctx.module_id) {
                         diagnostics.push(Diagnostic {
                             range: node.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: format!(
                                 "cont type `{}` must match cont type `{}` in continuation types",
                                 fst_symbol.idx.render(ctx.db),
@@ -285,7 +285,7 @@ pub fn check(
                 } else {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "cont type `{}` must match cont type `{}` in continuation arguments",
                             fst_symbol.idx.render(ctx.db),
@@ -326,7 +326,7 @@ pub fn check(
             if !src_type.matches(&dst_type, ctx.db, ctx.document, ctx.module_id) {
                 diagnostics.push(Diagnostic {
                     range: node.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!(
                         "ref type `{}` of source table `{}` doesn't match ref type `{}` of destination table `{}`",
                         dst_type.render(ctx.db),
@@ -370,7 +370,7 @@ pub fn check(
             if !elem_type.matches(&table_type, ctx.db, ctx.document, ctx.module_id) {
                 diagnostics.push(Diagnostic {
                     range: node.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!(
                         "ref type `{}` of element segment `{}` doesn't match ref type `{}` of table `{}`",
                         elem_type.render(ctx.db),
@@ -418,7 +418,7 @@ pub fn check(
                         Some(ty) => {
                             diagnostics.push(Diagnostic {
                                 range: node.text_range(),
-                                code: DIAGNOSTIC_CODE.into(),
+                                code: DIAGNOSTIC_CODE,
                                 message: format!("{BASE_MSG} but found `{}`", ty.render(ctx.db)),
                                 ..Default::default()
                             });
@@ -426,7 +426,7 @@ pub fn check(
                         None => {
                             diagnostics.push(Diagnostic {
                                 range: node.text_range(),
-                                code: DIAGNOSTIC_CODE.into(),
+                                code: DIAGNOSTIC_CODE,
                                 message: BASE_MSG.into(),
                                 ..Default::default()
                             });
@@ -443,7 +443,7 @@ pub fn check(
                 {
                     diagnostics.push(Diagnostic {
                         range: immediate.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "the last type of label `{}` must be ref type",
                             symbol.idx.render(ctx.db),
@@ -461,7 +461,7 @@ pub fn check(
                 } else {
                     diagnostics.push(Diagnostic {
                         range: label.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: "the last type of this label must be a ref type".into(),
                         ..Default::default()
                     });
@@ -474,7 +474,7 @@ pub fn check(
                 if !rt2.matches(&rt1, ctx.db, ctx.document, ctx.module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
                             rt2.render(ctx.db),
@@ -490,7 +490,7 @@ pub fn check(
                 if !rt2.matches(&rt_label, ctx.db, ctx.document, ctx.module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
                             rt2.render(ctx.db),
@@ -519,7 +519,7 @@ pub fn check(
                 } else {
                     diagnostics.push(Diagnostic {
                         range: label.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: "the last type of this label must be a ref type".into(),
                         ..Default::default()
                     });
@@ -532,7 +532,7 @@ pub fn check(
                 if !rt2.matches(&rt1, ctx.db, ctx.document, ctx.module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
                             rt2.render(ctx.db),
@@ -549,7 +549,7 @@ pub fn check(
                 if !rt_diff.matches(&rt_label, ctx.db, ctx.document, ctx.module_id) {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "type difference between given two ref types `{}` doesn't match the ref type `{}`",
                             rt_diff.render(ctx.db),
@@ -626,7 +626,7 @@ pub fn check(
                 {
                     diagnostics.push(Diagnostic {
                         range: immediate.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "result types of exception tag `{}` must be empty",
                             symbol.idx.render(ctx.db)
@@ -694,7 +694,7 @@ pub fn check(
                 if !tag_sig.params.is_empty() {
                     diagnostics.push(Diagnostic {
                         range: tag_ref_symbol.key.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "param types of tag `{}` must be empty when used in `switch`",
                             tag_ref_symbol.idx.render(ctx.db),
@@ -715,7 +715,7 @@ pub fn check(
                 {
                     diagnostics.push(Diagnostic {
                         range: tag_ref_symbol.key.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "result types of cont type `{}` must match result types of tag `{}`",
                             ct_ref_symbol.idx.render(ctx.db),
@@ -756,7 +756,7 @@ pub fn check(
                     {
                         diagnostics.push(Diagnostic {
                             range: tag_ref_symbol.key.text_range(),
-                            code: DIAGNOSTIC_CODE.into(),
+                            code: DIAGNOSTIC_CODE,
                             message: format!(
                                 "result types of tag `{}` must match result types of cont type `{}`",
                                 tag_ref_symbol.idx.render(ctx.db),
@@ -786,7 +786,7 @@ pub fn check(
                 } else {
                     diagnostics.push(Diagnostic {
                         range: ct_ref_symbol.key.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
+                        code: DIAGNOSTIC_CODE,
                         message: format!(
                             "last param type of cont type `{}` must be continuation reference type",
                             ct_ref_symbol.idx.render(ctx.db)
@@ -823,7 +823,7 @@ pub fn check(
                         Some(ty) => {
                             diagnostics.push(Diagnostic {
                                 range: node.text_range(),
-                                code: DIAGNOSTIC_CODE.into(),
+                                code: DIAGNOSTIC_CODE,
                                 message: format!("{BASE_MSG} but found `{}`", ty.render(ctx.db)),
                                 ..Default::default()
                             });
@@ -831,7 +831,7 @@ pub fn check(
                         None => {
                             diagnostics.push(Diagnostic {
                                 range: node.text_range(),
-                                code: DIAGNOSTIC_CODE.into(),
+                                code: DIAGNOSTIC_CODE,
                                 message: BASE_MSG.into(),
                                 ..Default::default()
                             });
@@ -890,7 +890,7 @@ fn check_table_ref_type(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnost
     {
         Some(Diagnostic {
             range: ref_key.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!(
                 "ref type of table `{}` must match `(ref null func)`",
                 ref_symbol.idx.render(ctx.db),
@@ -926,7 +926,7 @@ fn check_return_call_result_type(
     } else {
         Some(Diagnostic {
             range: reported_node.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "this result type must match the result type of current function".into(),
             ..Default::default()
         })
@@ -964,7 +964,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
             {
                 return Some(Diagnostic {
                     range: label_index.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!(
                         "param types of tag `{}` must match result types of label `{}`",
                         tag_ref_symbol.idx.render(ctx.db),
@@ -997,7 +997,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
             } else {
                 Some(Diagnostic {
                     range: label_index.text_range(),
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!(
                         "result types of tag `{}` must match result types of cont type `{}`",
                         tag_ref_symbol.idx.render(ctx.db),
@@ -1019,7 +1019,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
         } else {
             Some(Diagnostic {
                 range: label_index.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!(
                     "last result type of label `{}` must be continuation reference type",
                     label_index.green()
@@ -1040,7 +1040,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
     } else {
         Some(Diagnostic {
             range: tag_ref_symbol.key.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!(
                 "param types of tag `{}` must be empty",
                 tag_ref_symbol.idx.render(ctx.db),
@@ -1067,7 +1067,7 @@ fn check_cast(ctx: &DiagnosticCtx, instr: AmberNode, immediate: AmberNode) -> Op
     if is_cont {
         Some(Diagnostic {
             range: instr.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!("cannot cast to continuation type `{}`", ref_type.render(ctx.db)),
             ..Default::default()
         })
@@ -1087,7 +1087,7 @@ fn build_diagnostic(
     debug_assert!(matches!(actual_kind, "func" | "struct" | "array" | "cont"));
     Diagnostic {
         range: node.text_range(),
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: format!(
             "expected type is {expected_kind}, but type of `{}` is {actual_kind}",
             def_symbol.idx.render(db)

@@ -86,7 +86,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
     diagnostics.extend(ranges.into_iter().map(|range| Diagnostic {
         range,
         severity,
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: "unreachable code".into(),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()

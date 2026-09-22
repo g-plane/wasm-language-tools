@@ -46,7 +46,7 @@ pub fn check(
                 .map(|reason| Diagnostic {
                     range: symbol.key.text_range(),
                     severity,
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: if let Some(reason) = reason {
                         format!("{} `{}` is deprecated: {reason}", symbol.kind, symbol.idx.render(db))
                     } else {

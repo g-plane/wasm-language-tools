@@ -61,7 +61,7 @@ fn build_action(
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(uri.to_owned(), text_edits);
     Some(CodeAction {
-        title: format!("Replace instruction with `{new_text}`"),
+        title: format!("Replace instruction with `{new_text}`").into(),
         kind: Some(CodeActionKind::QuickFix),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

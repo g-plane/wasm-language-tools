@@ -16,7 +16,7 @@ pub fn check(node: AmberNode) -> Option<Diagnostic> {
             let block_kind = display_block_kind(node);
             Some(Diagnostic {
                 range: close.text_range(),
-                code: DIAGNOSTIC_CODE.into(),
+                code: DIAGNOSTIC_CODE,
                 message: format!(
                     "mismatched ident whose enclosing `{block_kind}` is labeled as `{}`",
                     open.text(),
@@ -32,7 +32,7 @@ pub fn check(node: AmberNode) -> Option<Diagnostic> {
         let block_kind = display_block_kind(node);
         Some(Diagnostic {
             range: close.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!("unexpected ident whose enclosing `{block_kind}` is not labeled"),
             related_information: Some(vec![RelatedInformation {
                 range: node

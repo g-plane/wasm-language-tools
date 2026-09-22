@@ -74,7 +74,7 @@ impl LanguageService {
                 title: if locations.len() == 1 {
                     "1 reference".into()
                 } else {
-                    format!("{} references", locations.len())
+                    format!("{} references", locations.len()).into()
                 },
                 tooltip: None,
                 command: "wasmLanguageTools.showReferences".into(),

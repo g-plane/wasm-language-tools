@@ -6,7 +6,7 @@ const DIAGNOSTIC_CODE: &str = "syntax";
 pub fn check(db: &dyn salsa::Database, diagnostics: &mut Vec<Diagnostic>, document: Document) {
     diagnostics.extend(document.syntax_errors(db).iter().map(|error| Diagnostic {
         range: error.range,
-        code: DIAGNOSTIC_CODE.into(),
+        code: DIAGNOSTIC_CODE,
         message: format!("syntax error: {}", error.message),
         ..Default::default()
     }));

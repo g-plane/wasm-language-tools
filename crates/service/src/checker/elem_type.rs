@@ -25,7 +25,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     } else {
         Some(Diagnostic {
             range: elem_ref_type_node.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: format!(
                 "ref type `{}` doesn't match ref type `{}` of table `{}`",
                 elem_ref_type.render(ctx.db),

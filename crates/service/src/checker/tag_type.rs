@@ -17,7 +17,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
     {
         diagnostics.push(Diagnostic {
             range: index.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "tag type must be function type".into(),
             ..Default::default()
         });

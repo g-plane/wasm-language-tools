@@ -59,7 +59,7 @@ pub fn check(
                 Diagnostic {
                     range: helpers::syntax::infer_def_poi(symbol.amber()),
                     severity,
-                    code: DIAGNOSTIC_CODE.into(),
+                    code: DIAGNOSTIC_CODE,
                     message: format!("`{name}` is shadowed"),
                     related_information: Some(
                         ranges

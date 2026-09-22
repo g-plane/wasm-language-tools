@@ -21,7 +21,7 @@ pub fn check(lint_level: LintLevel, node: AmberNode) -> Option<Diagnostic> {
         Some(Diagnostic {
             range: keyword.text_range(),
             severity,
-            code: DIAGNOSTIC_CODE.into(),
+            code: DIAGNOSTIC_CODE,
             message: "`try_table` block without catch clauses is unnecessary".into(),
             tags: Some(vec![DiagnosticTag::Unnecessary]),
             ..Default::default()

@@ -102,7 +102,7 @@ pub fn changed_text_bench(c: &mut Criterion) {
                 });
                 let completions = service.completion(black_box(CompletionParams {
                     context: Some(CompletionContext {
-                        trigger_character: Some(char.to_string()),
+                        trigger_character: Some(char),
                         trigger_kind: CompletionTriggerKind::TriggerCharacter,
                     }),
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
