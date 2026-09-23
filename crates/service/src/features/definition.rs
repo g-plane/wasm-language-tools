@@ -1,52 +1,25 @@
 use crate::{
     LanguageService,
-    binder::{SymbolKey, SymbolKind, SymbolTable},
+    binder::{SymbolKey, SymbolTable},
     helpers::{self, LineIndexExt},
 };
 use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams};
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/definition` request.
     pub fn goto_definition(&self, params: DefinitionParams) -> Option<Definition> {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let position = line_index.convert(params.position)?;
+        let root = SyntaxNode::new_root(document.root(self));
         let symbol_table = SymbolTable::of(self, document);
+        let parent = super::find_meaningful_token(self, document, &root, params.position)?.parent();
         symbol_table
-            .symbols
-            .iter()
-            .filter(|symbol| {
-                matches!(
-                    symbol.kind,
-                    SymbolKind::Call
-                        | SymbolKind::LocalRef
-                        | SymbolKind::TypeUse
-                        | SymbolKind::GlobalRef
-                        | SymbolKind::MemoryRef
-                        | SymbolKind::TableRef
-                        | SymbolKind::FieldRef
-                        | SymbolKind::BlockRef
-                        | SymbolKind::TagRef
-                        | SymbolKind::DataRef
-                        | SymbolKind::ElemRef
-                )
-            })
-            .fold::<Option<SymbolKey>, _>(None, |acc, ref_symbol| {
-                // find deepest ref-symbol node
-                if ref_symbol.key.text_range().contains_inclusive(position)
-                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_symbol.key.text_range()))
-                {
-                    Some(ref_symbol.key)
-                } else {
-                    acc
-                }
-            })
-            .and_then(|ref_key| symbol_table.find_def(ref_key))
+            .find_def(SymbolKey::from(&parent))
             .and_then(|symbol| line_index.convert(helpers::syntax::infer_def_poi(symbol.amber())))
             .map(|range| {
                 Definition::Location(Location {
-                    uri: params.text_document.uri.clone(),
+                    uri: params.text_document.uri,
                     range,
                 })
             })
@@ -56,38 +29,11 @@ impl LanguageService {
     pub fn goto_type_definition(&self, params: TypeDefinitionParams) -> Option<Definition> {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let position = line_index.convert(params.position)?;
+        let root = SyntaxNode::new_root(document.root(self));
         let symbol_table = SymbolTable::of(self, document);
+        let parent = super::find_meaningful_token(self, document, &root, params.position)?.parent();
         symbol_table
-            .symbols
-            .iter()
-            .filter(|symbol| {
-                matches!(
-                    symbol.kind,
-                    SymbolKind::Call
-                        | SymbolKind::LocalRef
-                        | SymbolKind::TypeUse
-                        | SymbolKind::GlobalRef
-                        | SymbolKind::MemoryRef
-                        | SymbolKind::TableRef
-                        | SymbolKind::FieldRef
-                        | SymbolKind::BlockRef
-                        | SymbolKind::TagRef
-                        | SymbolKind::DataRef
-                        | SymbolKind::ElemRef
-                )
-            })
-            .fold::<Option<SymbolKey>, _>(None, |acc, ref_symbol| {
-                // find deepest ref-symbol node
-                if ref_symbol.key.text_range().contains_inclusive(position)
-                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_symbol.key.text_range()))
-                {
-                    Some(ref_symbol.key)
-                } else {
-                    acc
-                }
-            })
-            .and_then(|ref_key| symbol_table.find_def(ref_key))
+            .find_def(SymbolKey::from(&parent))
             .and_then(|symbol| {
                 symbol
                     .amber()
