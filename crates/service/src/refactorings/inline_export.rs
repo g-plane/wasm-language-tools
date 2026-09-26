@@ -1,8 +1,4 @@
-use crate::{
-    binder::SymbolTable,
-    helpers::{self, LineIndexExt},
-};
-use line_index::LineIndex;
+use crate::{binder::SymbolTable, helpers, line_index::LineIndex};
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{AmberNode, SyntaxKind, TextRange};

@@ -2,7 +2,6 @@ use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     config::ServiceConfig,
     document::Document,
-    helpers::LineIndexExt,
     imex,
     types_analyzer::{DefTypes, get_def_types},
 };

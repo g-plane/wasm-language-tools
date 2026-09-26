@@ -1,9 +1,7 @@
 use crate::{
     LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
-    deprecation,
-    helpers::{self, LineIndexExt},
-    mutability,
+    deprecation, helpers, mutability,
     types_analyzer::{self, CompositeType},
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};

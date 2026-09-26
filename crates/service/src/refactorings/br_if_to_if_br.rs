@@ -1,6 +1,5 @@
-use crate::helpers::LineIndexExt;
+use crate::line_index::LineIndex;
 use itertools::Itertools;
-use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
@@ -15,7 +14,7 @@ pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeA
         return None;
     }
 
-    let indent = " ".repeat(line_index.line_col(node.text_range().start()).col as usize);
+    let indent = " ".repeat(line_index.convert(node.text_range().start())?.character as usize);
     let new_text = if instr.l_paren_token().is_some() {
         format!(
             "(if{}\n{indent}  (then\n{indent}    (br{})))",

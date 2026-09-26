@@ -1,7 +1,6 @@
 use crate::{
     LanguageService,
     binder::{IdxKind, SymbolKey, SymbolKind, SymbolTable},
-    helpers::LineIndexExt,
     idx::InternIdent,
 };
 use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, WorkspaceEdit};

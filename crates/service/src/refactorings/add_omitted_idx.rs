@@ -1,9 +1,8 @@
 use crate::{
     binder::{SymbolKind, SymbolTable},
-    helpers::LineIndexExt,
     idx::Idx,
+    line_index::LineIndex,
 };
-use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;

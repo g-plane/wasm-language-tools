@@ -3,13 +3,13 @@ use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     data_set, deprecation,
     document::Document,
-    helpers::{self, LineIndexExt},
+    helpers,
     idx::Idx,
+    line_index::LineIndex,
     types_analyzer::{self, CompositeType, Fields, NamedSig, OperandType, ValType},
 };
 use indexmap::IndexMap;
 use itertools::Itertools;
-use line_index::LineIndex;
 use lspt::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag, CompletionItemTextEdit,
     CompletionParams, MarkupContent, MarkupKind, StringOrMarkupContent, TextEdit,

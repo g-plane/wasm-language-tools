@@ -1,9 +1,8 @@
 use crate::{
     LanguageService,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
-    helpers::LineIndexExt,
+    line_index::LineIndex,
 };
-use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
 

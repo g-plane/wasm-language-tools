@@ -1,8 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    deprecation,
-    helpers::{self, LineIndexExt},
+    deprecation, helpers,
     types_analyzer::{self, NamedSig},
 };
 use lspt::{

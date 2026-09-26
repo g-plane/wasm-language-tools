@@ -1,5 +1,4 @@
-use crate::helpers::LineIndexExt;
-use line_index::LineIndex;
+use crate::line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{AmberNode, SyntaxKind};

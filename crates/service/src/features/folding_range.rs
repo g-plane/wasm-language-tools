@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers::LineIndexExt};
+use crate::LanguageService;
 use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind};
 

@@ -2,12 +2,10 @@ use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers::LineIndexExt,
     mutability,
 };
 use indexmap::IndexSet;
-use line_index::LineCol;
-use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
+use lspt::{Position, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
 use rustc_hash::FxBuildHasher;
 use std::mem;
 use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind};
@@ -54,10 +52,10 @@ impl LanguageService {
                 .take_while(|(token, ..)| token.text_range().start() < end)
                 .peekable();
             if let Some((token, ..)) = tokens.peek() {
-                LineCol {
+                Position {
                     line: delta_line,
-                    col: prev_start,
-                } = line_index.line_col(token.text_range().start());
+                    character: prev_start,
+                } = line_index.convert(token.text_range().start())?;
             }
             let tokens = build_tokens(db, token_types, document, tokens, &mut delta_line, &mut prev_start);
             Some(SemanticTokens {
@@ -98,7 +96,7 @@ fn build_tokens<'a>(
                         None
                     };
                     let range = token.text_range();
-                    let col = line_index.line_col(range.start()).col;
+                    let col = line_index.convert(range.start())?.character;
                     Some([
                         // delta line
                         mem::replace(delta_line, block_comment_lines.unwrap_or_default()),

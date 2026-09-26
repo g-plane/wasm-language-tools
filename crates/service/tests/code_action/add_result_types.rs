@@ -258,7 +258,7 @@ fn after_if_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
+    let response = service.code_action(create_params(uri, 5, 6, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -274,7 +274,7 @@ fn after_if_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
+    let response = service.code_action(create_params(uri, 5, 6, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -290,7 +290,7 @@ fn after_if_type_use() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
+    let response = service.code_action(create_params(uri, 5, 6, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
 

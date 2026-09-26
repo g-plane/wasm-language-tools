@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers::{self, LineIndexExt},
+    helpers,
     idx::Idx,
     types_analyzer,
 };

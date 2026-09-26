@@ -1,9 +1,8 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
     cfa::{self, FlowNode, FlowNodeKind},
-    helpers::LineIndexExt,
+    line_index::LineIndex,
 };
-use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};

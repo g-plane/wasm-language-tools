@@ -1,4 +1,4 @@
-use crate::{LanguageService, cfa, helpers::LineIndexExt};
+use crate::{LanguageService, cfa};
 use lspt::{ExecuteCommandParams, Position};
 use wat_syntax::{AmberNode, SyntaxKind, TextRange};
 

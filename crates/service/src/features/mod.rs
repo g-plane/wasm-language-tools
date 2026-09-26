@@ -19,7 +19,7 @@ mod signature_help;
 mod type_hierarchy;
 
 pub(crate) use self::semantic_tokens::{SemanticTokenType, SemanticTokenTypes};
-use crate::{document::Document, helpers::LineIndexExt};
+use crate::document::Document;
 use lspt::Position;
 use wat_syntax::{SyntaxNode, SyntaxToken, TokenAtOffset};
 

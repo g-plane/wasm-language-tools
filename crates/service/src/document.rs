@@ -1,5 +1,4 @@
-use crate::{LanguageService, config::ConfigState, helpers::LineIndexExt};
-use line_index::LineIndex;
+use crate::{LanguageService, config::ConfigState, line_index::LineIndex};
 use lspt::{
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, TextDocumentContentChangeEvent,
 };
@@ -9,7 +8,6 @@ use wat_syntax::{GreenNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
 
 #[salsa::input(debug)]
 pub(crate) struct Document {
-    pub text: String,
     pub line_index: LineIndex,
     pub root: GreenNode,
     pub syntax_errors: Vec<wat_parser::SyntaxError>,
@@ -19,17 +17,16 @@ impl LanguageService {
     #[inline]
     /// Commit a document to the service.
     pub fn commit(&mut self, uri: String, text: String) {
-        let line_index = LineIndex::new(&text);
         let (green, errors) = wat_parser::parse(&text);
+        let line_index = LineIndex::new(text);
         if let Some(document) = self.get_document(&uri) {
-            document.set_text(self).to(text);
             document.set_line_index(self).to(line_index);
             document.set_root(self).to(green);
             document.set_syntax_errors(self).to(errors);
         } else {
             self.documents
                 .write()
-                .insert(uri.clone(), Document::new(self, text, line_index, green, errors));
+                .insert(uri.clone(), Document::new(self, line_index, green, errors));
             if !self.support_pull_config {
                 self.configs.write().insert(uri, ConfigState::Inherit);
             }
@@ -38,11 +35,11 @@ impl LanguageService {
 
     /// Handler for `textDocument/didOpen` notification.
     pub fn did_open(&mut self, params: DidOpenTextDocumentParams) {
-        let line_index = LineIndex::new(&params.text_document.text);
         let (green, errors) = wat_parser::parse(&params.text_document.text);
+        let line_index = LineIndex::new(params.text_document.text);
         self.documents.write().insert(
             params.text_document.uri.clone(),
-            Document::new(self, params.text_document.text, line_index, green, errors),
+            Document::new(self, line_index, green, errors),
         );
         if !self.support_pull_config {
             self.configs
@@ -63,10 +60,11 @@ impl LanguageService {
                 if !partial.text.bytes().all(is_safe_for_incremental) {
                     break 'single;
                 }
-                let Some(range) = document.line_index(self).convert(partial.range) else {
+                let line_index = document.line_index(self);
+                let Some(range) = line_index.convert(partial.range) else {
                     break 'single;
                 };
-                let mut text = document.text(self).to_owned();
+                let mut text = line_index.text().to_owned();
                 let old_start = usize::from(range.start());
                 let old_end = usize::from(range.end());
                 if text
@@ -122,9 +120,7 @@ impl LanguageService {
                 });
                 all_errors.append(&mut partial_errors);
 
-                let line_index = LineIndex::new(&text);
-                document.set_text(self).to(text);
-                document.set_line_index(self).to(line_index);
+                document.set_line_index(self).to(LineIndex::new(text));
                 document.set_root(self).to(replaced_root);
                 document.set_syntax_errors(self).to(all_errors);
                 return;
@@ -134,22 +130,21 @@ impl LanguageService {
         }
 
         let mut line_index = document.line_index(self).clone();
-        let mut text = document.text(self).to_owned();
+        let mut text = line_index.text().to_owned();
         params.content_changes.into_iter().for_each(|change| match change {
             TextDocumentContentChangeEvent::Partial(partial) => {
                 if let Some(range) = line_index.convert(partial.range) {
                     text.replace_range::<Range<usize>>(range.start().into()..range.end().into(), &partial.text);
-                    line_index = LineIndex::new(&text);
+                    line_index = LineIndex::new(text.clone());
                 }
             }
             TextDocumentContentChangeEvent::WholeDocument(whole) => {
-                line_index = LineIndex::new(&whole.text);
-                text = whole.text;
+                text = whole.text.clone();
+                line_index = LineIndex::new(whole.text);
             }
         });
 
-        let (green, errors) = wat_parser::parse(&text);
-        document.set_text(self).to(text);
+        let (green, errors) = wat_parser::parse(line_index.text());
         document.set_line_index(self).to(line_index);
         document.set_root(self).to(green);
         document.set_syntax_errors(self).to(errors);
