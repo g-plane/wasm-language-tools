@@ -1,4 +1,4 @@
-use crate::{LanguageService, binder::SymbolTable, helpers::LineIndexExt, refactorings::*};
+use crate::{LanguageService, binder::SymbolTable, refactorings::*};
 use lspt::{CodeAction, CodeActionKind, CodeActionParams};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 

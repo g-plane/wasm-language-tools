@@ -1,5 +1,4 @@
-use crate::{LanguageService, helpers::LineIndexExt};
-use line_index::LineIndex;
+use crate::{LanguageService, line_index::LineIndex};
 use lspt::{
     DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangesFormattingParams, FormattingOptions,
     TextEdit,
@@ -15,7 +14,7 @@ impl LanguageService {
         let configs = self.configs.read();
         let config = configs.get(&params.text_document.uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
-        let old = document.text(self);
+        let old = line_index.text();
         let new = wat_formatter::format(
             document.root(self),
             &build_options(&params.options, config.format.clone()),

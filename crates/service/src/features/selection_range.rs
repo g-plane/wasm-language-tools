@@ -1,5 +1,4 @@
-use crate::{LanguageService, helpers::LineIndexExt};
-use line_index::LineIndex;
+use crate::{LanguageService, line_index::LineIndex};
 use lspt::{SelectionRange, SelectionRangeParams};
 use wat_syntax::SyntaxNode;
 

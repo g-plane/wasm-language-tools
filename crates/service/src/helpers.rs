@@ -1,59 +1,8 @@
 use crate::binder::{Symbol, SymbolTable};
-use line_index::{LineIndex, WideEncoding, WideLineCol};
-use lspt::{Position, Range};
 use std::{borrow::Cow, num::ParseIntError};
-use wat_syntax::{NodeOrToken, SyntaxKind, TextRange, TextSize};
+use wat_syntax::{NodeOrToken, SyntaxKind};
 
 pub use self::arena::{BumpCollectionsExt, BumpHashMap, BumpHashSet};
-
-pub trait LineIndexExt<In> {
-    type Out;
-    fn convert(&self, input: In) -> Self::Out;
-}
-impl LineIndexExt<TextSize> for LineIndex {
-    type Out = Option<Position>;
-    /// Convert syntax tree offset to LSP position.
-    fn convert(&self, input: TextSize) -> Self::Out {
-        self.try_line_col(input)
-            .and_then(|line_col| self.to_wide(WideEncoding::Utf16, line_col))
-            .map(|wide_line_col| Position {
-                line: wide_line_col.line,
-                character: wide_line_col.col,
-            })
-    }
-}
-impl LineIndexExt<TextRange> for LineIndex {
-    type Out = Option<Range>;
-    /// Convert syntax tree range to LSP range.
-    fn convert(&self, input: TextRange) -> Self::Out {
-        let start = self.convert(input.start())?;
-        let end = self.convert(input.end())?;
-        Some(Range { start, end })
-    }
-}
-impl LineIndexExt<Position> for LineIndex {
-    type Out = Option<TextSize>;
-    /// Convert LSP position to syntax tree offset.
-    fn convert(&self, input: Position) -> Self::Out {
-        self.to_utf8(
-            WideEncoding::Utf16,
-            WideLineCol {
-                line: input.line,
-                col: input.character,
-            },
-        )
-        .and_then(|line_col| self.offset(line_col))
-    }
-}
-impl LineIndexExt<Range> for LineIndex {
-    type Out = Option<TextRange>;
-    /// Convert LSP range to syntax tree range.
-    fn convert(&self, input: Range) -> Self::Out {
-        let start = self.convert(input.start)?;
-        let end = self.convert(input.end)?;
-        Some(TextRange::new(start, end))
-    }
-}
 
 // https://webassembly.github.io/spec/core/valid/instructions.html#polymorphism
 pub fn is_stack_polymorphic(instr_name: &str) -> bool {

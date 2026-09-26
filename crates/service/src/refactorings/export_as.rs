@@ -1,5 +1,4 @@
-use crate::{binder::SymbolKey, document::Document, helpers::LineIndexExt, imex};
-use line_index::LineIndex;
+use crate::{binder::SymbolKey, document::Document, imex, line_index::LineIndex};
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange, ast::support};

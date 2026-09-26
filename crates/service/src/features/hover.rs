@@ -3,8 +3,7 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     data_set,
     document::Document,
-    helpers::{self, LineIndexExt},
-    mutability,
+    helpers, mutability,
     types_analyzer::{self, CompositeType, DefType, HeapType, InstrSigResolverCtx, NamedSig, RefType},
 };
 use bumpalo::Bump;

@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{IdxKind, SymbolKind, SymbolTable},
-    helpers::{self, LineIndexExt},
+    helpers,
 };
 use lspt::{CodeLens, CodeLensParams, Command, Location};
 use serde::{Deserialize, Serialize};

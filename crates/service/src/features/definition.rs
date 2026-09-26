@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolTable},
-    helpers::{self, LineIndexExt},
+    helpers,
 };
 use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams};
 use wat_syntax::{SyntaxKind, SyntaxNode};

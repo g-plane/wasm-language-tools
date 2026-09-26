@@ -14,7 +14,6 @@ bumpalo = { workspace = true }
 hashbrown = { workspace = true }
 indexmap = "2.14"
 itertools = "0.15"
-line-index = "0.1"
 log = { workspace = true }
 lspt = { workspace = true }
 parking_lot = { workspace = true }

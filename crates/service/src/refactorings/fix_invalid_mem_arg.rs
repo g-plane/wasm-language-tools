@@ -1,5 +1,4 @@
-use crate::helpers::LineIndexExt;
-use line_index::LineIndex;
+use crate::line_index::LineIndex;
 use lspt::{
     CodeAction, CodeActionContext, CodeActionKind, NumberOrString, StringOrMarkupContent, TextEdit, WorkspaceEdit,
 };

@@ -11,6 +11,7 @@ mod features;
 mod helpers;
 mod idx;
 mod imex;
+mod line_index;
 mod mutability;
 mod refactorings;
 mod types_analyzer;
