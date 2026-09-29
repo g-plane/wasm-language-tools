@@ -8,6 +8,7 @@ use wat_syntax::{GreenNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
 
 #[salsa::input(debug)]
 pub(crate) struct Document {
+    pub text: String,
     pub line_index: LineIndex,
     pub root: GreenNode,
     pub syntax_errors: Vec<wat_parser::SyntaxError>,
@@ -18,15 +19,16 @@ impl LanguageService {
     /// Commit a document to the service.
     pub fn commit(&mut self, uri: String, text: String) {
         let (green, errors) = wat_parser::parse(&text);
-        let line_index = LineIndex::new(text);
+        let line_index = LineIndex::new(&text);
         if let Some(document) = self.get_document(&uri) {
+            document.set_text(self).to(text);
             document.set_line_index(self).to(line_index);
             document.set_root(self).to(green);
             document.set_syntax_errors(self).to(errors);
         } else {
             self.documents
                 .write()
-                .insert(uri.clone(), Document::new(self, line_index, green, errors));
+                .insert(uri.clone(), Document::new(self, text, line_index, green, errors));
             if !self.support_pull_config {
                 self.configs.write().insert(uri, ConfigState::Inherit);
             }
@@ -36,10 +38,10 @@ impl LanguageService {
     /// Handler for `textDocument/didOpen` notification.
     pub fn did_open(&mut self, params: DidOpenTextDocumentParams) {
         let (green, errors) = wat_parser::parse(&params.text_document.text);
-        let line_index = LineIndex::new(params.text_document.text);
+        let line_index = LineIndex::new(&params.text_document.text);
         self.documents.write().insert(
             params.text_document.uri.clone(),
-            Document::new(self, line_index, green, errors),
+            Document::new(self, params.text_document.text, line_index, green, errors),
         );
         if !self.support_pull_config {
             self.configs
@@ -64,7 +66,7 @@ impl LanguageService {
                 let Some(range) = line_index.convert(partial.range) else {
                     break 'single;
                 };
-                let mut text = line_index.text().to_owned();
+                let mut text = document.text(self).to_owned();
                 let old_start = usize::from(range.start());
                 let old_end = usize::from(range.end());
                 if text
@@ -120,7 +122,8 @@ impl LanguageService {
                 });
                 all_errors.append(&mut partial_errors);
 
-                document.set_line_index(self).to(LineIndex::new(text));
+                document.set_line_index(self).to(LineIndex::new(&text));
+                document.set_text(self).to(text);
                 document.set_root(self).to(replaced_root);
                 document.set_syntax_errors(self).to(all_errors);
                 return;
@@ -130,21 +133,22 @@ impl LanguageService {
         }
 
         let mut line_index = document.line_index(self).clone();
-        let mut text = line_index.text().to_owned();
+        let mut text = document.text(self).to_owned();
         params.content_changes.into_iter().for_each(|change| match change {
             TextDocumentContentChangeEvent::Partial(partial) => {
                 if let Some(range) = line_index.convert(partial.range) {
                     text.replace_range::<Range<usize>>(range.start().into()..range.end().into(), &partial.text);
-                    line_index = LineIndex::new(text.clone());
+                    line_index = LineIndex::new(&text);
                 }
             }
             TextDocumentContentChangeEvent::WholeDocument(whole) => {
-                text = whole.text.clone();
-                line_index = LineIndex::new(whole.text);
+                line_index = LineIndex::new(&whole.text);
+                text = whole.text;
             }
         });
 
-        let (green, errors) = wat_parser::parse(line_index.text());
+        let (green, errors) = wat_parser::parse(&text);
+        document.set_text(self).to(text);
         document.set_line_index(self).to(line_index);
         document.set_root(self).to(green);
         document.set_syntax_errors(self).to(errors);

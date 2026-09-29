@@ -12,34 +12,32 @@ mod x86_64;
 pub struct LineIndex {
     lines: Vec<u32>,
     non_ascii_chars: Vec<NonAsciiChar>,
-    text: String,
     len: u32,
 }
 impl LineIndex {
-    pub fn new(text: String) -> Self {
+    pub fn new(text: &str) -> Self {
         let len = u32::try_from(text.len()).expect("text len must be less than 4 GiB");
 
         #[cfg(target_arch = "x86_64")]
         let (lines, non_ascii_chars) = if std::arch::is_x86_feature_detected!("avx2") {
             // SAFETY: AVX2 support is checked
-            unsafe { self::x86_64::scan_avx2(&text) }
+            unsafe { self::x86_64::scan_avx2(text) }
         } else {
-            self::scalar::scan_scalar(&text)
+            self::scalar::scan_scalar(text)
         };
         #[cfg(target_arch = "aarch64")]
         let (lines, non_ascii_chars) = if std::arch::is_aarch64_feature_detected!("neon") {
             // SAFETY: NEON support is checked
-            unsafe { self::aarch64::scan_neon(&text) }
+            unsafe { self::aarch64::scan_neon(text) }
         } else {
-            self::scalar::scan_scalar(&text)
+            self::scalar::scan_scalar(text)
         };
         #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        let (lines, non_ascii_chars) = self::scalar::scan_scalar(&text);
+        let (lines, non_ascii_chars) = self::scalar::scan_scalar(text);
 
         Self {
             lines,
             non_ascii_chars,
-            text,
             len,
         }
     }
@@ -50,11 +48,6 @@ impl LineIndex {
         T: LocationConvert,
     {
         value.convert(self)
-    }
-
-    #[inline]
-    pub fn text(&self) -> &str {
-        &self.text
     }
 }
 
@@ -129,7 +122,7 @@ impl LocationConvert for Position {
                 } else {
                     None
                 }
-            } else if (offset as usize) <= line_index.text().len() {
+            } else if offset <= line_index.len {
                 Some(TextSize::new(offset))
             } else {
                 None
@@ -242,7 +235,7 @@ mod tests {
       (i32.const 1)
       (i32.const 2))))
 ";
-        let line_index = LineIndex::new(text.into());
+        let line_index = LineIndex::new(text);
         assert_eq!(
             line_index.convert(Position { line: 4, character: 18 }).unwrap(),
             TextSize::new(109),
@@ -276,7 +269,7 @@ mod tests {
       (i32.const 1)
       (i32.const 2))))
 ";
-        let line_index = LineIndex::new(text.into());
+        let line_index = LineIndex::new(text);
         assert_eq!(
             line_index.convert(TextSize::new(93)).unwrap(),
             Position { line: 5, character: 1 },
@@ -331,7 +324,7 @@ mod tests {
       (i32.const 1)
       (i32.const 2))))
 ";
-        let line_index = LineIndex::new(text.into());
+        let line_index = LineIndex::new(text);
         assert_eq!(
             line_index.convert(Position { line: 5, character: 1 }).unwrap(),
             TextSize::new(93),
@@ -391,7 +384,7 @@ mod tests {
       (i32.const 1)
       (i32.const 2))))
 ";
-        let line_index = LineIndex::new(text.into());
+        let line_index = LineIndex::new(text);
         assert!(
             line_index
                 .convert(Range {
@@ -404,7 +397,7 @@ mod tests {
 
     #[test]
     fn crlf() {
-        let line_index = LineIndex::new("(;;)\r\n(module)".into());
+        let line_index = LineIndex::new("(;;)\r\n(module)");
         assert_eq!(
             line_index.convert(Position { line: 0, character: 4 }).unwrap(),
             TextSize::new(4),
@@ -414,7 +407,7 @@ mod tests {
             TextSize::new(5),
         );
 
-        let line_index = LineIndex::new("(;😈🍔;)\r\n(module)".into());
+        let line_index = LineIndex::new("(;😈🍔;)\r\n(module)");
         assert_eq!(
             line_index.convert(Position { line: 0, character: 6 }).unwrap(),
             TextSize::new(10),

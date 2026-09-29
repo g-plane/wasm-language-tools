@@ -14,7 +14,7 @@ impl LanguageService {
         let configs = self.configs.read();
         let config = configs.get(&params.text_document.uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
-        let old = line_index.text();
+        let old = document.text(self);
         let new = wat_formatter::format(
             document.root(self),
             &build_options(&params.options, config.format.clone()),
