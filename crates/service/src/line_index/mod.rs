@@ -65,13 +65,16 @@ pub trait LocationConvert {
 impl LocationConvert for TextSize {
     type Out = Option<Position>;
     fn convert(&self, line_index: &LineIndex) -> Self::Out {
+        let offset = u32::from(*self);
+        if offset > line_index.len {
+            return None;
+        }
         let point = line_index.lines.partition_point(|line| *line <= u32::from(*self));
         let (line, line_start) = if let Some(index) = point.checked_sub(1) {
             (index as u32, line_index.lines.get(index)?)
         } else {
             return Some(Position { line: 0, character: 0 });
         };
-        let offset = u32::from(*self);
         if line_index.non_ascii_chars.is_empty() {
             Some(Position {
                 line,
@@ -295,15 +298,7 @@ mod tests {
             line_index.convert(TextSize::new(137)).unwrap(),
             Position { line: 7, character: 0 },
         );
-
-        assert!(
-            line_index
-                .convert(Position {
-                    line: 5,
-                    character: u32::MAX
-                })
-                .is_none(),
-        );
+        assert!(line_index.convert(TextSize::new(text.len() as u32 + 20)).is_none());
     }
 
     #[test]
@@ -363,6 +358,14 @@ mod tests {
         assert_eq!(
             line_index.convert(Position { line: 15, character: 0 }).unwrap(),
             TextSize::new(309),
+        );
+        assert!(
+            line_index
+                .convert(Position {
+                    line: 5,
+                    character: u32::MAX
+                })
+                .is_none(),
         );
     }
 
