@@ -1,23 +1,24 @@
+use super::NonAsciiChar;
 use std::arch::aarch64::*;
 
 static BIT_VALUES: [u8; 16] = [1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128];
 
+const CHUNK_SIZE: usize = 16;
+
 #[target_feature(enable = "neon")]
-pub unsafe fn scan_neon(text: &str) -> (Vec<u32>, bool) {
+pub unsafe fn scan_neon(text: &str) -> (Vec<u32>, Vec<NonAsciiChar>) {
     let bit_values = unsafe { vld1q_u8(BIT_VALUES.as_ptr()) };
     let newline = vdupq_n_u8(b'\n');
 
     let mut indices = vec![0];
-    let mut fully_ascii = true;
+    let mut non_ascii_chars = vec![];
 
     let bytes = text.as_bytes();
     let len = bytes.len();
     let mut i = 0;
-    while i + 16 <= len {
+    while i + CHUNK_SIZE <= len {
         let chunk = unsafe { vld1q_u8(bytes.as_ptr().add(i)) };
         let test_newline = vceqq_u8(chunk, newline);
-        let test_ascii = vshrq_n_u8::<7>(chunk);
-
         if vmaxvq_u8(test_newline) != 0 {
             let mask = vandq_u8(test_newline, bit_values);
             let lo = vaddv_u8(vget_low_u8(mask));
@@ -29,19 +30,43 @@ pub unsafe fn scan_neon(text: &str) -> (Vec<u32>, bool) {
             }
         }
 
-        fully_ascii &= vmaxvq_u8(test_ascii) == 0;
-
-        i += 16;
-    }
-
-    while let Some(byte) = bytes.get(i) {
-        if *byte == b'\n' {
-            indices.push(i as u32 + 1);
-        } else {
-            fully_ascii &= byte.is_ascii();
+        if !vmaxvq_u8(chunk).is_ascii()
+            && let Some(text) = text.get(i..)
+        {
+            std::hint::cold_path();
+            text.char_indices()
+                .take_while(|(index, _)| *index < CHUNK_SIZE)
+                .filter(|(_, char)| !char.is_ascii())
+                .for_each(|(index, char)| {
+                    let utf8_width = char.len_utf8();
+                    non_ascii_chars.push(NonAsciiChar {
+                        offset: (i + index) as u32,
+                        utf8_width: utf8_width as u8,
+                        utf16_width: char.len_utf16() as u8,
+                    });
+                    // for the case that the non-ASCII character is split across two chunks
+                    if let Some(extra) = (index + utf8_width).checked_sub(CHUNK_SIZE) {
+                        i += extra;
+                    }
+                });
         }
-        i += 1;
+
+        i += CHUNK_SIZE;
     }
 
-    (indices, fully_ascii)
+    if let Some(text) = text.get(i..) {
+        text.char_indices().for_each(|(index, char)| {
+            if char == '\n' {
+                indices.push((i + index + 1) as u32);
+            } else if !char.is_ascii() {
+                non_ascii_chars.push(NonAsciiChar {
+                    offset: (i + index) as u32,
+                    utf8_width: char.len_utf8() as u8,
+                    utf16_width: char.len_utf16() as u8,
+                });
+            }
+        });
+    }
+
+    (indices, non_ascii_chars)
 }

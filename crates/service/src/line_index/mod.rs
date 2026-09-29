@@ -1,5 +1,5 @@
 use lspt::{Position, Range};
-use std::ops::ControlFlow;
+use std::{cmp::Ordering, ops::ControlFlow};
 use wat_syntax::{TextRange, TextSize};
 
 #[cfg(target_arch = "aarch64")]
@@ -11,32 +11,36 @@ mod x86_64;
 #[derive(Clone, Debug)]
 pub struct LineIndex {
     lines: Vec<u32>,
-    fully_ascii: bool,
+    non_ascii_chars: Vec<NonAsciiChar>,
     text: String,
+    len: u32,
 }
 impl LineIndex {
     pub fn new(text: String) -> Self {
+        let len = u32::try_from(text.len()).expect("text len must be less than 4 GiB");
+
         #[cfg(target_arch = "x86_64")]
-        let (lines, fully_ascii) = if std::arch::is_x86_feature_detected!("avx2") {
+        let (lines, non_ascii_chars) = if std::arch::is_x86_feature_detected!("avx2") {
             // SAFETY: AVX2 support is checked
             unsafe { self::x86_64::scan_avx2(&text) }
         } else {
             self::scalar::scan_scalar(&text)
         };
         #[cfg(target_arch = "aarch64")]
-        let (lines, fully_ascii) = if std::arch::is_aarch64_feature_detected!("neon") {
+        let (lines, non_ascii_chars) = if std::arch::is_aarch64_feature_detected!("neon") {
             // SAFETY: NEON support is checked
             unsafe { self::aarch64::scan_neon(&text) }
         } else {
             self::scalar::scan_scalar(&text)
         };
         #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        let (lines, fully_ascii) = self::scalar::scan_scalar(&text);
+        let (lines, non_ascii_chars) = self::scalar::scan_scalar(&text);
 
         Self {
             lines,
-            fully_ascii,
+            non_ascii_chars,
             text,
+            len,
         }
     }
 
@@ -54,6 +58,13 @@ impl LineIndex {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct NonAsciiChar {
+    offset: u32,
+    utf8_width: u8,
+    utf16_width: u8,
+}
+
 pub trait LocationConvert {
     type Out;
     fn convert(&self, line_index: &LineIndex) -> Self::Out;
@@ -67,19 +78,30 @@ impl LocationConvert for TextSize {
         } else {
             return Some(Position { line: 0, character: 0 });
         };
-        if line_index.fully_ascii {
+        let offset = u32::from(*self);
+        if line_index.non_ascii_chars.is_empty() {
             Some(Position {
                 line,
-                character: u32::from(*self) - line_start,
+                character: offset - line_start,
             })
         } else {
+            let from = line_index
+                .non_ascii_chars
+                .partition_point(|char| char.offset < *line_start);
             line_index
-                .text
-                .get(*line_start as usize..usize::from(*self))
-                .map(|content| Position {
-                    line,
-                    character: content.encode_utf16().count() as u32,
+                .non_ascii_chars
+                .get(from..)?
+                .iter()
+                .take_while(|char| char.offset < offset)
+                .try_fold(offset - line_start, |col, char| {
+                    if offset < char.offset + char.utf8_width as u32 {
+                        // invalid UTF-8 boundary
+                        None
+                    } else {
+                        Some(col + char.utf16_width as u32 - char.utf8_width as u32)
+                    }
                 })
+                .map(|character| Position { line, character })
         }
     }
 }
@@ -99,8 +121,8 @@ impl LocationConvert for Position {
             .lines
             .get(self.line as usize + 1)
             .map(|offset| *offset as usize);
-        if line_index.fully_ascii {
-            let offset = line_start + self.character;
+        if line_index.non_ascii_chars.is_empty() {
+            let offset = line_start.checked_add(self.character)?;
             if let Some(next_line_start) = next_line_start {
                 if (offset as usize) < next_line_start {
                     Some(TextSize::new(offset))
@@ -113,20 +135,39 @@ impl LocationConvert for Position {
                 None
             }
         } else {
-            let content = line_index
-                .text
-                .get(*line_start as usize..next_line_start.unwrap_or(line_index.text().len()))?;
-            match content.char_indices().try_fold(0, |acc, (bytes, char)| {
-                if acc == self.character {
-                    ControlFlow::Break(bytes)
-                } else {
-                    ControlFlow::Continue(acc + char.len_utf16() as u32)
-                }
-            }) {
-                ControlFlow::Break(byte_col) => Some(TextSize::new(*line_start + byte_col as u32)),
-                ControlFlow::Continue(byte_col) => {
-                    if next_line_start.is_none() && byte_col as usize == content.len() {
-                        Some(TextSize::new(*line_start + byte_col))
+            let line_end = next_line_start.map_or(line_index.len, |offset| offset as u32 - 1);
+            let from = line_index
+                .non_ascii_chars
+                .partition_point(|char| char.offset < *line_start);
+            match line_index
+                .non_ascii_chars
+                .get(from..)?
+                .iter()
+                .take_while(|char| char.offset < line_end)
+                .try_fold((*line_start, 0), |(offset, col), char| {
+                    // all chars between non-ASCII chars are ASCII
+                    let ascii_len = char.offset - offset;
+                    // calculate the UTF-16 column of current char
+                    let col_before_current = col + ascii_len;
+                    if self.character <= col_before_current {
+                        ControlFlow::Break(Some(offset + (self.character - col)))
+                    } else {
+                        let offset_after_current = char.offset + char.utf8_width as u32;
+                        let col_after_current = col_before_current + char.utf16_width as u32;
+                        match self.character.cmp(&col_after_current) {
+                            Ordering::Less => ControlFlow::Break(None), // invalid UTF-16 boundary
+                            Ordering::Equal => ControlFlow::Break(Some(offset_after_current)),
+                            Ordering::Greater => ControlFlow::Continue((offset_after_current, col_after_current)),
+                        }
+                    }
+                }) {
+                ControlFlow::Break(Some(offset)) => Some(TextSize::new(offset)),
+                ControlFlow::Break(None) => None,
+                ControlFlow::Continue((offset, col)) => {
+                    let ascii_len = line_end - offset;
+                    let col_line_end = col + ascii_len;
+                    if self.character <= col_line_end {
+                        Some(TextSize::new(offset + (self.character - col)))
                     } else {
                         None
                     }
@@ -140,7 +181,11 @@ impl LocationConvert for Range {
     fn convert(&self, line_index: &LineIndex) -> Self::Out {
         let start = self.start.convert(line_index)?;
         let end = self.end.convert(line_index)?;
-        Some(TextRange::new(start, end))
+        if start <= end {
+            Some(TextRange::new(start, end))
+        } else {
+            None
+        }
     }
 }
 
@@ -153,7 +198,7 @@ mod tests {
         #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         let text = "(module
   (type $t (func))
-  (table $t1 10 (ref null func))
+  (;😈;)(table $t1 10 (ref null func))
   (table $t2 10 (ref null $t))
   (elem $el funcref)
   (func $f
@@ -257,6 +302,15 @@ mod tests {
             line_index.convert(TextSize::new(137)).unwrap(),
             Position { line: 7, character: 0 },
         );
+
+        assert!(
+            line_index
+                .convert(Position {
+                    line: 5,
+                    character: u32::MAX
+                })
+                .is_none(),
+        );
     }
 
     #[test]
@@ -287,9 +341,19 @@ mod tests {
             TextSize::new(94),
         );
         assert_eq!(
+            line_index.convert(Position { line: 6, character: 11 }).unwrap(),
+            TextSize::new(124),
+        );
+        assert_eq!(
+            line_index.convert(Position { line: 6, character: 13 }).unwrap(),
+            TextSize::new(126),
+        );
+        assert!(line_index.convert(Position { line: 6, character: 14 }).is_none());
+        assert_eq!(
             line_index.convert(Position { line: 6, character: 15 }).unwrap(),
             TextSize::new(130),
         );
+        assert!(line_index.convert(Position { line: 6, character: 16 }).is_none());
         assert_eq!(
             line_index.convert(Position { line: 6, character: 17 }).unwrap(),
             TextSize::new(134),
@@ -306,6 +370,58 @@ mod tests {
         assert_eq!(
             line_index.convert(Position { line: 15, character: 0 }).unwrap(),
             TextSize::new(309),
+        );
+    }
+
+    #[test]
+    fn range() {
+        let text = "
+(module
+  (type $t (func))
+  (table $t1 10 (ref null func))
+  (table $t2 10 (ref null $t))
+  (elem $el funcref)
+  (func $f (;😈🍔;)
+    (table.init $t1 $el
+      (i32.const 0)
+      (i32.const 1)
+      (i32.const 2))
+    (table.copy $t1 $t2
+      (i32.const 0)
+      (i32.const 1)
+      (i32.const 2))))
+";
+        let line_index = LineIndex::new(text.into());
+        assert!(
+            line_index
+                .convert(Range {
+                    start: Position { line: 5, character: 2 },
+                    end: Position { line: 5, character: 1 }
+                })
+                .is_none(),
+        );
+    }
+
+    #[test]
+    fn crlf() {
+        let line_index = LineIndex::new("(;;)\r\n(module)".into());
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 4 }).unwrap(),
+            TextSize::new(4),
+        );
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 5 }).unwrap(),
+            TextSize::new(5),
+        );
+
+        let line_index = LineIndex::new("(;😈🍔;)\r\n(module)".into());
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 6 }).unwrap(),
+            TextSize::new(10),
+        );
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 7 }).unwrap(),
+            TextSize::new(11),
         );
     }
 }
