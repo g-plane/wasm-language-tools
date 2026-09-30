@@ -17,29 +17,44 @@ pub struct LineIndex {
 impl LineIndex {
     pub fn new(text: &str) -> Self {
         let len = u32::try_from(text.len()).expect("text len must be less than 4 GiB");
-
-        #[cfg(target_arch = "x86_64")]
-        let (lines, non_ascii_chars) = if std::arch::is_x86_feature_detected!("avx2") {
-            // SAFETY: AVX2 support is checked
-            unsafe { self::x86_64::scan_avx2(text) }
-        } else {
-            self::scalar::scan_scalar(text)
-        };
-        #[cfg(target_arch = "aarch64")]
-        let (lines, non_ascii_chars) = if std::arch::is_aarch64_feature_detected!("neon") {
-            // SAFETY: NEON support is checked
-            unsafe { self::aarch64::scan_neon(text) }
-        } else {
-            self::scalar::scan_scalar(text)
-        };
-        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        let (lines, non_ascii_chars) = self::scalar::scan_scalar(text);
-
+        let (lines, non_ascii_chars) = scan(text);
         Self {
             lines,
             non_ascii_chars,
             len,
         }
+    }
+
+    pub fn modify(&mut self, range: TextRange, new_text: &str) {
+        let start = u32::from(range.start());
+        let end = u32::from(range.end());
+        let changed = (new_text.len() as u32).wrapping_sub(end - start);
+        let (lines, non_ascii_chars) = scan(new_text);
+        let lines = &lines[1..];
+
+        let from = self.lines.partition_point(|line| *line <= start);
+        let to = self.lines.partition_point(|line| *line <= end);
+        if let Some(lines) = self.lines.get_mut(to..) {
+            lines.iter_mut().for_each(|line| *line = line.wrapping_add(changed));
+        }
+        self.lines.splice(from..to, lines.iter().map(|line| *line + start));
+
+        let from = self.non_ascii_chars.partition_point(|char| char.offset < start);
+        let to = self.non_ascii_chars.partition_point(|char| char.offset < end);
+        if let Some(non_ascii_chars) = self.non_ascii_chars.get_mut(to..) {
+            non_ascii_chars
+                .iter_mut()
+                .for_each(|char| char.offset = char.offset.wrapping_add(changed));
+        }
+        self.non_ascii_chars.splice(
+            from..to,
+            non_ascii_chars.into_iter().map(|mut char| {
+                char.offset += start;
+                char
+            }),
+        );
+
+        self.len = self.len.wrapping_add(changed);
     }
 
     #[inline]
@@ -56,6 +71,25 @@ struct NonAsciiChar {
     offset: u32,
     utf8_width: u8,
     utf16_width: u8,
+}
+
+fn scan(text: &str) -> (Vec<u32>, Vec<NonAsciiChar>) {
+    #[cfg(target_arch = "x86_64")]
+    if std::arch::is_x86_feature_detected!("avx2") {
+        // SAFETY: AVX2 support is checked
+        unsafe { self::x86_64::scan_avx2(text) }
+    } else {
+        self::scalar::scan_scalar(text)
+    }
+    #[cfg(target_arch = "aarch64")]
+    if std::arch::is_aarch64_feature_detected!("neon") {
+        // SAFETY: NEON support is checked
+        unsafe { self::aarch64::scan_neon(text) }
+    } else {
+        self::scalar::scan_scalar(text)
+    }
+    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+    self::scalar::scan_scalar(text)
 }
 
 pub trait LocationConvert {
@@ -418,6 +452,106 @@ mod tests {
         assert_eq!(
             line_index.convert(Position { line: 0, character: 7 }).unwrap(),
             TextSize::new(11),
+        );
+    }
+
+    #[test]
+    fn modify() {
+        let text = "
+(module
+  (type $t (func))
+  (table $t1 10 (ref null func))
+  (table $t2 10 (ref null $t))
+  (elem $el funcref)
+  (func $f (;😈🍔;)
+    (table.init $t1 $el
+      (i32.const 0)
+      (i32.const 1)
+      (i32.const 2))
+    (table.copy $t1 $t2
+      (i32.const 0)
+      (i32.const 1)
+      (i32.const 2))))
+";
+        let mut line_index = LineIndex::new(text);
+        line_index.modify(TextRange::new(TextSize::new(74), TextSize::new(76)), "200");
+        assert_eq!(
+            line_index.convert(TextSize::new(101)).unwrap(),
+            Position { line: 5, character: 8 },
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(136)).unwrap(),
+            Position { line: 6, character: 18 },
+        );
+
+        line_index.modify(
+            TextRange::new(TextSize::new(74), TextSize::new(77)),
+            "10\n    (;🍔;)\n    200",
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(136)).unwrap(),
+            Position { line: 8, character: 2 },
+        );
+
+        line_index.modify(
+            TextRange::new(TextSize::new(82), TextSize::new(108)),
+            "300\n    (;😈;)\n    ",
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(136)).unwrap(),
+            Position { line: 9, character: 7 },
+        );
+
+        let mut line_index = LineIndex::new("a\n😈\nb\n");
+        line_index.modify(TextRange::new(TextSize::new(1), TextSize::new(1)), "🍔\n");
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 3 }).unwrap(),
+            TextSize::new(5),
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(12)).unwrap(),
+            Position { line: 3, character: 0 },
+        );
+
+        line_index.modify(TextRange::new(TextSize::new(5), TextSize::new(11)), "");
+        assert_eq!(
+            line_index.convert(Position { line: 1, character: 0 }).unwrap(),
+            TextSize::new(6),
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(7)).unwrap(),
+            Position { line: 1, character: 1 },
+        );
+
+        line_index.modify(TextRange::new(TextSize::new(1), TextSize::new(5)), "word");
+        assert_eq!(
+            line_index.convert(Position { line: 1, character: 0 }).unwrap(),
+            TextSize::new(6),
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(5)).unwrap(),
+            Position { line: 0, character: 5 },
+        );
+        line_index.modify(TextRange::new(TextSize::new(1), TextSize::new(5)), "😈");
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 3 }).unwrap(),
+            TextSize::new(5),
+        );
+        assert_eq!(
+            line_index.convert(TextSize::new(6)).unwrap(),
+            Position { line: 1, character: 0 },
+        );
+
+        let mut line_index = LineIndex::new("a\nb");
+        line_index.modify(TextRange::new(TextSize::new(2), TextSize::new(2)), "x");
+        assert_eq!(
+            line_index.convert(Position { line: 1, character: 0 }).unwrap(),
+            TextSize::new(2),
+        );
+        line_index.modify(TextRange::new(TextSize::new(0), TextSize::new(0)), "x");
+        assert_eq!(
+            line_index.convert(Position { line: 0, character: 0 }).unwrap(),
+            TextSize::new(0),
         );
     }
 }

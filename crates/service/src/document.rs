@@ -56,13 +56,13 @@ impl LanguageService {
         let Some(document) = self.get_document(uri) else {
             return;
         };
+        let mut line_index = document.line_index(self).clone();
         'single: {
             // only do incremental parsing for single change
             if let [TextDocumentContentChangeEvent::Partial(partial)] = &*params.content_changes {
                 if !partial.text.bytes().all(is_safe_for_incremental) {
                     break 'single;
                 }
-                let line_index = document.line_index(self);
                 let Some(range) = line_index.convert(partial.range) else {
                     break 'single;
                 };
@@ -122,7 +122,8 @@ impl LanguageService {
                 });
                 all_errors.append(&mut partial_errors);
 
-                document.set_line_index(self).to(LineIndex::new(&text));
+                line_index.modify(range, &partial.text);
+                document.set_line_index(self).to(line_index);
                 document.set_text(self).to(text);
                 document.set_root(self).to(replaced_root);
                 document.set_syntax_errors(self).to(all_errors);
@@ -132,13 +133,12 @@ impl LanguageService {
             }
         }
 
-        let mut line_index = document.line_index(self).clone();
         let mut text = document.text(self).to_owned();
         params.content_changes.into_iter().for_each(|change| match change {
             TextDocumentContentChangeEvent::Partial(partial) => {
                 if let Some(range) = line_index.convert(partial.range) {
                     text.replace_range::<Range<usize>>(range.start().into()..range.end().into(), &partial.text);
-                    line_index = LineIndex::new(&text);
+                    line_index.modify(range, &partial.text);
                 }
             }
             TextDocumentContentChangeEvent::WholeDocument(whole) => {
