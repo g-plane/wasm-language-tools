@@ -26,6 +26,14 @@ impl GreenToken {
     }
 
     #[inline]
+    /// Create a new token that will never be dropped.
+    pub fn new_leaked(kind: SyntaxKind, text: &str) -> Self {
+        let token = Self::new(kind, text);
+        token.data.mark_as_intentionally_leaked();
+        token
+    }
+
+    #[inline]
     /// Kind of this token.
     pub fn kind(&self) -> SyntaxKind {
         self.data.header.kind

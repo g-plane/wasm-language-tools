@@ -51,6 +51,18 @@ impl GreenNode {
     }
 
     #[inline]
+    /// Create a green node that will never be dropped.
+    pub fn new_leaked<I>(kind: SyntaxKind, children: I) -> GreenNode
+    where
+        I: IntoIterator<Item = NodeOrToken<GreenNode, GreenToken>>,
+        I::IntoIter: ExactSizeIterator,
+    {
+        let node = Self::new(kind, children);
+        node.data.mark_as_intentionally_leaked();
+        node
+    }
+
+    #[inline]
     /// Kind of this node.
     pub fn kind(&self) -> SyntaxKind {
         self.data.header.kind
