@@ -249,7 +249,7 @@ impl Parser<'_, '_> {
         }
         let keyword = self.lexer.keyword("pagesize")?;
         self.add_child(keyword);
-        if !self.retry(|parser| parser.expect(UNSIGNED_INT)) {
+        if !self.recover(|parser| parser.expect(UNSIGNED_INT)) {
             self.report_missing(Message::Name("unsigned integer"));
         }
         self.expect_right_paren();

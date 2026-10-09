@@ -188,28 +188,16 @@ error: expected string
 8 │   (func (export $xx))
   │                 ^^^
 
-error: expected export name
-  ┌─ exports-malformed.wat:8:20
-  │
-8 │   (func (export $xx))
-  │                    ^
-
 error: unterminated string
   ┌─ exports-malformed.wat:9:17
   │
 9 │   (func (export "func
   │                 ^^^^^
 
-error: unterminated string
+error: unexpected token
    ┌─ exports-malformed.wat:10:3
    │
 10 │   "
-   │   ^
-
-error: expected export name
-   ┌─ exports-malformed.wat:11:3
-   │
-11 │   ))
    │   ^
 
 error: export must come before import

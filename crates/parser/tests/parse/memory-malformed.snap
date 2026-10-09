@@ -185,12 +185,6 @@ error: expected unsigned integer
 9 │   (memory 0 (pagesize $1))
   │                       ^^
 
-error: expected unsigned integer
-  ┌─ memory-malformed.wat:9:25
-  │
-9 │   (memory 0 (pagesize $1))
-  │                         ^
-
 error: expected share keyword to be `shared` or `unshared`
    ┌─ memory-malformed.wat:10:15
    │

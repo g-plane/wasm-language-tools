@@ -80,7 +80,7 @@ impl Parser<'_, '_> {
     }
 
     fn parse_export(&mut self, mark: NodeMark) -> GreenNode {
-        if !self.retry(Self::parse_name) {
+        if !self.recover(Self::parse_name) {
             self.report_missing(Message::Name("export name"));
         }
         self.expect_right_paren();
@@ -126,10 +126,10 @@ impl Parser<'_, '_> {
     }
 
     fn parse_import(&mut self, mark: NodeMark) -> GreenNode {
-        if !self.retry(Self::parse_module_name) {
+        if !self.recover(Self::parse_module_name) {
             self.report_missing(Message::Name("import module name"));
         }
-        if !self.retry(Self::parse_name) {
+        if !self.recover(Self::parse_name) {
             self.report_missing(Message::Name("import name"));
         }
         self.expect_right_paren();
