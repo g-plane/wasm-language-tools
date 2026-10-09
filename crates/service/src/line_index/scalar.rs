@@ -10,8 +10,8 @@ pub fn scan_scalar(text: &str) -> (Vec<u32>, Vec<NonAsciiChar>) {
         } else if !char.is_ascii() {
             non_ascii_chars.push(NonAsciiChar {
                 offset: index as u32,
-                utf8_width: char.len_utf8() as u8,
-                utf16_width: char.len_utf16() as u8,
+                utf8_len: char.len_utf8() as u8,
+                utf16_len: char.len_utf16() as u8,
             });
         }
     });

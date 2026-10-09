@@ -69,8 +69,8 @@ impl LineIndex {
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct NonAsciiChar {
     offset: u32,
-    utf8_width: u8,
-    utf16_width: u8,
+    utf8_len: u8,
+    utf16_len: u8,
 }
 
 fn scan(text: &str) -> (Vec<u32>, Vec<NonAsciiChar>) {
@@ -124,11 +124,11 @@ impl LocationConvert for TextSize {
                 .iter()
                 .take_while(|char| char.offset < offset)
                 .try_fold(offset - line_start, |col, char| {
-                    if offset < char.offset + char.utf8_width as u32 {
+                    if offset < char.offset + char.utf8_len as u32 {
                         // invalid UTF-8 boundary
                         None
                     } else {
-                        Some(col + char.utf16_width as u32 - char.utf8_width as u32)
+                        Some(col + char.utf16_len as u32 - char.utf8_len as u32)
                     }
                 })
                 .map(|character| Position { line, character })
@@ -182,8 +182,8 @@ impl LocationConvert for Position {
                     if self.character <= col_before_current {
                         ControlFlow::Break(Some(offset + (self.character - col)))
                     } else {
-                        let offset_after_current = char.offset + char.utf8_width as u32;
-                        let col_after_current = col_before_current + char.utf16_width as u32;
+                        let offset_after_current = char.offset + char.utf8_len as u32;
+                        let col_after_current = col_before_current + char.utf16_len as u32;
                         match self.character.cmp(&col_after_current) {
                             Ordering::Less => ControlFlow::Break(None), // invalid UTF-16 boundary
                             Ordering::Equal => ControlFlow::Break(Some(offset_after_current)),

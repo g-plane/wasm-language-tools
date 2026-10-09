@@ -31,14 +31,14 @@ pub unsafe fn scan_avx2(text: &str) -> (Vec<u32>, Vec<NonAsciiChar>) {
                 .take_while(|(index, _)| *index < CHUNK_SIZE)
                 .filter(|(_, char)| !char.is_ascii())
                 .for_each(|(index, char)| {
-                    let utf8_width = char.len_utf8();
+                    let utf8_len = char.len_utf8();
                     non_ascii_chars.push(NonAsciiChar {
                         offset: (i + index) as u32,
-                        utf8_width: utf8_width as u8,
-                        utf16_width: char.len_utf16() as u8,
+                        utf8_len: utf8_len as u8,
+                        utf16_len: char.len_utf16() as u8,
                     });
                     // for the case that the non-ASCII character is split across two chunks
-                    if let Some(extra) = (index + utf8_width).checked_sub(CHUNK_SIZE) {
+                    if let Some(extra) = (index + utf8_len).checked_sub(CHUNK_SIZE) {
                         i += extra;
                     }
                 });
@@ -54,8 +54,8 @@ pub unsafe fn scan_avx2(text: &str) -> (Vec<u32>, Vec<NonAsciiChar>) {
             } else if !char.is_ascii() {
                 non_ascii_chars.push(NonAsciiChar {
                     offset: (i + index) as u32,
-                    utf8_width: char.len_utf8() as u8,
-                    utf16_width: char.len_utf16() as u8,
+                    utf8_len: char.len_utf8() as u8,
+                    utf16_len: char.len_utf16() as u8,
                 });
             }
         });
