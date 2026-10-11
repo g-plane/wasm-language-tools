@@ -546,6 +546,19 @@ fn data_used() {
 }
 
 #[test]
+fn data_active() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (data (i32.const 0)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn elem_unused() {
     let uri = "untitled:test".to_string();
     let source = r#"
@@ -583,6 +596,19 @@ fn elem_declare() {
   (elem declare func $f)
   (func $f))
 ";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn elem_active() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (elem (i32.const 0)))
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));

@@ -41,9 +41,7 @@ pub fn check(
                 | SymbolKind::MemoryDef
                 | SymbolKind::TableDef
                 | SymbolKind::FieldDef
-                | SymbolKind::TagDef
-                | SymbolKind::DataDef
-                | SymbolKind::ElemDef => {
+                | SymbolKind::TagDef => {
                     if used.contains(&i) || has_export(symbol) || is_prefixed_with_underscore(db, symbol) {
                         None
                     } else {
@@ -56,6 +54,17 @@ pub fn check(
                         || is_prefixed_with_underscore(db, symbol)
                         || imports.contains(&symbol.region)
                         || symbol.region.kind() == SyntaxKind::TYPE_DEF
+                    {
+                        None
+                    } else {
+                        let range = helpers::syntax::infer_def_poi(symbol.amber());
+                        Some(report(db, range, severity, symbol))
+                    }
+                }
+                SymbolKind::DataDef | SymbolKind::ElemDef => {
+                    if used.contains(&i)
+                        || is_prefixed_with_underscore(db, symbol)
+                        || symbol.amber().children_by_kind(SyntaxKind::OFFSET).next().is_some()
                     {
                         None
                     } else {
