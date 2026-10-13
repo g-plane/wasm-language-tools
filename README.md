@@ -27,7 +27,7 @@ Smart, zero-config tooling for confident WebAssembly development:
 - 🔧 **Smart Code Actions**  \
   Provides around 20 practical code actions to assist with quick fixes, refactoring, and code improvements.
 - ⚡ **Near-instant Feedback**  \
-  Deeply tuned and heavily optimized — silky smooth even on huge modules.
+  Deeply tuned and heavily optimized — silky smooth even on huge modules. [See benchmark.](https://github.com/g-plane/wasm-language-tools/discussions/60)
 - 💡 **Full Editor Experience**  \
   Code completion, hover, go-to-definition, find references, rename and more work out of the box in VS Code, Zed, Neovim, Emacs, and Helix.
 
