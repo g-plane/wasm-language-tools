@@ -15,7 +15,7 @@ It delivers deep and smart static analysis, precise type checking, and full-feat
 Smart, zero-config tooling for confident WebAssembly development:
 
 - 🌐 **WebAssembly 3.0 Ready**  \
-  Full core spec support (GC, exceptions, etc.) and ongoing Phase 4 & 3 proposals — code with tomorrow's standards today.
+  Full core spec support (GC, exceptions, etc.) and ongoing Phase 4 & 3 proposals — code with tomorrow's standards today. [See supported features.](https://wasm-language-tools.netlify.app/guide/introduction.html#supported-webassembly-features)
 - 🔍 **Deep Semantic Checks**  \
   Powered by Control Flow Analysis (CFA) for precise unreachable code detection, along with checks for uninitialized locals, written-but-never-read locals, and undefined and unused items.
 - ⚖️ **Precise Type Safety**  \
