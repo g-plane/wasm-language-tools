@@ -425,6 +425,7 @@ impl LanguageService {
 
 #[wasm_bindgen(js_name = "debugSyntaxTree")]
 pub fn debug_syntax_tree(code: String) -> String {
+    console_error_panic_hook::set_once();
     format!("{:?}", SyntaxNode::new_root(&wat_parser::parse(&code).0))
 }
 
@@ -433,5 +434,6 @@ pub fn format(
     code: String,
     #[wasm_bindgen(unchecked_param_type = "FormatOptions")] options: JsValue,
 ) -> Result<String, Error> {
+    console_error_panic_hook::set_once();
     serde_wasm_bindgen::from_value(options).map(|options| wat_formatter::format(&wat_parser::parse(&code).0, &options))
 }
