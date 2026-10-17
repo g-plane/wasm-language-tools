@@ -54,6 +54,7 @@ pub struct LanguageService {
 
 impl Default for LanguageService {
     fn default() -> Self {
+        console_error_panic_hook::set_once();
         Self {
             inner: wat_service::LanguageService::default(),
             serializer: Serializer::json_compatible(),
