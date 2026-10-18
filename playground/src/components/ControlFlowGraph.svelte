@@ -11,7 +11,7 @@
     onNodeRangeChange: (start: number, end: number) => void,
   } = $props()
   let el: HTMLDivElement
-  let graphviz: ReturnType<typeof import('d3-graphviz')['graphviz']> | undefined = $state()
+  let graphviz: ReturnType<typeof import('d3-graphviz')['graphviz']> | undefined = $state.raw()
   let hasGraph = $state(false)
 
   $effect(() => {

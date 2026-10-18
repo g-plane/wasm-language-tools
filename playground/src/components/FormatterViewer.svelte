@@ -9,7 +9,7 @@
     options: FormatOptions,
   } = $props()
   let el: HTMLDivElement
-  let editor: IStandaloneCodeEditor | undefined = $state()
+  let editor: IStandaloneCodeEditor | undefined = $state.raw()
 
   $effect(() => {
     editor?.setValue(format(sourceCode, options))

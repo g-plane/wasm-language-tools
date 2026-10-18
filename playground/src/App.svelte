@@ -13,7 +13,7 @@
   import { resources } from './resources.js'
 
   let sourceCode = $state('')
-  let cursorPos: Position | null = $state(null)
+  let cursorPos: Position | null = $state.raw(null)
   let selectedRange: { start: number, end: number } | null = $state(null)
 
   function changeSelectedRange(start: number, end: number) {

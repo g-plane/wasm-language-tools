@@ -16,8 +16,8 @@
     onCursorPositionChange: (position: Position) => void,
   } = $props()
   let el: HTMLDivElement
-  let model: ITextModel | undefined = $state()
-  let editor: IStandaloneCodeEditor | undefined = $state()
+  let model: ITextModel | undefined = $state.raw()
+  let editor: IStandaloneCodeEditor | undefined = $state.raw()
 
   $effect(() => {
     if (model && value !== model.getValue()) {

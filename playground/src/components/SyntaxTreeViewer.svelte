@@ -9,7 +9,7 @@
     onNodeRangeChange: (start: number, end: number) => void,
   } = $props()
   let el: HTMLDivElement
-  let editor: IStandaloneCodeEditor | undefined = $state()
+  let editor: IStandaloneCodeEditor | undefined = $state.raw()
 
   $effect(() => {
     editor?.setValue(debugSyntaxTree(sourceCode))
