@@ -25,7 +25,7 @@
   onMount(() => {
     graphviz = d3Graphviz.graphviz(el, { useWorker: false })
     return () => {
-      ;(graphviz as { destroy(): unknown } | undefined)?.destroy()
+      graphviz?.destroy()
     }
   })
 
