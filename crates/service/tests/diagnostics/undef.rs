@@ -151,6 +151,9 @@ fn memory_undefined() {
     drop
     i32.const 0
     i32.load 0
+    drop
+    i32.const 0
+    i32.atomic.load
     drop)
   (export "" (memory 0)))
 "#;

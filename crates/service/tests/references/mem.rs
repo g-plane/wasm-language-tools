@@ -18,6 +18,12 @@ fn memory_def_int_idx() {
         (memory.copy 0 1)
         (memory.init 0 0))
     (data (memory 0))
+    (func
+        memory.atomic.notify
+        memory.atomic.wait64
+        i32.atomic.load
+        i64.atomic.store8
+        i32.atomic.rmw8.and_u)
 )
 (module (memory))
 "#;
@@ -45,6 +51,12 @@ fn memory_def_ident_idx() {
         (memory.copy $memory 1)
         (memory.init $memory 0))
     (data (memory $memory))
+    (func
+        memory.atomic.notify
+        memory.atomic.wait64
+        i32.atomic.load
+        i64.atomic.store8
+        i32.atomic.rmw8.and_u)
 )
 (module (memory $memory))
 "#;
@@ -72,6 +84,12 @@ fn memory_ref_int_idx() {
         (memory.copy 0 1)
         (memory.init 0 0))
     (data (memory 0))
+    (func
+        memory.atomic.notify
+        memory.atomic.wait64
+        i32.atomic.load
+        i64.atomic.store8
+        i32.atomic.rmw8.and_u)
 )
 (module (memory))
 "#;
@@ -99,6 +117,12 @@ fn memory_ref_ident_idx() {
         (memory.copy $memory 1)
         (memory.init $memory 0))
     (data (memory $memory))
+    (func
+        memory.atomic.notify
+        memory.atomic.wait64
+        i32.atomic.load
+        i64.atomic.store8
+        i32.atomic.rmw8.and_u)
 )
 (module (memory $memory))
 "#;
