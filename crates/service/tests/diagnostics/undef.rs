@@ -153,7 +153,7 @@ fn memory_undefined() {
     i32.load 0
     drop
     i32.const 0
-    i32.atomic.load
+    i32.atomic.load align=4
     drop)
   (export "" (memory 0)))
 "#;

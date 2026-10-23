@@ -490,7 +490,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
-                false,
+                true,
                 instr_name,
             );
             check_immediate(

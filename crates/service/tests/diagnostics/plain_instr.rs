@@ -125,7 +125,10 @@ fn mem_arg_incorrect() {
     drop
     i32.const 0
     f64.load 0 0.0
-    drop)
+    drop
+    i32.const 0
+    i32.const 0
+    i32.atomic.store)
   (memory 1))
 ";
     let mut service = LanguageService::default();
@@ -168,6 +171,10 @@ fn mem_arg_correct() {
     i32.const 0
     i64.const 0
     i64.atomic.rmw.xchg align=8 offset=1
+    drop
+    i32.const 0
+    i32.const 0
+    i32.atomic.rmw.add align=4
     drop)
   (memory 1))
 ";
