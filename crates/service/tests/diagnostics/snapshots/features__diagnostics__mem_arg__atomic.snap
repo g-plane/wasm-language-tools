@@ -1,0 +1,233 @@
+---
+source: crates/service/tests/diagnostics/mem_arg.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 20
+        },
+        "end": {
+          "line": 5,
+          "character": 27
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 4"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 20
+        },
+        "end": {
+          "line": 11,
+          "character": 27
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 4"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 21
+        },
+        "end": {
+          "line": 16,
+          "character": 28
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 8"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 24
+        },
+        "end": {
+          "line": 22,
+          "character": 31
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 2"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 28,
+          "character": 24
+        },
+        "end": {
+          "line": 28,
+          "character": 31
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 2"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 35,
+          "character": 22
+        },
+        "end": {
+          "line": 35,
+          "character": 29
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 1"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 40,
+          "character": 23
+        },
+        "end": {
+          "line": 40,
+          "character": 30
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 8"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 50,
+          "character": 27
+        },
+        "end": {
+          "line": 50,
+          "character": 34
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 2"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 58,
+          "character": 28
+        },
+        "end": {
+          "line": 58,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 2"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 63,
+          "character": 25
+        },
+        "end": {
+          "line": 63,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 4"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 71,
+          "character": 25
+        },
+        "end": {
+          "line": 71,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 4"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 77,
+          "character": 25
+        },
+        "end": {
+          "line": 77,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 4"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 87,
+          "character": 25
+        },
+        "end": {
+          "line": 87,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 4"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 93,
+          "character": 25
+        },
+        "end": {
+          "line": 93,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be 8"
+    }
+  ]
+}

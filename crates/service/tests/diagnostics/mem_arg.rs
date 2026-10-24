@@ -201,3 +201,114 @@ fn offset() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn atomic() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 1 shared)
+  (func
+    i32.const 0
+    i32.atomic.load align=1
+    drop
+    i32.const 0
+    i32.atomic.load align=4
+    drop
+    i32.const 0
+    i32.atomic.load align=8
+    drop
+
+    i32.const 0
+    i64.const 0
+    i64.atomic.store align=4
+    i32.const 0
+    i64.const 0
+    i64.atomic.store align=8
+
+    i32.const 0
+    i32.atomic.load16_u align=1
+    drop
+    i32.const 0
+    i32.atomic.load16_u align=2
+    drop
+    i32.const 0
+    i32.atomic.load16_u align=4
+    drop
+
+    i32.const 0
+    i32.atomic.store8 align=1
+    drop
+    i32.const 0
+    i32.atomic.store8 align=2
+    drop
+
+    i32.const 0
+    i64.const 0
+    i64.atomic.rmw.xor align=4
+    drop
+    i32.const 0
+    i64.const 0
+    i64.const 0
+    i64.atomic.rmw.cmpxchg align=8
+    drop
+
+    i32.const 0
+    i32.const 0
+    i32.atomic.rmw16.add_u align=1
+    drop
+    i32.const 0
+    i32.const 0
+    i32.atomic.rmw16.and_u align=2
+    drop
+    i32.const 0
+    i32.const 0
+    i32.atomic.rmw16.xchg_u align=4
+    drop
+
+    i32.const 0
+    i32.const 0
+    memory.atomic.notify align=1
+    drop
+    i32.const 0
+    i32.const 0
+    memory.atomic.notify align=4
+    drop
+    i32.const 0
+    i32.const 0
+    memory.atomic.notify align=8
+    drop
+
+    i32.const 0
+    i32.const 0
+    i64.const 0
+    memory.atomic.wait32 align=1
+    drop
+    i32.const 0
+    i32.const 0
+    i64.const 0
+    memory.atomic.wait32 align=4
+    drop
+    i32.const 0
+    i32.const 0
+    i64.const 0
+    memory.atomic.wait32 align=8
+    drop
+
+    i32.const 0
+    i64.const 0
+    i64.const 0
+    memory.atomic.wait64 align=4
+    drop
+    i32.const 0
+    i64.const 0
+    i64.const 0
+    memory.atomic.wait64 align=8
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

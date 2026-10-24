@@ -15,11 +15,17 @@ pub fn check(
     instr_name: AmberToken,
 ) -> Option<()> {
     let (nt, action) = instr_name.text().split_once('.')?;
-    let rest = action.strip_prefix("store").or_else(|| action.strip_prefix("load"))?;
-    // check if instr name is applicable
-    if !(rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_digit())) {
-        return None;
-    }
+    let kind = if let Some(rest) = action.strip_prefix("atomic.") {
+        InstrKind::Atomic(rest)
+    } else {
+        let rest = action.strip_prefix("store").or_else(|| action.strip_prefix("load"))?;
+        // check if instr name is applicable
+        if !(rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_digit())) {
+            return None;
+        }
+        InstrKind::Normal(rest)
+    };
+
     let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE).peekable();
     let mem_def = if let Some(immediate) = immediates.next_if(|immediate| {
         immediate
@@ -55,19 +61,6 @@ pub fn check(
                         });
                     }
                     has_align = true;
-                    let ty_size = match rest.split_once('_').map(|(left, _)| left).unwrap_or(rest) {
-                        "8" => 1,
-                        "16" => 2,
-                        "32" => 4,
-                        "64" | "8x8" | "16x4" | "32x2" => 8,
-                        "" => match nt {
-                            "i32" | "f32" => 4,
-                            "i64" | "f64" => 8,
-                            "v128" => 16,
-                            _ => return,
-                        },
-                        _ => return,
-                    };
                     let Some(align) = mem_arg
                         .tokens_by_kind(SyntaxKind::UNSIGNED_INT)
                         .next()
@@ -75,20 +68,79 @@ pub fn check(
                     else {
                         return;
                     };
-                    if !align.is_power_of_two() {
-                        diagnostics.push(Diagnostic {
-                            range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE,
-                            message: "alignment must be power-of-two".into(),
-                            ..Default::default()
-                        });
-                    } else if align > ty_size {
-                        diagnostics.push(Diagnostic {
-                            range: mem_arg.text_range(),
-                            code: DIAGNOSTIC_CODE,
-                            message: format!("alignment must be between 1 and {ty_size} inclusively"),
-                            ..Default::default()
-                        });
+                    match kind {
+                        InstrKind::Normal(rest) => {
+                            let ty_size = match rest.split_once('_').map(|(left, _)| left).unwrap_or(rest) {
+                                "8" => 1,
+                                "16" => 2,
+                                "32" => 4,
+                                "64" | "8x8" | "16x4" | "32x2" => 8,
+                                _ => match nt {
+                                    "i32" | "f32" => 4,
+                                    "i64" | "f64" => 8,
+                                    "v128" => 16,
+                                    _ => return,
+                                },
+                            };
+                            if !align.is_power_of_two() {
+                                diagnostics.push(Diagnostic {
+                                    range: mem_arg.text_range(),
+                                    code: DIAGNOSTIC_CODE,
+                                    message: "alignment must be power-of-two".into(),
+                                    ..Default::default()
+                                });
+                            } else if align > ty_size {
+                                diagnostics.push(Diagnostic {
+                                    range: mem_arg.text_range(),
+                                    code: DIAGNOSTIC_CODE,
+                                    message: format!("alignment must be between 1 and {ty_size} inclusively"),
+                                    ..Default::default()
+                                });
+                            }
+                        }
+                        InstrKind::Atomic(rest) if nt == "memory" => {
+                            let expected = match rest {
+                                "notify" | "wait32" => 4,
+                                "wait64" => 8,
+                                _ => return,
+                            };
+                            if align != expected {
+                                diagnostics.push(Diagnostic {
+                                    range: mem_arg.text_range(),
+                                    code: DIAGNOSTIC_CODE,
+                                    message: format!("alignment must be {expected}"),
+                                    ..Default::default()
+                                });
+                            }
+                        }
+                        InstrKind::Atomic(rest) => {
+                            let expected = match rest
+                                .split_once('.')
+                                .and_then(|(left, _)| left.strip_prefix("rmw"))
+                                .or_else(|| {
+                                    rest.strip_prefix("load")
+                                        .map(|rest| rest.strip_suffix("_u").unwrap_or(rest))
+                                        .or_else(|| rest.strip_prefix("store"))
+                                }) {
+                                Some("8") => 1,
+                                Some("16") => 2,
+                                Some("32") => 4,
+                                Some("") => match nt {
+                                    "i32" => 4,
+                                    "i64" => 8,
+                                    _ => return,
+                                },
+                                _ => return,
+                            };
+                            if align != expected {
+                                diagnostics.push(Diagnostic {
+                                    range: mem_arg.text_range(),
+                                    code: DIAGNOSTIC_CODE,
+                                    message: format!("alignment must be {expected}"),
+                                    ..Default::default()
+                                });
+                            }
+                        }
                     }
                 }
                 Some("offset") => {
@@ -127,4 +179,9 @@ pub fn check(
             }
         });
     None
+}
+
+enum InstrKind<'a> {
+    Normal(&'a str),
+    Atomic(&'a str),
 }
