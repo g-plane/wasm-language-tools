@@ -556,6 +556,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                 ctx.push(CmpCtx::ShapeDescriptor);
             }
             Some(("cont", "new" | "bind")) => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Cont))),
+            Some(("i32" | "i64" | "memory", snd)) if snd.starts_with("atomic.") => ctx.push(CmpCtx::MemArg),
             None => match instr_name {
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
                 "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" => {
