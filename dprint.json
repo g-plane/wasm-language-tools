@@ -1,5 +1,5 @@
 {
-  "extends": "https://dprint.gplane.win/2026-03.json",
+  "extends": "npm:@gplane/dprint-config@1.0.0",
   "excludes": [
     "docs/.vitepress/cache",
     "dist",
