@@ -11,10 +11,10 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
-      - uses: rust-lang/crates-io-auth-action@v1.0.4
+      - uses: rust-lang/crates-io-auth-action@v1.0.6
         id: cratesio-auth
       - name: Publish crates
         run: |
@@ -62,7 +62,7 @@ jobs:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.host }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -93,7 +93,7 @@ jobs:
       attestations: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           pattern: wat_server-*
@@ -111,7 +111,7 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: rustup target add wasm32-unknown-unknown
       - uses: taiki-e/install-action@v2
         with:
@@ -121,14 +121,14 @@ jobs:
           wasm-bindgen --out-dir=bindings/pkg --target=web --omit-default-module-path target/wasm32-unknown-unknown/release/binding_wasm.wasm
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: latest
           run_install: true
       - shell: pwsh
         run: |
           $pkg = Get-Content ./bindings/pkg/package.json | ConvertFrom-Json
           $pkg.version = (cargo pkgid -p wat_server) -replace '^.*@', ''
           ConvertTo-Json $pkg | Set-Content ./bindings/pkg/package.json
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           registry-url: "https://registry.npmjs.org"
           node-version: "24"

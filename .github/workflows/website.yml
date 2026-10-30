@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: netlify
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: rustup target add wasm32-unknown-unknown
       - uses: taiki-e/install-action@v2
         with:

@@ -9,7 +9,7 @@ jobs:
         os: [ubuntu-latest, ubuntu-26.04-arm]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
 
@@ -19,12 +19,12 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-deny,dprint
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: cargo fmt --check && dprint check
       - run: cargo deny check licenses bans sources
 
   server:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: cargo test -p wat_server
